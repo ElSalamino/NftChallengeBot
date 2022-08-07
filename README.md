@@ -6,11 +6,7 @@
 	<meta name="generator" content="LibreOffice 7.0.5.2 (Windows)"/>
 	<meta name="created" content="2022-08-07T14:55:38.668000000"/>
 	<meta name="changed" content="2022-08-07T15:01:17.595000000"/>
-	<style type="text/css">
-		@page { size: 21cm 29.7cm; margin: 2cm }
-		p { margin-bottom: 0.25cm; line-height: 115%; background: transparent }
-		a:link { color: #000080; so-language: zxx; text-decoration: underline }
-	</style>
+
 </head>
 <body lang="it-IT" link="#000080" vlink="#800000" dir="ltr"><p align="center" style="margin-bottom: 0cm; line-height: 100%">
 Il bot <font color="#c9211e">dovrebbe</font> avviarsi da solo una
