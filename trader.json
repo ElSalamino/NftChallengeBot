@@ -1,0 +1,218 @@
+{
+    "vuole": "Mazzuolo acculturato LV0",
+    "da": "Armatura del macellaio LV0",
+    "conto": 160,
+    "primo": "Decibelg",
+    "preferenziale": [],
+    "ordine": [],
+    "erranti": {
+        "un castoro cattivissimo": "Andrea_fit",
+        "Un megafono megaenorme": "bountyFF",
+        "Una mail di spam con anche qualche pene": "Lukill",
+        "Una copia dell'arte della guerra autografata": "Deid_Ghio",
+        "Il controller del super raggio mortale a neutroni mega pericolosissimo": "djlorenzouasset"
+    },
+    "vorrei": [],
+    "conto2": 120,
+    "meteo": {
+        "Dune di rione": "Caldo torrido",
+        "Delta del fiume Vern": "Pioggia",
+        "Monte cashmere": "Pioggia",
+        "Allevamento spettrale": "Nuvoloso",
+        "Citt\u00e0 di mezzo": "Caldo torrido",
+        "Ordine della rocca": "Caldo infernale",
+        "Piana dell'inzio": "Caldo torrido",
+        "Antico deserto": "Nuvoloso",
+        "Selva dei predatori": "Caldo infernale",
+        "Grotte tori": "Arieggiato",
+        "Circolo polare": "Tempesta",
+        "Sentieri spersi": "Normale",
+        "Labirintico inizio": "Soleggiato",
+        "Lootonia": "Soleggiato",
+        "Hub": "Normale"
+    },
+    "Gioved\u00ec": null,
+    "battaglieri": [],
+    "bossoggi": [
+        "Carl",
+        "Pensatore corrotto",
+        "Comandante della bastiglia"
+    ],
+    "Suggerimenti": {},
+    "suggerimenti": {},
+    "attese": {
+        "un castoro cattivissimo": 1642532679.2294376,
+        "Un megafono megaenorme": 1642532748.0644174,
+        "Una mail di spam con anche qualche pene": 1642529559.6483676,
+        "Una copia dell'arte della guerra autografata": 1642532748.4109955,
+        "Il controller del super raggio mortale a neutroni mega pericolosissimo": 1642532748.586526
+    },
+    "qr": {
+        "FreeRolex": []
+    },
+    "ricerca": null,
+    "moda": [
+    ],
+    "arena": null,
+    "rissa": [
+    ],
+    "arenal": [
+    ],
+    "killer": 43863,
+    "sfide": {},
+    "sette": {
+        "Dune di rione": {
+            "Nome": "Kaimano",
+            "Bonus": "Stats maggiori in assalti solitari, {}% ognuna",
+            "power": 8,
+            "%": 93,
+            "iscritti": 3
+        },
+        "Delta del fiume Vern": {
+            "Nome": "Alligatore",
+            "Bonus": "{} punti rubati ogni sfida",
+            "power": 5,
+            "%": 89,
+            "iscritti": 5
+        },
+        "Monte cashmere": {
+            "Nome": "Caprone",
+            "Bonus": "{} % stats extra contro i boss",
+            "power": 10,
+            "%": 98,
+            "iscritti": 1
+        },
+        "Allevamento spettrale": {
+            "Nome": "Non morto",
+            "Bonus": "Morte pi\u00f9 rapida di {} secondi",
+            "power": 180,
+            "%": 93,
+            "iscritti": 3
+        },
+        "Citt\u00e0 di mezzo": {
+            "Nome": "Guardia reale",
+            "Bonus": "Pi\u00f9 item dalle sfide, il {}% extra",
+            "power": 10,
+            "%": 87,
+            "iscritti": 6
+        },
+        "Ordine della rocca": {
+            "Nome": "Acquila",
+            "Bonus": "Pi\u00f9 fortuna, {}%",
+            "power": 20,
+            "%": 91,
+            "iscritti": 4
+        },
+        "Piana dell'inzio": {
+            "Nome": "Gufo",
+            "Bonus": "Assalti pi\u00f9 rapidi di {} secondi",
+            "power": 10,
+            "%": 91,
+            "iscritti": 4
+        },
+        "Antico deserto": {
+            "Nome": "Verme delle sabbie",
+            "Bonus": "Movimenti interzona pi\u00f9 rapidi del {}%",
+            "power": 33,
+            "%": 96,
+            "iscritti": 2
+        },
+        "Selva dei predatori": {
+            "Nome": "Giaguaro",
+            "Bonus": "Velocit\u00e0 nell'affrontare mob in dg aumentata di {} secondi",
+            "power": 5,
+            "%": 98,
+            "iscritti": 1
+        },
+        "Grotte tori": {
+            "Nome": "Tartagura",
+            "Bonus": "Bonus contro i boss marini di {}% a statistica",
+            "power": 10,
+            "%": 98,
+            "iscritti": 1
+        },
+        "Circolo polare": {
+            "Nome": "Orso polare",
+            "Bonus": "Stats maggiori in assalti di gruppo, {}% ognuna",
+            "power": 10,
+            "%": 89,
+            "iscritti": 5
+        },
+        "Sentieri spersi": {
+            "Nome": "Corvo",
+            "Bonus": "Maggior drop di esperienza dalle sfide {}%",
+            "power": 5,
+            "%": 89,
+            "iscritti": 5
+        },
+        "Labirintico inizio": {
+            "Nome": "Troll del labirinto",
+            "Bonus": "Bonus di {} intelligenza nelle sfide",
+            "power": 10,
+            "%": 91,
+            "iscritti": 4
+        },
+        "Lootonia": {
+            "Nome": "Avventuriero",
+            "Bonus": "Velocit\u00e0 nell'affrontare stanze in dg aumentata di {} secondi",
+            "power": 5,
+            "%": 98,
+            "iscritti": 1
+        }
+    },
+    "obquanti": {
+        "Primo": 36,
+        "El forgiator": 1,
+        "Lo vincitor": 19,
+        "Stessa storia": 32,
+        "Ottima kill": 55,
+        "Quasi tuto perfetto": 64,
+        "Set all'improvviso": 24,
+        "DPS": 36,
+        "Ultima kill": 47,
+        "Aiuto dungeon": 11,
+        "Bello e bravo": 45,
+        "Come non bruciarsi": 80,
+        "Milano tutta la vita": 13,
+        "MEGA aiutino": 4,
+        "Forgiatore seriale": 43,
+        "Luzzica": 51,
+        "neeerrrd": 14,
+        "Fra, fatti una vita": 14,
+        "Pesca grande ma poco fumo o arrosto": 20,
+        "Super smash sbros sbrau": 33,
+        "Perditore": 227,
+        "A ri vederci": 24,
+        "Tossico": 32,
+        "Te la sei cercata": 15,
+        "Ultima a morire": 22,
+        "Fuga col sacco": 14,
+        "Collezionista": 1,
+        "A met\u00e0 strada": 13,
+        "Un decimo della collezione": 43,
+        "Prima scoperta": 92,
+        "Precisino": 100,
+        "Tutta fortuna": 68,
+        "Titanico": 24,
+        "Caduta con stile": 6,
+        "Danneggiatore": 38,
+        "Schiappetta": 196,
+        "Iperattivo": 1,
+        "Prima sfida": 222,
+        "Sfidante tosto": 31,
+        "Campione di sfida": 18,
+        "SUPER SFIDANTE": 9,
+        "Micro Pescatore": 62,
+        "Macro Pescatore": 63,
+        "Dito lesto": 53,
+        "Prima compera": 54,
+        "Andr\u00e0 meglio la prossima volta": 66,
+        "Non \u00e8 andata meglio": 56,
+        "Boss buster": 53,
+        "Boss slayer": 43,
+        "Capo del boss": 34,
+        "Maestro dei boss": 10,
+        "Voglioso di perdere": 51
+    },
+    "stagione": "alto livello"
+}
