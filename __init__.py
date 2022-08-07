@@ -23,33 +23,45 @@ allneed = newpesci + liste.ingredienti
 notifiche = ["exp", "compatte", "oggetti", "privacy","amichevoli"]
 if 1 == 1:
     pozioni = dict()
-    with open("./backup/pozioni.json") as json_file:
+    try: 
+        with open("./backup/pozioni.json") as json_file:
         pozioni = json.load(json_file)
+    except: pass
     
     sicurezza = dict()
-    with open("./backup/sicurezza.json") as json_file:
+    try: 
+        with open("./backup/sicurezza.json") as json_file:
         sicurezza = json.load(json_file)
-
-    clan = dict()
-    with open("./backup/clan.json") as json_file:
-        clan = json.load(json_file)
-
-    trader = dict()
-    with open("./backup/trader.json") as json_file:
-        trader = json.load(json_file)
-
-    player = dict()
-    with open("./backup/player.json") as json_file:
-        player = json.load(json_file)
-    inabilitati = dict()
-    with open("./backup/inabilitati.json") as json_file:
-        inabilitati = json.load(json_file)
+    except: pass
     
+    clan = dict()
+    try: 
+        with open("./backup/clan.json") as json_file:
+        clan = json.load(json_file)
+    except: pass
+    
+    trader = dict()
+    try: 
+        with open("./backup/trader.json") as json_file:
+        trader = json.load(json_file)
+    except: pass
+    
+    player = dict()
+    try: 
+        with open("./backup/player.json") as json_file:
+        player = json.load(json_file)
+    except: pass
+    
+    inabilitati = dict()
+    try: with open("./backup/inabilitati.json") as json_file:
+        inabilitati = json.load(json_file)
+    except: pass
 
     evento = list()
-    with open("./backup/evento.json") as json_file:
+    try: 
+        with open("./backup/evento.json") as json_file:
         evento = json.load(json_file)
-
+    except: pass
 strader = {"sfide":{}}
 sched = BackgroundScheduler({'apscheduler.job_defaults.max_instances': 12})
 
