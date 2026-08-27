@@ -1,0 +1,366 @@
+001. Anello perfezionista
+Descrizione attuale: Imposta il seed delle sfide ed assalti, creando delle ipotetiche imprese perfette
+Effetti dal bilanciamento:
+• generale / seed: Anello perfezionista
+
+---
+
+002. Cinta del comandante
+Descrizione attuale: Riduci l'attacco nemico!
+Effetti dal bilanciamento:
+• turno / comando: probabilità: 25%; atk target base: 35
+
+---
+
+003. Amuleto del protettore
+Descrizione attuale: Ingrossati e blocca l'avversario prima di colpire
+Effetti dal bilanciamento:
+• turno / protezione: probabilità: 18%; moltiplicatore bonus: 1
+
+---
+
+004. Guanto titanico
+Descrizione attuale: Nullifica l'attacco avversario con la tua presenza
+Effetti dal bilanciamento:
+• turno / difesa: probabilità: 20%; dps base: 100
+
+---
+
+005. Stemma della rocca
+Descrizione attuale: Senti la tua difesa crescere
+Effetti dal bilanciamento:
+• turno / rocca: probabilità: 25%; def base: 35
+
+---
+
+006. Un frammento del potere
+Descrizione attuale: ILLIMITATI POTERI COSMICI, in un minuscolo frammento
+Effetti dal bilanciamento:
+• turno / attacco: probabilità: 3%; trasforma in: Anello superfortissimo ma proprio rotto sgravatissimo
+• turno / difesa: probabilità: 2%; trasforma in: Anello superfortissimo ma proprio rotto sgravatissimo
+
+---
+
+007. Un generatore incartato
+Descrizione attuale: A fine sfide aggiunge una possibilità di trovare incartati, bene no?
+Effetto centralizzato: nessun dato in PROC_ANELLI.
+
+---
+
+008. Occhio del falco
+Descrizione attuale: Aiuta il clan nella sua missione evitando i colpi avversari!
+Solo negli assalti
+Effetti dal bilanciamento:
+• assalto / aura: stat: agi; valore: 5
+
+---
+
+009. Carica mobile
+Descrizione attuale: Smonta il nemico un pochino più facilmente!
+Solo negli assalti
+Effetti dal bilanciamento:
+• assalto / esplosione: probabilità: 20%; danno minimo: 20; danno max: 150
+
+---
+
+010. Ricordo straziante
+Descrizione attuale: Scompari alle volte, ritorna con stile
+Effetti dal bilanciamento:
+• turno / intangibile: probabilità: 15%; danno: 0; mod: 0; nomi equivalenti: Fantasma del rimorso
+
+---
+
+011. Chiavi dell'aldilà
+Descrizione attuale: Ritorna dalla tomba con furore!
+Effetti dal bilanciamento:
+• turno / resurrezione: probabilità: 30%; hp base: 500
+
+---
+
+012. Cuore delle sabbie
+Descrizione attuale: Il potere delle sabbie è con te, tempesta l'avversario!
+Effetti dal bilanciamento:
+• turno / insabbiato: probabilità: 25%; lv: 2; dur: 1; lv incremento: 1; nomi equivalenti: Leviatano delle sabbi
+
+---
+
+013. Tasto B
+Descrizione attuale: A volte la schivata è il modo più semplice per non subire danno
+Effetti dal bilanciamento:
+• turno / roll: probabilità: 15%; mod: 0
+
+---
+
+014. Tasto X
+Descrizione attuale: Fai sparire i proiettili nemici in un esplosione di luce, stordendolo un poco!
+Effetti dal bilanciamento:
+• turno / obliteratore: probabilità: 12%; divisore mod: 5; bonus stat base: 7
+
+---
+
+015. Coda demoniaca
+Descrizione attuale: Blocca dal dolore i tuoi avversari!
+Effetti dal bilanciamento:
+• turno / schivata: lastD reset: 0
+• turno / dolore: divisore chance: 1000; bonus speciale: 0.2; nome speciale: Demone spezza-ossa; danno: 0; mod: 0
+
+---
+
+016. Anello superfortissimo ma proprio rotto sgravatissimo
+Descrizione attuale: Serve solo per il debug, giuro
+Effetto centralizzato: nessun dato in PROC_ANELLI.
+
+---
+
+017. Stemma del leader
+Descrizione attuale: Dimostra al tuo clan di essere adatto al lavoro sporco!
+Ottieni un boost di attacco nei raid!
+Effetti dal bilanciamento:
+• assalto / aura: stat: atk; valore: 20
+
+---
+
+018. Chiavi
+Descrizione attuale: Cosa?!
+Effetti dal bilanciamento:
+• turno / batmobile: probabilità: 33%; danno: 35
+
+---
+
+019. Aura pessima
+Descrizione attuale: La difesa avversaria è il 10% meno efficace
+Effetti dal bilanciamento:
+• turno / aura: moltiplicatore difesa target: 0.8
+
+---
+
+020. Fanghiglia della palude
+Descrizione attuale: Sei un mostro fintanto che la tua vita lo permette, ma ad un piccolo prezzo
+Effetti dal bilanciamento:
+• turno / fango: probabilità: 50%; HP minimi: 450; attacco: 11; difesa: 11; HP: -25
+
+---
+
+021. Anello dell'occulto
+Descrizione attuale: E se l'avversario schiva? Come non l'avessa mai fatto.
+Effetti dal bilanciamento:
+• turno / trascinamento: probabilità: 20%; dps divisore: 3; random min: 0.3; random max: 1.5
+
+---
+
+022. Effige della tribe
+Descrizione attuale: Sfutta antichi fantasmi per aumentare la tua vita
+Effetti dal bilanciamento:
+• turno / cura_spettrale: probabilità: 20%; HP massimi: 3500; cura percento hp: 10%; equivalenti: Anello superfortissimo ma proprio rotto sgravatissimo; speciali: {'Ipposciamano indemoniato': {'proc': 80, 'hp_max': 5500}}
+
+---
+
+023. Scarica di adrenalina
+Descrizione attuale: Più il danno preso è alto e più la crescita è garantita!
+Effetti dal bilanciamento:
+• turno / adrenalina: probabilità: 40%; offset danno: 2; divisore: 2; bonus finale: 1
+
+---
+
+024. Lapsus vitale
+Descrizione attuale: Sfutta il dolore che ricevi come fonte di cura!
+Effetti dal bilanciamento:
+• turno / cura_danno: probabilità: 40%; offset danno: 2; divisore: 2; nomi equivalenti: Ipposciamano indemoniato
+
+---
+
+025. Elsa vitale
+Descrizione attuale: Un boost temporaneo, vita permettendo
+Effetti dal bilanciamento:
+• turno / crescita: probabilità: 60%; hp divisore: 10; agi divisore: 2
+
+---
+
+026. Benedizione sanguinolenta
+Descrizione attuale: Adora il sangue, il danno e ironicamente il gelato alla pesca
+Effetti dal bilanciamento:
+• turno / cura_danno: probabilità: 22%; divisore: 2; nomi equivalenti: Ipposciamano indemoniato
+
+---
+
+027. Corna da toro
+Descrizione attuale: Un malus temporaneo all'avversario, maggiori gli hp e maggiore è la paura!
+Effetti dal bilanciamento:
+• turno / terrore: probabilità: 50%; hp divisore: 10; agi divisore: 3; nomi equivalenti: Cerbero sdentato
+
+---
+
+028. Sassolino scintillante
+Descrizione attuale: Restare sul filo del rasoio ti rende mostro!
+Effetto centralizzato: nessun dato in PROC_ANELLI.
+
+---
+
+029. Scudo levitante
+Descrizione attuale: Sii di ispiarazione per le tue doti difensive a tutto il tuo clan!
+Aiuta nei raid.
+Effetti dal bilanciamento:
+• assalto / aura: stat: def; valore: 20
+
+---
+
+030. Pegno di amicizia
+Descrizione attuale: Rendi amichevoleve il tuo nemico, riduci il suo dannoe  beccalo con più sicurezza!
+Effetti dal bilanciamento:
+• turno / difesa: moltiplicatore danno: 0.9; sottrai int: sì
+
+---
+
+031. Cuffia da boia
+Descrizione attuale: Termina i tuoi avversari prima del dovuto
+Effetti dal bilanciamento:
+• turno / esecuzione: hp target base: 100; hp finale: 0
+
+---
+
+032. Veleno del folle
+Descrizione attuale: sApPi cHe hAi iL 50% Di pOsSiBiLiTà dI EsPlOdErE Di FoRzA eD Il 50% dI EsPlOdErE E BaStA!
+Effetti dal bilanciamento:
+• turno / veleno: probabilità: 50%; bonus dps: 250; malus dps: 100
+
+---
+
+033. Guanto del falco
+Descrizione attuale: Annulla la difesa avversaria, passando oltre le armature
+Effetti dal bilanciamento:
+• turno / falcon_punch: probabilità: 20%; difesa base: 100
+
+---
+
+034. Testuggine del vecchio saggio
+Descrizione attuale: Permette di annullare e di ritorcere all'avversario il suo stesso bonus schivata
+Effetti dal bilanciamento:
+• turno / atterraggio: moltiplicatore mod: 0.7
+
+---
+
+035. Campanellina concentrante
+Descrizione attuale: Garantisce il colpo successivo all'attivazione
+Effetti dal bilanciamento:
+• turno / concentrazione: probabilità: 30%; agilità: 1000001; nomi equivalenti: Cerbero sdentato
+
+---
+
+036. Bilanciere
+Descrizione attuale: Il range dei danni sia tuoi CHE DEL TUO AVVERSARIO si riducono
+Effetti dal bilanciamento:
+• turno / bilanciamento: probabilità: 88%; mod: 1.2
+
+---
+
+037. Compasso
+Descrizione attuale: Riduce al minimo il range di danni fattibili
+Effetti dal bilanciamento:
+• turno / bilanciamento: probabilità: 88%; mod: 1.2
+
+---
+
+038. Roccia viva
+Descrizione attuale: Il tuo prossimo attacco scalerà in difesa anzichè attacco!
+Effetti dal bilanciamento:
+• turno / golem: probabilità: 20%; bonus def: 5
+
+---
+
+039. Vincastro
+Descrizione attuale: Trasforma l'avversario in pecorella, distruggi le sue stats!
+Effetti dal bilanciamento:
+• turno / attacco: probabilità: 7%; difesa base: 45
+• turno / difesa: probabilità: 7%; danno: 35
+
+---
+
+040. Fascette luminose
+Descrizione attuale: Schivate stilose fanno un danno atroce!
+Effetti dal bilanciamento:
+• turno / atterraggio: probabilità: 60%; mod: 0.3
+
+---
+
+041. Anello d'oro fortissimo
+Descrizione attuale: Perdi meno punti e guadagni più punti, sfida ovviamente
+Effetto centralizzato: nessun dato in PROC_ANELLI.
+
+---
+
+042. Fantasmino luminoso
+Descrizione attuale: Depotenzia il tuo avversario, rendilo deludente verso se stesse ed i suoi avi
+Effetti dal bilanciamento:
+• turno / debuff: probabilità: 44%; agilità: -4; atk base: -8; def base: -8; nomi equivalenti: Carl, il becchino
+
+---
+
+043. Corteccia naturale
+Descrizione attuale: Che la crescita abbia inizio, nulla piò fermarti se sei ENORME
+Effetti dal bilanciamento:
+• turno / crescita: probabilità: 45%; atk base: 8; def base: 8; agilità: 3
+
+---
+
+044. Scudiero fidato
+Descrizione attuale: Pronto al sacrificio per te!
+Effetti dal bilanciamento:
+• turno / blocco: probabilità: 25%; danno: 0
+
+---
+
+045. Vasetto all'orlo
+Descrizione attuale: Accumula il tuo dolore e rilascialo al momento giusto...
+Effetti dal bilanciamento:
+• turno / contrattacco: probabilità: 25%; random min: 0.5; random max: 1
+
+---
+
+046. Spuntoni
+Descrizione attuale: Aumenta il danno con spuntoni extra!
+Effetti dal bilanciamento:
+• turno / danno_extra: probabilità: 55%; mod: 0.4
+
+---
+
+047. Anello di totano
+Descrizione attuale: Una cura costante, un fido anello senza troppi poteri, la schivata concede cure extra!
+Effetti dal bilanciamento:
+• turno / cura: probabilità: 45%; cura colpito: 15; cura schivato: 25; random min: 0.8; random max: 1.8; moltiplicatore mod schivato: 1.3
+
+---
+
+048. Muschio Selvaggio
+Descrizione attuale: Diventa selvaggio e raddoppia il tuo approccio!
+Effetti dal bilanciamento:
+• turno / selvaggio: probabilità: 22%; limiti stat: {'agi': 525, 'hp': 2200, 'def': 3500, 'atk': 3500}
+
+---
+
+049. Pozione di furia
+Descrizione attuale: Boost estremo dell'attacco!
+Effetti dal bilanciamento:
+• turno / furia: probabilità: 25%; atk base: 35
+
+---
+
+050. Aureola
+Descrizione attuale: La luce salverà qualche tuo danno!
+Effetti dal bilanciamento:
+• turno / salvezza: probabilità: 35%; moltiplicatore danno: 0.45; danno minimo: 1
+
+---
+
+051. Ali di luminite
+Descrizione attuale: Ambisci al volo, alza drasticamente la tua agilità!
+Effetti dal bilanciamento:
+• turno / volo: probabilità: 35%; agi difesa: 260
+
+---
+
+052. Proteina brullicanti
+Descrizione attuale: Un colpo secco senza confronti, raddoppia il tuo attacco!
+Effetti dal bilanciamento:
+• turno / massa: probabilità: 18%; moltiplicatore extra dps: 1.8
+
+---
