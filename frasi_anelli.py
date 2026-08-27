@@ -44,7 +44,7 @@ FRASI_ANELLI_TECNICHE = {
     "Bilanciere": "Nel {turno.bilanciamento.proc:pct} dei turni costringi entrambi a combattere in modo molto più regolare, stringendo il danno attorno a un modificatore di {turno.bilanciamento.mod:x}.",
     "Compasso": "Nel {turno.bilanciamento.proc:pct} dei turni trovi la misura giusta e riduci quasi del tutto gli estremi del danno, portando il riferimento del colpo a {turno.bilanciamento.mod:x}.",
     "Roccia viva": "Nel {turno.golem.proc:pct} dei turni la roccia prende vita e il tuo attacco usa la difesa al posto dell'attacco, aggiungendo anche {turno.golem.bonus_def:signed} difesa al calcolo.",
-    "Vincastro": "Quando attacchi hai il {turno.attacco.proc:pct} di trasformare il nemico in una pecorella e schiacciare la sua difesa verso {turno.attacco.difesa_base}; quando difendi hai un altro {turno.difesa.proc:pct} di ridurre il colpo a {turno.difesa.danno} danni.",
+    "Vincastro": "Quando attacchi hai il {turno.attacco.proc:pct} di trasformare il nemico in una pecorella e schiacciare la sua difesa verso {turno.attacco.difesa_base}; quando difendi hai un altro {turno.difesa.proc:pct} di ridurre il colpo a {turno.difesa.dps} danni.",
     "Fascette luminose": "Dopo una schivata hai il {turno.atterraggio.proc:pct} di rientrare con stile e aggiungere {turno.atterraggio.mod:signed} al modificatore del contrattacco.",
     "Anello d'oro fortissimo": "Fa quello che ci si aspetta da un anello d'oro fortissimo: nelle sfide protegge meglio i tuoi punti quando perdi e rende più ricche le vittorie.",
     "Fantasmino luminoso": "Nel {turno.debuff.proc:pct} dei turni il fantasmino si mette a tormentare il nemico: gli toglie {turno.debuff.agi:abs} agilità e parte da un malus di {turno.debuff.atk_base:abs} attacco e {turno.debuff.def_base:abs} difesa.",
@@ -57,5 +57,5 @@ FRASI_ANELLI_TECNICHE = {
     "Pozione di furia": "Nel {turno.furia.proc:pct} dei turni la furia prende il sopravvento e guadagni {turno.furia.atk_base:signed} attacco più la tua INT.",
     "Aureola": "Nel {turno.salvezza.proc:pct} dei turni la luce ti protegge e lascia passare solo il {turno.salvezza.moltiplicatore_danno:pct_mul} del danno, quindi ne cancella il {turno.salvezza.moltiplicatore_danno:rid_pct}; almeno {turno.salvezza.danno_min} danno passa comunque.",
     "Ali di luminite": "Nel {turno.volo.proc:pct} dei turni spicchi il volo e porti la tua agilità difensiva a {turno.volo.agi_difesa}, diventando molto più difficile da colpire.",
-    "Proteina brullicanti": "Nel {turno.massa.proc:pct} dei turni raddoppi la massa e aggiungi al colpo un altro {turno.massa.moltiplicatore_extra_dps:pct} del suo danno: con il valore attuale il colpo arriva quindi a 2,8× il normale.",
+    "Proteina brullicanti": "Nel {turno.massa.proc:pct} dei turni raddoppi la massa e aggiungi al colpo un altro {turno.massa.moltiplicatore_extra_dps:pct_mul} del suo danno: con il valore attuale il colpo arriva quindi a 2,8× il normale.",
 }
