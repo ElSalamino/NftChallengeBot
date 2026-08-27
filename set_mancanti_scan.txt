@@ -1,0 +1,733 @@
+
+==========================================================================================
+Eroe caduto
+==========================================================================================
+--- contesto riga 824 ---
+00814:                                     giocatore = copy.deepcopy(player[username]["scheda"])
+00815:                                     if "pet" in player[username]:
+00816:                                         giocatore["animale"] = player[username]["pet"]
+00817:                                     matx = 0
+00818:                                     for pl in clan[user["team"]]["last"]:
+00819:                                         elapsed = time.time() - clan[user["team"]]["last"][pl]
+00820:                                         if elapsed < 301 and username != pl:
+00821:                                             matx += 1
+00822:                                             
+00823:                                     serv = matx
+00824:                                     if matx < 2 and giocatore["set"] == 'Eroe caduto':
+00825:                                         serv += 1
+00826:                                         
+00827:                                     if giocatore["set"] == 'Eroe della rivolta':
+00828:                                         serv = serv * 1.2
+00829:                                     if player[username]["setta"]["benedizione"] == 'Orso polare' and  matx > 2:
+00830:                                         
+00831:                                         a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
+00832:                                         serv += (a/4)
+00833:                                     if player[username]["setta"]["benedizione"] == 'Kaimano' and  matx <= 2:
+00834:                                         a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
+00835:                                         serv += (a/4)
+00836:                                     
+00837:                                     bostabile = ["def", "atk", "agi"]
+00838:                                     for stat in bostabile:
+00839:     
+00840:                                         giocatore[stat] = round(giocatore[stat] + (giocatore[stat] * (serv / 12)))
+00841:                                         
+
+==========================================================================================
+Eroe della rivolta
+==========================================================================================
+--- contesto riga 827 ---
+00817:                                     matx = 0
+00818:                                     for pl in clan[user["team"]]["last"]:
+00819:                                         elapsed = time.time() - clan[user["team"]]["last"][pl]
+00820:                                         if elapsed < 301 and username != pl:
+00821:                                             matx += 1
+00822:                                             
+00823:                                     serv = matx
+00824:                                     if matx < 2 and giocatore["set"] == 'Eroe caduto':
+00825:                                         serv += 1
+00826:                                         
+00827:                                     if giocatore["set"] == 'Eroe della rivolta':
+00828:                                         serv = serv * 1.2
+00829:                                     if player[username]["setta"]["benedizione"] == 'Orso polare' and  matx > 2:
+00830:                                         
+00831:                                         a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
+00832:                                         serv += (a/4)
+00833:                                     if player[username]["setta"]["benedizione"] == 'Kaimano' and  matx <= 2:
+00834:                                         a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
+00835:                                         serv += (a/4)
+00836:                                     
+00837:                                     bostabile = ["def", "atk", "agi"]
+00838:                                     for stat in bostabile:
+00839:     
+00840:                                         giocatore[stat] = round(giocatore[stat] + (giocatore[stat] * (serv / 12)))
+00841:                                         
+00842:                                     classe(giocatore,giocatore["set"],bonus)
+00843:                                     
+00844:                                     output = assedio(player,
+
+==========================================================================================
+Paladino
+==========================================================================================
+--- contesto riga 1349 ---
+01339:                             pass
+01340: 
+01341:                     
+01342:                     else:
+01343: 
+01344:                         nome1 = username
+01345:                         nome2 = scelta
+01346: 
+01347:                         user1 = copy.deepcopy(player[username]["scheda"])
+01348:                         user2 = copy.deepcopy(Boss[scelta])
+01349:                         if user1["set"] == "Paladino":
+01350:                             user1["Scudo"] = 1000
+01351:                         if user1["set"] == "Serial killer":
+01352:                             user2["hp"] = round(user2["hp"] * 0.75)
+01353: 
+01354:                         controllo_effetti_sfida(username,player)
+01355:                         bostabile = ["hp", "def", "atk", "agi"]
+01356:                         user1["fatto"] = 0
+01357:                         user2["fatto"] = 0
+01358:                         user1["incantamenti"] = get_ench(player[username])
+01359:                         user2["incantamenti"] = []
+01360:                         classe(user1, user1["set"],bonus)
+01361:                         text = f"Sfida tra {nome1} e {nome2} lv {forza}, uno dei terribili boss!!\n\n"
+01362: 
+01363:                         if player[username]["setta"]["benedizione"] == "Caprone":
+01364:                             a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))                       
+01365:                             for stat in bostabile:
+01366:                                 print(user1[stat])
+--- contesto riga 2530 ---
+02520:             user1 = copy.deepcopy(player[username]["scheda"])
+02521:             user1["incantamenti"] = get_ench(player[username])
+02522: 
+02523: 
+02524: 
+02525:             bossino = listToString(scelta.split(" ")[1:])
+02526:             user2 = copy.deepcopy(nemici[bossino])
+02527:             user2["incantamenti"] = []
+02528: 
+02529:             nome2 = user2["Nome"]
+02530:             if user1["set"] == "Paladino":
+02531:                 user1["Scudo"] = 200
+02532:             if user2["set"] == "Paladino":
+02533:                 user2["Scudo"] = 200
+02534:             if user1["set"] == "Serial killer":
+02535:                 user2["hp"] = round(user2["hp"] * 0.75)
+02536:             if user2["set"] == "Serial killer":
+02537:                 user1["hp"] = round(user1["hp"] * 0.75)
+02538:             if "supporto" in player[username]:
+02539:                 if nome1 != player[username]["supporto"]["Nome"]:
+02540:                     user3 = copy.deepcopy(player[username]["supporto"])
+02541:                     user3["incantamenti"] = get_ench(player[player[username]["supporto"]["Nome"]])
+02542:                     nome3 = user3["Nome"]
+02543:                     user3["fatto"] = 0
+02544:                     if user3["set"] == "Paladino":
+02545:                         user3["Scudo"] = 200
+02546:                     if user3["set"] == "Serial killer":
+02547:                         user2["hp"] = round(user2["hp"] * 0.75)
+--- contesto riga 2544 ---
+02534:             if user1["set"] == "Serial killer":
+02535:                 user2["hp"] = round(user2["hp"] * 0.75)
+02536:             if user2["set"] == "Serial killer":
+02537:                 user1["hp"] = round(user1["hp"] * 0.75)
+02538:             if "supporto" in player[username]:
+02539:                 if nome1 != player[username]["supporto"]["Nome"]:
+02540:                     user3 = copy.deepcopy(player[username]["supporto"])
+02541:                     user3["incantamenti"] = get_ench(player[player[username]["supporto"]["Nome"]])
+02542:                     nome3 = user3["Nome"]
+02543:                     user3["fatto"] = 0
+02544:                     if user3["set"] == "Paladino":
+02545:                         user3["Scudo"] = 200
+02546:                     if user3["set"] == "Serial killer":
+02547:                         user2["hp"] = round(user2["hp"] * 0.75)
+02548:                     classe(user3,user3["set"],bonus)
+02549:                 else:
+02550:                     player[username].pop("supporto")
+02551:             
+02552:             controllo_effetti_sfida(username,player)
+02553:             bostabile = ["hp", "def", "atk", "agi"]
+02554:             inizio = user1["hp"]
+02555:             user1["hp"] -= player[username]["dungeon"]["danno"]
+02556:             user1["fatto"] = 0
+02557:             user2["fatto"] = 0
+02558:             classe(user1, user1["set"],bonus)
+02559:             classe(user2, user2["set"],bonus)
+02560: 
+02561: 
+--- contesto riga 2809 ---
+02799:         if elapsed > 35:
+02800:             last_dungeon[username] = now
+02801:             await message.message.delete()
+02802:             
+02803:             last_dungeon[username] = now
+02804:             nome1 = username
+02805:             nome2 = scelta
+02806: 
+02807:             user1 = copy.deepcopy(player[username]["scheda"])
+02808:             user2 = copy.deepcopy(nemici[scelta])
+02809:             if user1["set"] == "Paladino":
+02810:                 user1["Scudo"] = 200
+02811:             if user2["set"] == "Paladino":
+02812:                 user2["Scudo"] = 200
+02813:             if user1["set"] == "Serial killer":
+02814:                 user2["hp"] = round(user2["hp"] * 0.75)
+02815:             if user2["set"] == "Serial killer":
+02816:                 user1["hp"] -= 150
+02817:             controllo_effetti_sfida(username,player)
+02818:             inizio = user1["hp"]
+02819:             user1["hp"] -= player[username]["dungeon"]["danno"]
+02820:             user1["fatto"] = 0
+02821:             user2["fatto"] = 0
+02822:             classe(user1, user1["set"],bonus)
+02823:             classe(user2, user2["set"],bonus)
+02824:                         
+02825:             user2["hp"] = user2["hp"] / 2
+02826:             stats = ["def", "atk", "agi"]
+--- contesto riga 3211 ---
+03201:             if user2["protezione"] == "armatura sakuretsu LV0":
+03202:                 stats = ["hp", "def", "atk", "agi"]
+03203:                 try:
+03204:                     arma = user2["arma"]
+03205:                     for st in stats:
+03206:                         user2[st] += armi[arma][st]
+03207:                     text += f"L'armatura di {nome2} muta!\n"
+03208:                 except:
+03209:                     pass
+03210: 
+03211:             if user1["set"] == "Paladino":
+03212:                 user1["Scudo"] = 800
+03213: 
+03214:             if user2["set"] == "Paladino":
+03215:                     user2["Scudo"] = 800
+03216:             if user1["set"] == "Serial killer":
+03217:                     user2["hp"] = round(user2["hp"] * 0.75)
+03218:             if user2["set"] == "Serial killer":
+03219:                     user1["hp"] = round(user1["hp"] * 0.75)
+03220:             boost(user1, Approcci)
+03221:             boost(user2, Approcci)
+03222:             user1["fatto"] = 0
+03223:             user2["fatto"] = 0
+03224:             classe(user1, user1["set"], bonus)
+03225:             classe(user2, user2["set"], bonus)
+03226:             try:
+03227:                 user1["incantamenti"]
+03228:             except:
+--- contesto riga 4517 ---
+04507:                 main["def"] += proc_val(main["set"], "turno", "respira", "def")
+04508:                 main["agi"] += proc_val(main["set"], "turno", "respira", "agi")
+04509:                 danno = 0
+04510:                 mod = 0
+04511:                 dannov = 0
+04512:     else:
+04513:         if mod == 0 or danno == 0 or dannov == 0:
+04514:             pass
+04515:         else:
+04516:             num = random.random()
+04517:             if setN == "Paladino" and oppo["Scudo"] >= 0:
+04518: 
+04519:                     oppo["Scudo"] -= round(float(danno) * (mod +0.5))
+04520:                     vita = oppo["Scudo"]
+04521:                     text += f"{nome1} infligge {dannov} danno allo scudo di {nome2} ({vita} scudo)!\n"
+04522:                     if oppo["Scudo"] <= 0:
+04523:                         text += "**Lo scudo si è rotto!**\n"
+04524:             else:
+04525:                     oppo["hp"] -= round(float(danno) * mod)
+04526:                     vita = oppo["hp"]
+04527:                     dannov = round(danno * mod)
+04528:                     text += f"{nome1} infligge {dannov} danni a {nome2} ({vita})!\n"
+04529: 
+04530:             if set == "Shogun moderno":
+04531: 
+04532:                     if proc_ok(num, set, "turno", "doppio_colpo"):
+04533:                         text += "**Doppio colpo**\n"
+04534:                         if setN == "Paladino" and oppo["Scudo"] >= 0:
+--- contesto riga 4534 ---
+04524:             else:
+04525:                     oppo["hp"] -= round(float(danno) * mod)
+04526:                     vita = oppo["hp"]
+04527:                     dannov = round(danno * mod)
+04528:                     text += f"{nome1} infligge {dannov} danni a {nome2} ({vita})!\n"
+04529: 
+04530:             if set == "Shogun moderno":
+04531: 
+04532:                     if proc_ok(num, set, "turno", "doppio_colpo"):
+04533:                         text += "**Doppio colpo**\n"
+04534:                         if setN == "Paladino" and oppo["Scudo"] >= 0:
+04535: 
+04536:                             oppo["Scudo"] -= round(float(danno) * random.uniform(proc_val(set, "turno", "doppio_colpo", "moltiplicatore_min"), proc_val(set, "turno", "doppio_colpo", "moltiplicatore_max")))
+04537:                             vita = oppo["Scudo"]
+04538:                             text += f"{nome1} infligge {dannov} danno allo scudo di {nome2} ({vita} scudo)!\n"
+04539:                             if oppo["Scudo"] <= 0:
+04540:                                 text += "**Lo scudo si è rotto!**\n"
+04541:                         else:
+04542:                             new_m = random.uniform(proc_val(set, "turno", "doppio_colpo", "moltiplicatore_min"), proc_val(set, "turno", "doppio_colpo", "moltiplicatore_max"))
+04543:                             oppo["hp"] -= round(float(danno) * new_m)
+04544:                             vita = oppo["hp"]
+04545:                             dannov = round(danno * new_m)
+04546:                             text += f"{nome1} infligge {dannov} danni a {nome2} ({vita})!\n"
+04547: 
+04548:             if set == "Manipolatore di morte" and proc_ok(num, set, "turno", "scheletri"):
+04549:                     text += f"\n**{nome1} evoca una marea di scheletri ad attaccare!**\n"
+04550:                     scheletri = cura = round((proc_val(set, "turno", "scheletri", "hp_riferimento") - main["hp"]) / proc_val(set, "turno", "scheletri", "hp_per_scheletro"))
+04551:                     new_m = mod
+--- contesto riga 4554 ---
+04544:                             vita = oppo["hp"]
+04545:                             dannov = round(danno * new_m)
+04546:                             text += f"{nome1} infligge {dannov} danni a {nome2} ({vita})!\n"
+04547: 
+04548:             if set == "Manipolatore di morte" and proc_ok(num, set, "turno", "scheletri"):
+04549:                     text += f"\n**{nome1} evoca una marea di scheletri ad attaccare!**\n"
+04550:                     scheletri = cura = round((proc_val(set, "turno", "scheletri", "hp_riferimento") - main["hp"]) / proc_val(set, "turno", "scheletri", "hp_per_scheletro"))
+04551:                     new_m = mod
+04552:                     for x in range(scheletri):
+04553: 
+04554:                         if setN == "Paladino" and oppo["Scudo"] >= 0:
+04555: 
+04556:                             new_m = random.uniform(proc_val(set, "turno", "scheletri", "mod_min"), proc_val(set, "turno", "scheletri", "mod_max"))
+04557:                             oppo["Scudo"] -= round(float(danno) * new_m)
+04558: 
+04559:                             vita = oppo["Scudo"]
+04560:                             text += f"Uno scheletrino infligge {dannov} danno allo scudo di {nome2} ({vita} scudo)!\n"
+04561:                             if oppo["Scudo"] <= 0:
+04562:                                 text += "**Lo scudo si è rotto!**\n"
+04563:                             danno += proc_val(set, "turno", "scheletri", "crescita_danno_scudo")
+04564:                         else:
+04565:                             new_m = random.uniform(proc_val(set, "turno", "scheletri", "mod_min"), proc_val(set, "turno", "scheletri", "mod_max"))
+04566:                             oppo["hp"] -= round(float(danno) * new_m)
+04567: 
+04568:                             vita = oppo["hp"]
+04569:                             dannov = round(danno * new_m)
+04570:                             text += f"Uno scheletrino infligge {dannov} danni a {nome2} ({vita})!\n"
+04571:                             danno += proc_val(set, "turno", "scheletri", "crescita_danno_hp")
+
+==========================================================================================
+Serial killer
+==========================================================================================
+--- contesto riga 1351 ---
+01341:                     
+01342:                     else:
+01343: 
+01344:                         nome1 = username
+01345:                         nome2 = scelta
+01346: 
+01347:                         user1 = copy.deepcopy(player[username]["scheda"])
+01348:                         user2 = copy.deepcopy(Boss[scelta])
+01349:                         if user1["set"] == "Paladino":
+01350:                             user1["Scudo"] = 1000
+01351:                         if user1["set"] == "Serial killer":
+01352:                             user2["hp"] = round(user2["hp"] * 0.75)
+01353: 
+01354:                         controllo_effetti_sfida(username,player)
+01355:                         bostabile = ["hp", "def", "atk", "agi"]
+01356:                         user1["fatto"] = 0
+01357:                         user2["fatto"] = 0
+01358:                         user1["incantamenti"] = get_ench(player[username])
+01359:                         user2["incantamenti"] = []
+01360:                         classe(user1, user1["set"],bonus)
+01361:                         text = f"Sfida tra {nome1} e {nome2} lv {forza}, uno dei terribili boss!!\n\n"
+01362: 
+01363:                         if player[username]["setta"]["benedizione"] == "Caprone":
+01364:                             a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))                       
+01365:                             for stat in bostabile:
+01366:                                 print(user1[stat])
+01367:                                 user1[stat] = round(
+01368:                                     user1[stat] + (user1[stat] * (a / 100))
+--- contesto riga 1754 ---
+01744:             player["atk"] += proc_val(set, "assalto", "massa_nemici", "atk_per_nemico") * len(nemico)
+01745:             text += "🆙" * len(nemico) + "\n"
+01746:     
+01747:     num = random.random()    
+01748:     
+01749:     if "Bersaglio enorme" in list(nemico) and 0.2 > num:
+01750:         if set == "Vigilante":
+01751:             text += "__Nessuna distrazione__"
+01752:         else:
+01753:             target = "Bersaglio enorme"
+01754:             if set == "Serial killer":
+01755:                 text += f"Anche se sa di aver sbagliato bersaglio {nome} è deciso ad arrivarci!"
+01756:                 player["agi"] += 30
+01757:     
+01758:     if "Divino" in effetti:
+01759:         player["atk"] = player["atk"] * 10
+01760:         player["def"] = player["def"] * 10000
+01761:     
+01762:     if anello != None:
+01763:         for pl in clan[team]['membri']:
+01764:             aniel = playerg[pl]["scheda"]["anello"]
+01765:             if aniel in PROC_ANELLI and "aura" in PROC_ANELLI[aniel].get("assalto", {}):
+01766:                 cfg_anello = anello_cfg(aniel, "assalto", "aura")
+01767:                 stat_anello = cfg_anello["stat"]
+01768:                 valore_anello = cfg_anello["valore"]
+01769:                 moltiplicatore = 1
+01770:                 if set == "Portatore di morte":
+01771:                     moltiplicatore = proc_val(set, "assalto", "bonus_gadget", "moltiplicatore", 2)
+--- contesto riga 2534 ---
+02524: 
+02525:             bossino = listToString(scelta.split(" ")[1:])
+02526:             user2 = copy.deepcopy(nemici[bossino])
+02527:             user2["incantamenti"] = []
+02528: 
+02529:             nome2 = user2["Nome"]
+02530:             if user1["set"] == "Paladino":
+02531:                 user1["Scudo"] = 200
+02532:             if user2["set"] == "Paladino":
+02533:                 user2["Scudo"] = 200
+02534:             if user1["set"] == "Serial killer":
+02535:                 user2["hp"] = round(user2["hp"] * 0.75)
+02536:             if user2["set"] == "Serial killer":
+02537:                 user1["hp"] = round(user1["hp"] * 0.75)
+02538:             if "supporto" in player[username]:
+02539:                 if nome1 != player[username]["supporto"]["Nome"]:
+02540:                     user3 = copy.deepcopy(player[username]["supporto"])
+02541:                     user3["incantamenti"] = get_ench(player[player[username]["supporto"]["Nome"]])
+02542:                     nome3 = user3["Nome"]
+02543:                     user3["fatto"] = 0
+02544:                     if user3["set"] == "Paladino":
+02545:                         user3["Scudo"] = 200
+02546:                     if user3["set"] == "Serial killer":
+02547:                         user2["hp"] = round(user2["hp"] * 0.75)
+02548:                     classe(user3,user3["set"],bonus)
+02549:                 else:
+02550:                     player[username].pop("supporto")
+02551:             
+--- contesto riga 2546 ---
+02536:             if user2["set"] == "Serial killer":
+02537:                 user1["hp"] = round(user1["hp"] * 0.75)
+02538:             if "supporto" in player[username]:
+02539:                 if nome1 != player[username]["supporto"]["Nome"]:
+02540:                     user3 = copy.deepcopy(player[username]["supporto"])
+02541:                     user3["incantamenti"] = get_ench(player[player[username]["supporto"]["Nome"]])
+02542:                     nome3 = user3["Nome"]
+02543:                     user3["fatto"] = 0
+02544:                     if user3["set"] == "Paladino":
+02545:                         user3["Scudo"] = 200
+02546:                     if user3["set"] == "Serial killer":
+02547:                         user2["hp"] = round(user2["hp"] * 0.75)
+02548:                     classe(user3,user3["set"],bonus)
+02549:                 else:
+02550:                     player[username].pop("supporto")
+02551:             
+02552:             controllo_effetti_sfida(username,player)
+02553:             bostabile = ["hp", "def", "atk", "agi"]
+02554:             inizio = user1["hp"]
+02555:             user1["hp"] -= player[username]["dungeon"]["danno"]
+02556:             user1["fatto"] = 0
+02557:             user2["fatto"] = 0
+02558:             classe(user1, user1["set"],bonus)
+02559:             classe(user2, user2["set"],bonus)
+02560: 
+02561: 
+02562:             for stat in bostabile:
+02563: 
+--- contesto riga 2813 ---
+02803:             last_dungeon[username] = now
+02804:             nome1 = username
+02805:             nome2 = scelta
+02806: 
+02807:             user1 = copy.deepcopy(player[username]["scheda"])
+02808:             user2 = copy.deepcopy(nemici[scelta])
+02809:             if user1["set"] == "Paladino":
+02810:                 user1["Scudo"] = 200
+02811:             if user2["set"] == "Paladino":
+02812:                 user2["Scudo"] = 200
+02813:             if user1["set"] == "Serial killer":
+02814:                 user2["hp"] = round(user2["hp"] * 0.75)
+02815:             if user2["set"] == "Serial killer":
+02816:                 user1["hp"] -= 150
+02817:             controllo_effetti_sfida(username,player)
+02818:             inizio = user1["hp"]
+02819:             user1["hp"] -= player[username]["dungeon"]["danno"]
+02820:             user1["fatto"] = 0
+02821:             user2["fatto"] = 0
+02822:             classe(user1, user1["set"],bonus)
+02823:             classe(user2, user2["set"],bonus)
+02824:                         
+02825:             user2["hp"] = user2["hp"] / 2
+02826:             stats = ["def", "atk", "agi"]
+02827:             for g in stats:
+02828:                 user2[g] = round(
+02829:                     user2[g]
+02830:                     + (
+--- contesto riga 3216 ---
+03206:                         user2[st] += armi[arma][st]
+03207:                     text += f"L'armatura di {nome2} muta!\n"
+03208:                 except:
+03209:                     pass
+03210: 
+03211:             if user1["set"] == "Paladino":
+03212:                 user1["Scudo"] = 800
+03213: 
+03214:             if user2["set"] == "Paladino":
+03215:                     user2["Scudo"] = 800
+03216:             if user1["set"] == "Serial killer":
+03217:                     user2["hp"] = round(user2["hp"] * 0.75)
+03218:             if user2["set"] == "Serial killer":
+03219:                     user1["hp"] = round(user1["hp"] * 0.75)
+03220:             boost(user1, Approcci)
+03221:             boost(user2, Approcci)
+03222:             user1["fatto"] = 0
+03223:             user2["fatto"] = 0
+03224:             classe(user1, user1["set"], bonus)
+03225:             classe(user2, user2["set"], bonus)
+03226:             try:
+03227:                 user1["incantamenti"]
+03228:             except:
+03229:                 user1["incantamenti"] = []
+03230:             
+03231:             try:
+03232:                 user2["incantamenti"]
+03233:             except:
+
+==========================================================================================
+Difensore del popolo
+==========================================================================================
+--- contesto riga 2596 ---
+02586:                         a = "Boss"
+02587:                         text += (
+02588:                             f"{nome1} cade a terra sfinito!\n"
+02589:                         )
+02590:                         break
+02591: 
+02592:                     text += turno(user2, user1)
+02593:                     if is_dead(user1):
+02594:                         b = "player"
+02595:                         a = "Boss"
+02596:                         if user3["set"] == 'Difensore del popolo':
+02597:                             if user3["hp"] < 0:
+02598:                                 user3["hp"] = 100
+02599:                             user3["set"] = None
+02600:                             user1["hp"] += (user3["hp"]/2)
+02601:                             if user1["hp"] < 0:
+02602:                                 user1["hp"] = 1
+02603:                             user3["hp"] = -1000
+02604:                             text += f"**You will not die, not yet amigo!**\n"
+02605:                         else:
+02606:                             break
+02607:                     elif is_dead(user2):
+02608:                         a = "player"
+02609:                         b = "Boss"
+02610: 
+02611:                         break
+02612:                     text += turno(user1, user2)
+02613:                     if is_dead(user2):
+--- contesto riga 2622 ---
+02612:                     text += turno(user1, user2)
+02613:                     if is_dead(user2):
+02614:                         a = "player"
+02615:                         b = "Boss"
+02616: 
+02617:                         break
+02618:                     elif is_dead(user1):
+02619:                         b = "player"
+02620:                         a = "Boss"
+02621: 
+02622:                         if user3["set"] == 'Difensore del popolo':
+02623:                             if user3["hp"] < 0:
+02624:                                 user3["hp"] = 100
+02625:                             user3["set"] = None
+02626:                             user1["hp"] += (user3["hp"]/2)
+02627:                             if user1["hp"] < 0:
+02628:                                 user1["hp"] = 1
+02629:                             user3["hp"] = -1000
+02630:                             text += f"**You will not die, not yet amigo!**\n"
+02631:                         else:
+02632:                             break
+02633:                     if user3["hp"] > 0:
+02634:                         text += turno(user2, user3)
+02635:                         text += turno(user3, user2)
+02636:                         if is_dead(user2):
+02637:                             a = "player"
+02638:                             b = "Boss"
+02639: 
+
+==========================================================================================
+Spadaccino Musashi
+==========================================================================================
+--- contesto riga 1820 ---
+01810:                 difesan = (starmi[difesa]["def"] + starmi[difesa]["def"] * (nemico[difesa]["lv"] / 10) + bonus["def"])
+01811:                 agin = (starmi[difesa]["agi"] + starmi[difesa]["agi"] * (nemico[difesa]["lv"] / 10) + bonus["agi"])
+01812:                     
+01813:                 if set != None:
+01814:                     num = random.random()
+01815:                     if set == "Ultima speranza" and proc_ok(num, set, "assalto", "paura"):
+01816:                         text += "__Il fatto che non sei morto spaventa i nemici!__\n"
+01817:                         bonus["def"] += proc_val(set, "assalto", "paura", "bonus_def_nemico")
+01818:                     elif set == "Macellaio":
+01819:                         defense += player["hp"] / 20
+01820:                     elif set == 'Spadaccino Musashi':
+01821:                         defense = defense * 1.2                    
+01822:                     elif set == "Proiettile":
+01823:                         defense += 40
+01824:                     elif set == "Illusionista" and proc_ok(num, set, "assalto", "copie"):
+01825:                         agin += proc_val(set, "assalto", "copie", "agi_difesa")
+01826:                         text += f"Copie di {nome} si spargono a caso!\n"
+01827: 
+01828:                     elif set == "Uomo di classe" and proc_ok(num, set, "assalto", "spumeggiante"):
+01829:                         dps = attaccon
+01830:                         defense = difesan
+01831:                         agin += proc_val(set, "assalto", "spumeggiante", "agi_difesa")
+01832:                         text += "**Spumeggiante!**\n"
+01833: 
+01834:                     elif set == "Maestro delle tartarughe" and proc_ok(num, set, "assalto", "carapace"):
+01835:                         player["def"] += proc_val(set, "assalto", "carapace", "def")
+01836:                         text += f"__{nome} sfrutta il carapace come difesa!__\n"
+01837: 
+--- contesto riga 4489 ---
+04479:     if "Minimista" in main["incantamenti"] and mod <= 0:
+04480:         mod = 0.1
+04481:         text += "+"
+04482:         if danno <= 0:
+04483:             danno = 10
+04484:             text += "+"
+04485:     
+04486:     
+04487:     dannov = round(danno * mod)
+04488:     main["fatto"] += dannov
+04489:     if setN == 'Spadaccino Musashi':
+04490:                 danno = danno * .7
+04491:     if anello == "Coda demoniaca":
+04492:         oppo["lastD"] = dannov
+04493:     
+04494:     if "terrore"in main:
+04495:                 text += f"{nome1} è terrorizzato!\n"
+04496:                 main.pop("terrore")
+04497:     elif "bloccato" in main:
+04498:                 text += f"{nome1} è bloccato, le corde lo danneggiano!\n"
+04499:                 main["hp"] -= 10
+04500:                 main.pop("bloccato")
+04501:                 danno = 0
+04502:                 mod = 0
+04503:                 dannov = 0
+04504:     elif main["set"] == 'Avventuriero delle praterie' and proc_ok(1 - num, main["set"], "turno", "respira"):
+04505:                 text += f"Respira {nome1}, sta andando bene!\n"
+04506:                 main["atk"] += proc_val(main["set"], "turno", "respira", "atk")
+
+==========================================================================================
+Incubo dei cieli
+==========================================================================================
+NESSUNA OCCORRENZA
+
+==========================================================================================
+Pescatore
+==========================================================================================
+--- contesto riga 6185 ---
+06175:                     )
+06176: 
+06177:                 if scelta == "Armeria":
+06178:                     text += "Entri in un antica armeria, il tutto è un poco polveroso ma qualcosa si potrà pur trovare!\n"
+06179:                     try:
+06180:                                     seet = player[username]["scheda"]["set"]
+06181:                     except:
+06182:                                     seet = None         
+06183:                     if seet == None or dungeon_under(num, "Armeria", "evento", "nessun_evento_pct"):
+06184:                         text += "Il tuo set non richiama nessun evento, vabbè succede"
+06185:                     elif "Forma" in seet or "Pescatore" == seet:
+06186:                         text += "Il tuo set è troppo recente, non può interagire con questi rottami..."
+06187:                     else:
+06188:                         cosa = random.choice(classi[seet]) + " LV0"
+06189:                         text += f"Davanti a te un manichino porta il tuo set, il {seet}!\nRiesci a prendere però solo **{cosa}**"
+06190:                         try:
+06191:                             player[username]["zaino"][cosa] += 1
+06192:                         except:
+06193:                             player[username]["zaino"][cosa] = 1
+06194:                     fines = True
+06195:                 if scelta == "Spada conficcata":
+06196:                     text += "Non credo si possa fare qualcosa per estrarla, la spada del folle titano è troppo pesante e maledetta..."
+06197:                     today = date.today()
+06198:                     d1 = today.strftime("%d")
+06199:                     if int(d1) == 17 or int(d1) == 21:
+06200:                         bottoni = list()
+06201:                         for appz in [f"Estrai la spada","Non ora"]:
+06202:                             bottoni.append([InlineKeyboardButton(appz, callback_data=f"dungi_{appz}")])
+
+==========================================================================================
+Esperto di animali
+==========================================================================================
+--- contesto riga 4264 ---
+04254:             agi += 30  
+04255:                
+04256:         if "Duraturo" in oppo["incantamenti"] and 0.1 > num:
+04257:             difesan = difesan * 1.7
+04258:             text += "🛡"
+04259:             num = random.random()
+04260:         if "Multiplo" in oppo["incantamenti"] and 0.1 > num:
+04261:             agin += 8
+04262:             text += f"💪"
+04263:     
+04264:     if setN == "Esperto di animali" and oppo["Ap"] == "Fantamsa del ritorno" and proc_ok(num, setN, "turno", "fantasma_ritorno"):
+04265:             text += f"Il Fantamsa del ritorno spaventa {nome1}"
+04266:             dps *= proc_val(setN, "turno", "fantasma_ritorno", "dps_mul")
+04267:     if set == "Esperto di animali" and main["Ap"] == "Dragone delle stelle" and proc_ok(num, set, "turno", "dragone_stelle"):
+04268:             text += f"Il Dragone delle stelle colpisce con {nome1}"
+04269:             dps *= proc_val(set, "turno", "dragone_stelle", "dps_mul")
+04270:     
+04271:     possibile = possibiles(agin, agi)
+04272:     possibile += dogebonus
+04273: 
+04274: 
+04275:     if possibile > random.randint(0, 100):
+04276:         text += f"{nome2} schiva il colpo di {nome1}\n"
+04277:         oppo["schivato"] = True
+04278:         if anello == "Coda demoniaca":
+04279:             oppo["lastD"] = anello_val(anello, "turno", "schivata", "lastD_reset")
+04280:         mod = 0
+04281:         danno = 0
+--- contesto riga 4810 ---
+04800:                     oppo["hp"] -= dannissimi
+04801:                     text += f"**Un raggio del distruttore di mondi colpisce {nome2} infliggendo {dannissimi} danni!**"
+04802:                 else:
+04803:                     pass
+04804:         elif set == "Accolito" and main["fatto"] >= proc_val(set, "turno", "potere", "danno_fatto_min"):
+04805:                 text += "**ECCOLO ECCOLO LUI E' QUI, LUI MI DA POTEEERE**\n"
+04806:                 main["atk"] += proc_val(set, "turno", "potere", "atk")
+04807:                 main["def"] += proc_val(set, "turno", "potere", "def")
+04808:                 main["hp"] += proc_val(set, "turno", "potere", "hp")
+04809:                 main["agi"] += proc_val(set, "turno", "potere", "agi")
+04810:         elif set == "Esperto di animali" and main["Ap"] == "Ratto delle tombe" and oppo["hp"] <= proc_val(set, "turno", "ratto_tombe", "hp_target_max"):
+04811:                 oppo["hp"] = 0
+04812:                 text += "Il Ratto delle tombe finisce il lavoro"
+04813:         elif set == "Esperto di animali" and main["Ap"] == "Balena territoriale" and proc_ok(num, set, "turno", "balena_territoriale"):
+04814:             text += f"La Balena territoriale aumenta la difesa di {nome1}"
+04815:             main["def"] += proc_val(set, "turno", "balena_territoriale", "def")
+04816:         elif set == "Esperto di animali" and main["Ap"] == "Silvantropo" and proc_ok(num, set, "turno", "silvantropo"):
+04817:             text += f"Il Silvantropo cura {nome1}"
+04818:             main["hp"] += proc_val(set, "turno", "silvantropo", "cura")
+04819:     
+04820:     if setN != None:
+04821:         num = random.random()
+04822:         if setN == "Sanguinolento" and proc_ok(num, setN, "turno", "sangue_difesa"):
+04823:             if "schiva il colpo" not in text:
+04824:                 if set == "Ombra silenziosa" and proc_ok(num, set, "turno", "silenzio_sanguinolento"):
+04825: 
+04826:                     text += "(Silenziato)\n"
+04827:                 else:
+--- contesto riga 4875 ---
+04865:                     text += f"**{nome1} subisce {danno2} danni da spine!**\n"
+04866:                     main["hp"] -= danno2
+04867: 
+04868:                 
+04869:         elif setN == "Mariachi" and proc_ok(num, setN, "turno", "resurrezione_difesa") and oppo["hp"] <= 0:
+04870:                     oppo["hp"] = proc_val(setN, "turno", "resurrezione_difesa", "hp")
+04871:                     oppo["atk"] += proc_val(setN, "turno", "resurrezione_difesa", "atk")
+04872:                     oppo["def"] += proc_val(setN, "turno", "resurrezione_difesa", "def")
+04873:                     text += f"**El Dios de la Muerte, fiero di {nome2}, decide di far continuare la sua avventura, almeno un altro pochettino!**\n"
+04874: 
+04875:         elif setN == "Esperto di animali" and oppo["Ap"] == "OrsoDruido" and proc_ok(num, setN, "turno", "orsodruido"):
+04876:                 try:
+04877: 
+04878:                     danno2 = round(dannov * random.uniform(proc_val(setN, "turno", "orsodruido", "random_min"), proc_val(setN, "turno", "orsodruido", "random_max")))
+04879: 
+04880:                     text += f"**{nome1} viene attaccato dall'oOrsoDruido, subendo {danno2} danni!**\n"
+04881:                     main["hp"] -= danno2
+04882:                 except:
+04883:                     pass
+04884:     
+04885: 
+04886: 
+04887: 
+04888: 
+04889:     if anellon != None:
+04890:             num = random.random()
+04891:             
+04892:             if anellon == "Scarica di adrenalina" and anello_ok(num, anellon, "turno", "adrenalina"):
