@@ -1,0 +1,63 @@
+name: Scan set da main
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+      - name: Estrai occorrenze da main
+        shell: bash
+        run: |
+          git fetch origin main
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+          targets = [
+              'Eroe caduto', 'Eroe della rivolta', 'Paladino', 'Serial killer',
+              'Difensore del popolo', 'Spadaccino Musashi', 'Incubo dei cieli',
+              'Pescatore', 'Esperto di animali'
+          ]
+          text = subprocess.check_output(['git','show','origin/main:nft.py'], text=True)
+          lines = text.splitlines()
+          out = []
+          for target in targets:
+              out.append('\n' + '='*90)
+              out.append(target)
+              out.append('='*90)
+              hits = [i for i, line in enumerate(lines) if target in line]
+              if not hits:
+                  out.append('NESSUNA OCCORRENZA')
+                  continue
+              used = []
+              for i in hits:
+                  if any(abs(i-j) < 12 for j in used):
+                      continue
+                  used.append(i)
+                  start = max(0, i-12)
+                  end = min(len(lines), i+30)
+                  out.append(f'--- contesto riga {i+1} ---')
+                  for n in range(start, end):
+                      out.append(f'{n+1:05d}: {lines[n]}')
+          Path('set_main_scan.txt').write_text('\n'.join(out), encoding='utf-8')
+          PY
+      - name: Commit report e pulizia
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add set_main_scan.txt
+          git rm .github/workflows/scan-main-set.yml
+          git commit -m "chore: confronta set con main"
+          git push origin HEAD:refactor/bilanciamento-config
