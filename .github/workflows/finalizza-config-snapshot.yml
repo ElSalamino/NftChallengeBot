@@ -1,0 +1,84 @@
+name: Finalizza configurazione e snapshot set
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Applica il refactor 114 su 114 già validato
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+
+          wf = Path('.github/workflows/completa-config-set.yml').read_text(encoding='utf-8')
+          start = wf.index("python - <<'PY'") + len("python - <<'PY'")
+          end = wf.index("\n          PY", start)
+          script = textwrap.dedent(wf[start:end]).lstrip('\n')
+          exec(compile(script, '<completa-config-set>', 'exec'), {})
+          PY
+          python -m py_compile nft.py bilanciamento.py __init__.py
+
+      - name: Genera snapshot completo per le frasi custom
+        shell: bash
+        run: |
+          python - <<'PY'
+          import ast
+          import pprint
+          from pathlib import Path
+
+          def literal(text, name):
+              tree = ast.parse(text)
+              for node in tree.body:
+                  if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+                      return ast.literal_eval(node.value)
+              raise RuntimeError(name)
+
+          liste = Path('liste.py').read_text(encoding='utf-8')
+          bil = Path('bilanciamento.py').read_text(encoding='utf-8')
+          classi = literal(liste, 'classi')
+          frasi = literal(liste, 'frasi_set')
+          bonus = literal(liste, 'bonus')
+          proc = literal(bil, 'PROC_CLASSI')
+
+          assert set(classi) == set(proc), (len(classi), len(proc), sorted(set(classi)-set(proc)))
+          out = []
+          out.append(f'TOTALE SET: {len(classi)}\n')
+          for i, nome in enumerate(classi, 1):
+              out.append('=' * 100)
+              out.append(f'{i:03d}. {nome}')
+              out.append('=' * 100)
+              out.append('COMPONENTI: ' + repr(classi[nome]))
+              out.append('BONUS BASE: ' + repr(bonus.get(nome, {})))
+              out.append('DESCRIZIONE ATTUALE: ' + repr(frasi.get(nome, '')))
+              out.append('CONFIG:')
+              out.append(pprint.pformat(proc[nome], width=120, sort_dicts=False))
+              out.append('')
+          Path('snapshot_frasi_set.txt').write_text('\n'.join(out), encoding='utf-8')
+          PY
+
+      - name: Commit refactor e snapshot
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f audit_set_completo.txt audit_set_globale.txt audit_hardcode_set.txt set_mancanti_scan.txt set_main_scan.txt
+          git rm --ignore-unmatch .github/workflows/completa-config-set.yml
+          git rm --ignore-unmatch .github/workflows/finalizza-config-snapshot.yml
+          git add -A
+          git commit -m "refactor: completa config set e prepara frasi custom"
+          git push origin HEAD:refactor/bilanciamento-config
