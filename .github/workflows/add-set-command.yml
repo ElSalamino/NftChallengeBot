@@ -1,0 +1,234 @@
+name: Aggiungi comando set e descrizioni tecniche
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Applica patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          nft_path = Path('nft.py')
+          nft = nft_path.read_text(encoding='utf-8')
+
+          helper_marker = '''def take_boss(lista, numero):\n'''
+          helper_block = r'''def _titolo_parametro_tecnico(chiave):
+              """Converte le chiavi del database in etichette leggibili senza alterarne il significato."""
+              speciali = {
+                  "proc": "Probabilità",
+                  "atk": "ATK",
+                  "def": "DEF",
+                  "agi": "AGI",
+                  "hp": "HP",
+                  "dps": "DPS",
+                  "powa_min": "POWA minima",
+                  "powe_min": "POWE minima",
+                  "powa_per_turno": "POWA per turno",
+                  "powe_per_turno": "POWE per turno",
+                  "cura": "Cura",
+                  "danno": "Danno",
+                  "moltiplicatore": "Moltiplicatore",
+                  "divisore": "Divisore",
+                  "hp_max": "HP massimi",
+                  "hp_min": "HP minimi",
+                  "hp_target_max": "HP bersaglio max",
+                  "hp_target_min": "HP bersaglio min",
+                  "danno_fatto_min": "Danno fatto minimo",
+                  "random_min": "Random minimo",
+                  "random_max": "Random massimo",
+              }
+              return speciali.get(chiave, str(chiave).replace("_", " ").strip().capitalize())
+
+
+          def _is_percentuale_tecnica(chiave):
+              chiave = str(chiave).lower()
+              return (
+                  chiave == "proc"
+                  or chiave.startswith("proc_")
+                  or chiave.endswith("_proc")
+                  or "percento" in chiave
+                  or chiave.endswith("_pct")
+                  or chiave.startswith("soglia")
+                  or (len(chiave) > 1 and chiave[0] == "s" and chiave[1:].isdigit())
+              )
+
+
+          def _format_valore_tecnico(chiave, valore):
+              if isinstance(valore, bool):
+                  return "sì" if valore else "no"
+              if isinstance(valore, (list, tuple, set)):
+                  return ", ".join(str(x) for x in valore)
+              if isinstance(valore, float) and valore.is_integer():
+                  valore = int(valore)
+              if _is_percentuale_tecnica(chiave) and isinstance(valore, (int, float)):
+                  return f"{valore}%"
+              return str(valore)
+
+
+          def _righe_config_tecnica(config):
+              righe = []
+              for contesto, dati in config.items():
+                  if not isinstance(dati, dict):
+                      continue
+
+                  titolo_contesto = str(contesto).replace("_", " ").capitalize()
+                  effetti = [(nome, parametri) for nome, parametri in dati.items() if isinstance(parametri, dict)]
+                  diretti = [(chiave, valore) for chiave, valore in dati.items() if not isinstance(valore, dict)]
+
+                  for effetto, parametri in effetti:
+                      dettagli = []
+                      for chiave, valore in parametri.items():
+                          if chiave == "nomi_equivalenti":
+                              continue
+                          dettagli.append(
+                              f"{_titolo_parametro_tecnico(chiave)}: {_format_valore_tecnico(chiave, valore)}"
+                          )
+                      if dettagli:
+                          nome_effetto = str(effetto).replace("_", " ").capitalize()
+                          righe.append(f"• {titolo_contesto} / {nome_effetto}: " + "; ".join(dettagli))
+
+                  if diretti:
+                      dettagli = []
+                      for chiave, valore in diretti:
+                          if chiave == "nomi_equivalenti":
+                              continue
+                          dettagli.append(
+                              f"{_titolo_parametro_tecnico(chiave)}: {_format_valore_tecnico(chiave, valore)}"
+                          )
+                      if dettagli:
+                          righe.append(f"• {titolo_contesto}: " + "; ".join(dettagli))
+              return righe
+
+
+          def descrizione_set_tecnica(nome, bonus=None):
+              """Descrizione meccanica del set, generata direttamente da PROC_CLASSI."""
+              righe = ["⚙️ Dettagli tecnici"]
+              bonus = bonus or {}
+              bonus_testo = []
+              for stat in ("hp", "atk", "def", "agi"):
+                  valore = bonus.get(stat, 0)
+                  if valore:
+                      segno = "+" if valore > 0 else ""
+                      bonus_testo.append(f"{stat.upper()} {segno}{valore}")
+              if bonus_testo:
+                  righe.append("• Bonus base: " + " | ".join(bonus_testo))
+
+              righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))
+              if len(righe) == 1:
+                  righe.append("• Nessun parametro numerico centralizzato per questo set.")
+              return "\n".join(righe)
+
+
+          def descrizione_anello_tecnica(nome):
+              """Descrizione meccanica dell'anello, generata direttamente da PROC_ANELLI."""
+              righe = ["⚙️ Dettagli tecnici"]
+              righe.extend(_righe_config_tecnica(PROC_ANELLI.get(nome, {})))
+              if len(righe) == 1:
+                  righe.append("• Nessun parametro numerico centralizzato per questo anello.")
+              return "\n".join(righe)
+
+
+          def aggiorna_descrizioni_bilanciamento(liste_module):
+              """Aggiunge alle descrizioni esistenti un blocco tecnico sempre allineato al bilanciamento."""
+              marker = "\n\n⚙️ Dettagli tecnici"
+
+              for nome in liste_module.classi:
+                  base = liste_module.frasi_set.get(nome, f"Set del {nome}.")
+                  base = base.split(marker, 1)[0].rstrip()
+                  bonus_set = getattr(liste_module, "bonus", {}).get(nome, {})
+                  liste_module.frasi_set[nome] = base + "\n\n" + descrizione_set_tecnica(nome, bonus_set)
+
+              for nome in list(liste_module.anelli):
+                  base = liste_module.anelli[nome]
+                  base = base.split(marker, 1)[0].rstrip()
+                  liste_module.anelli[nome] = base + "\n\n" + descrizione_anello_tecnica(nome)
+
+
+          def testo_lista_set(liste_module):
+              """Catalogo completo dei set con i componenti richiesti per completarli."""
+              righe = ["🧩 **SET E COMPONENTI**", ""]
+              for nome in sorted(liste_module.classi, key=lambda x: str(x).lower()):
+                  componenti = liste_module.classi[nome]
+                  righe.append(f"**{nome}**")
+                  if componenti:
+                      for componente in componenti:
+                          righe.append(f"• `{componente}`")
+                  else:
+                      righe.append("• _Nessun componente definito_")
+                  righe.append("")
+              return "\n".join(righe)
+
+
+          '''
+
+          if 'def descrizione_set_tecnica(' not in nft:
+              if helper_marker not in nft:
+                  raise RuntimeError('Marker take_boss non trovato in nft.py')
+              nft = nft.replace(helper_marker, helper_block + helper_marker, 1)
+              nft_path.write_text(nft, encoding='utf-8')
+
+          init_path = Path('__init__.py')
+          init = init_path.read_text(encoding='utf-8')
+
+          startup_line = 'nft.aggiorna_descrizioni_bilanciamento(liste)'
+          if startup_line not in init:
+              import_marker = 'liste = importlib.import_module("liste")\n'
+              if import_marker not in init:
+                  raise RuntimeError('Import di liste non trovato in __init__.py')
+              init = init.replace(import_marker, import_marker + startup_line + '\n', 1)
+
+          command_signature = 'async def catalogo_set(client, message):'
+          if command_signature not in init:
+              start_marker = '@app.on_message(filters.command(["start"]) & filters.private & ~filters.user(bannati))'
+              if start_marker not in init:
+                  raise RuntimeError('Handler /start non trovato in __init__.py')
+              command_block = '''@app.on_message(filters.command("set") & filters.private & ~filters.user(bannati))
+          async def catalogo_set(client, message):
+              testo = nft.testo_lista_set(liste)
+              for blocco in nft.separatore(testo):
+                  await app.send_message(message.chat.id, blocco)
+
+
+          '''
+              init = init.replace(start_marker, command_block + start_marker, 1)
+
+          init_path.write_text(init, encoding='utf-8')
+
+          assert 'def descrizione_set_tecnica(' in nft_path.read_text(encoding='utf-8')
+          assert 'def descrizione_anello_tecnica(' in nft_path.read_text(encoding='utf-8')
+          assert startup_line in init_path.read_text(encoding='utf-8')
+          assert command_signature in init_path.read_text(encoding='utf-8')
+          PY
+
+          python -m py_compile nft.py bilanciamento.py
+
+      - name: Commit e pulizia workflow temporaneo
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- nft.py __init__.py
+          git rm -- .github/workflows/add-set-command.yml
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica da committare"
+            exit 0
+          fi
+          git commit -m "feat: aggiungi catalogo set e dettagli tecnici"
+          git push origin HEAD:refactor/bilanciamento-config
