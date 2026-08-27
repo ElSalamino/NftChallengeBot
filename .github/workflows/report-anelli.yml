@@ -1,0 +1,90 @@
+name: Report anelli
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Genera report anelli
+        shell: bash
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+
+          def literal(path, name):
+              tree = ast.parse(Path(path).read_text(encoding='utf-8'))
+              for node in tree.body:
+                  if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+                      return ast.literal_eval(node.value)
+              raise RuntimeError(f'{name} non trovato')
+
+          anelli = literal('liste.py', 'anelli')
+          proc = literal('bilanciamento.py', 'PROC_ANELLI')
+
+          def label(k):
+              speciali = {
+                  'proc':'probabilità','atk':'attacco','def':'difesa','agi':'agilità','hp':'HP','dps':'danno',
+                  'cura':'cura','danno':'danno','moltiplicatore':'moltiplicatore','divisore':'divisore',
+                  'seed':'seed','danno_min':'danno minimo','hp_min':'HP minimi','hp_max':'HP massimi',
+                  'atk_target':'attacco nemico','def_target':'difesa nemica','agi_target':'agilità nemica',
+                  'atk_player':'attacco proprio','def_player':'difesa propria','agi_player':'agilità propria',
+              }
+              return speciali.get(k, k.replace('_',' '))
+
+          def fmt(k,v):
+              if isinstance(v,bool): return 'sì' if v else 'no'
+              if isinstance(v,(list,tuple,set)): return ', '.join(map(str,v))
+              if isinstance(v,float) and v.is_integer(): v=int(v)
+              lk=k.lower()
+              if isinstance(v,(int,float)) and (k=='proc' or 'pct' in lk or 'percento' in lk): return f'{v}%'
+              return str(v)
+
+          lines=[]
+          for i,(nome,descr) in enumerate(anelli.items(),1):
+              lines.append(f'{i:03d}. {nome}')
+              lines.append(f'Descrizione attuale: {descr}')
+              cfg=proc.get(nome)
+              if not cfg:
+                  lines.append('Effetto centralizzato: nessun dato in PROC_ANELLI.')
+              else:
+                  lines.append('Effetti dal bilanciamento:')
+                  for contesto,dati in cfg.items():
+                      if isinstance(dati,dict):
+                          for effetto,param in dati.items():
+                              if isinstance(param,dict):
+                                  dettagli='; '.join(f'{label(k)}: {fmt(k,v)}' for k,v in param.items())
+                                  lines.append(f'• {contesto} / {effetto}: {dettagli}')
+                              else:
+                                  lines.append(f'• {contesto} / {label(effetto)}: {fmt(effetto,param)}')
+                      else:
+                          lines.append(f'• {contesto}: {dati}')
+              lines.append('')
+              lines.append('---')
+              lines.append('')
+          Path('report_anelli_complete.txt').write_text('\n'.join(lines),encoding='utf-8')
+          print(f'Anelli: {len(anelli)} | Configurati: {sum(1 for x in anelli if x in proc)}')
+          PY
+
+      - name: Commit report e pulizia workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add report_anelli_complete.txt
+          git rm .github/workflows/report-anelli.yml
+          git commit -m "chore: genera report anelli"
+          git push origin HEAD:refactor/bilanciamento-config
