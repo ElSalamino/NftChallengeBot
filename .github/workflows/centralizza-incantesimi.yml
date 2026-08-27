@@ -96,6 +96,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add nft.py bilanciamento.py frasi_incantesimi.py __init__.py
-          git rm .github/workflows/centralizza-incantesimi.yml .github/scripts/centralizza_incantesimi.py
+          git rm -f .github/workflows/centralizza-incantesimi.yml .github/scripts/centralizza_incantesimi.py
           git commit -m "feat: centralizza incantesimi e correggi effetti"
           git push origin refactor/bilanciamento-config
