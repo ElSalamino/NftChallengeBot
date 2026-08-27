@@ -240,11 +240,11 @@ def render_frase_set_tecnica(nome, bonus=None):
 
 def descrizione_set_tecnica(nome, bonus=None):
     """Descrizione meccanica del set, con frase custom e dati analitici."""
-    righe = ["⚙️ Dettagli tecnici"]
+    righe = ["⚙️ Dettagli del set"]
     bonus = bonus or {}
     frase_custom = render_frase_set_tecnica(nome, bonus)
     if frase_custom:
-        righe.append("📝 " + frase_custom)
+        righe.append(frase_custom)
     bonus_testo = []
     for stat in ("hp", "atk", "def", "agi"):
         valore = bonus.get(stat, 0)
@@ -254,9 +254,6 @@ def descrizione_set_tecnica(nome, bonus=None):
     if bonus_testo:
         righe.append("• Bonus base: " + " | ".join(bonus_testo))
 
-    righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))
-    if len(righe) == 1:
-        righe.append("• Nessun parametro numerico centralizzato per questo set.")
     return "\n".join(righe)
 
 
@@ -4244,8 +4241,8 @@ def turno(main, oppo,cond=None):
             dps += proc_val(setN, "turno", "chip_difesa", "dps")
         elif setN == "Forma lunare" and proc_ok(num, setN, "turno", "chip_difesa"):
             text += "__Chip lunare, attivazione!__\n"
-            main["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_main")
-            oppo["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_oppo")
+            main["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_nemico")
+            oppo["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_propria")
         elif setN == "Regina golgari" and proc_ok(num, setN, "turno", "pietrifica"):
             text += f"{nome2} pietrifica un poco {nome1}\n"
             main["def"] += proc_val(setN, "turno", "pietrifica", "def_main")
