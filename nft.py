@@ -6,6 +6,7 @@ from datetime import date
 from liste import *
 from bilanciamento import PROC_CLASSI, PROC_ANELLI, DUNGEON_CONFIG
 from frasi_set import FRASI_SET_TECNICHE
+from frasi_anelli import FRASI_ANELLI_TECNICHE
 from pyrogram.errors import FloodWait
 
 def proc_cfg(classe, contesto, nome):
@@ -217,6 +218,8 @@ def _format_placeholder_set(valore, formato=""):
         return "sì" if valore else "no"
     if formato == "rid_pct":
         return f"{_numero_placeholder_tecnico((1 - float(valore)) * 100)}%"
+    if formato == "pct_mul":
+        return f"{_numero_placeholder_tecnico(float(valore) * 100)}%"
     if formato:
         raise ValueError(f"Formato placeholder non supportato: {formato}")
     return _numero_placeholder_tecnico(valore)
@@ -257,28 +260,57 @@ def descrizione_set_tecnica(nome, bonus=None):
     return "\n".join(righe)
 
 
+def _valore_placeholder_anello(nome, percorso):
+    valore = PROC_ANELLI.get(nome, {})
+    for parte in percorso.split("."):
+        if not isinstance(valore, dict) or parte not in valore:
+            raise KeyError(f"Placeholder anello non valido: {nome}.{percorso}")
+        valore = valore[parte]
+    return valore
+
+
+def render_frase_anello_tecnica(nome):
+    template = FRASI_ANELLI_TECNICHE.get(nome, "")
+    if not template:
+        return ""
+    parti = []
+    for letterale, campo, formato, conversione in string.Formatter().parse(template):
+        parti.append(letterale)
+        if campo is None:
+            continue
+        if conversione:
+            raise ValueError(f"Conversione placeholder non supportata: {conversione}")
+        valore = _valore_placeholder_anello(nome, campo)
+        parti.append(_format_placeholder_set(valore, formato))
+    return "".join(parti)
+
+
 def descrizione_anello_tecnica(nome):
-    """Descrizione meccanica dell'anello, generata direttamente da PROC_ANELLI."""
-    righe = ["⚙️ Dettagli tecnici"]
-    righe.extend(_righe_config_tecnica(PROC_ANELLI.get(nome, {})))
-    if len(righe) == 1:
-        righe.append("• Nessun parametro numerico centralizzato per questo anello.")
+    """Descrizione leggibile dell'anello, sempre allineata a PROC_ANELLI."""
+    righe = ["⚙️ Dettagli dell'anello"]
+    frase = render_frase_anello_tecnica(nome)
+    if frase:
+        righe.append(frase)
     return "\n".join(righe)
 
 
 def aggiorna_descrizioni_bilanciamento(liste_module):
     """Aggiunge alle descrizioni esistenti un blocco tecnico sempre allineato al bilanciamento."""
-    marker = "\n\n⚙️ Dettagli tecnici"
+    markers = ("\n\n⚙️ Dettagli tecnici", "\n\n⚙️ Dettagli del set", "\n\n⚙️ Dettagli dell'anello")
 
     for nome in liste_module.classi:
         base = liste_module.frasi_set.get(nome, f"Set del {nome}.")
-        base = base.split(marker, 1)[0].rstrip()
+        for marker in markers:
+            base = base.split(marker, 1)[0]
+        base = base.rstrip()
         bonus_set = getattr(liste_module, "bonus", {}).get(nome, {})
         liste_module.frasi_set[nome] = base + "\n\n" + descrizione_set_tecnica(nome, bonus_set)
 
     for nome in list(liste_module.anelli):
         base = liste_module.anelli[nome]
-        base = base.split(marker, 1)[0].rstrip()
+        for marker in markers:
+            base = base.split(marker, 1)[0]
+        base = base.rstrip()
         liste_module.anelli[nome] = base + "\n\n" + descrizione_anello_tecnica(nome)
 
 
