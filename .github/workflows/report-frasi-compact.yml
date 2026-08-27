@@ -1,0 +1,58 @@
+name: Report compatto frasi set
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+      - name: Genera report
+        run: |
+          python - <<'PY'
+          import ast, json
+          from pathlib import Path
+
+          def literal(text, name):
+              tree = ast.parse(text)
+              for node in tree.body:
+                  if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+                      return ast.literal_eval(node.value)
+              raise RuntimeError(name)
+
+          ltxt = Path('liste.py').read_text(encoding='utf-8')
+          btxt = Path('bilanciamento.py').read_text(encoding='utf-8')
+          classi = literal(ltxt, 'classi')
+          frasi = literal(ltxt, 'frasi_set')
+          bonus = literal(ltxt, 'bonus')
+          proc = literal(btxt, 'PROC_CLASSI')
+          assert len(classi) == 114 and set(classi) == set(proc)
+
+          righe = []
+          for i, nome in enumerate(classi, 1):
+              payload = {
+                  'componenti': classi[nome],
+                  'bonus': bonus.get(nome, {}),
+                  'descrizione': frasi.get(nome, ''),
+                  'config': proc[nome],
+              }
+              righe.append(f'{i:03d}\t{nome}\t' + json.dumps(payload, ensure_ascii=False, separators=(',', ':')))
+          Path('report_frasi_set_compact.txt').write_text('\n'.join(righe) + '\n', encoding='utf-8')
+          PY
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/report-frasi-compact.yml
+          git add report_frasi_set_compact.txt
+          git commit -m "chore: aggiungi report compatto set"
+          git push origin HEAD:refactor/bilanciamento-config
