@@ -1,0 +1,77 @@
+name: Correggi MusicoSciamano
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Correggi logica database e frase
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          # 1) Database: non copia, blocca.
+          bil_path = Path('bilanciamento.py')
+          bil = bil_path.read_text(encoding='utf-8')
+          pattern = r"'MusicoSciamano':\s*\{'turno':\s*\{'specchio':\s*\{'copia_set_avversario':\s*True\}\}\},"
+          repl = "'MusicoSciamano': {'turno': {'blocco_set': {'blocca_set_avversario': True}}},"
+          bil, n = re.subn(pattern, repl, bil, count=1)
+          if n != 1:
+              if "'MusicoSciamano': {'turno': {'blocco_set': {'blocca_set_avversario': True}}}," not in bil:
+                  raise RuntimeError(f'Config MusicoSciamano inattesa: sostituzioni={n}')
+          bil_path.write_text(bil, encoding='utf-8')
+
+          # 2) Logica: applica il blocco PRIMA di qualsiasi proc di set.
+          nft_path = Path('nft.py')
+          nft = nft_path.read_text(encoding='utf-8')
+          marker = '''    set = main.get("set",None)\n    setN = oppo.get("set",None)\n'''
+          insert = '''    set = main.get("set",None)\n    setN = oppo.get("set",None)\n\n    # I set con blocco_set disattivano le abilità di entrambi prima di qualsiasi proc.\n    blocca_set = (\n        (set is not None and proc_val(set, "turno", "blocco_set", "blocca_set_avversario", False))\n        or (setN is not None and proc_val(setN, "turno", "blocco_set", "blocca_set_avversario", False))\n    )\n    if blocca_set:\n        set = "MusicoSciamano"\n        setN = "MusicoSciamano"\n'''
+          if 'blocca_set = (' not in nft:
+              if marker not in nft:
+                  raise RuntimeError('Assegnazione set/setN non trovata')
+              nft = nft.replace(marker, insert, 1)
+          nft_path.write_text(nft, encoding='utf-8')
+
+          # 3) Frase leggibile.
+          frase_path = Path('frasi_set.py')
+          frasi = frase_path.read_text(encoding='utf-8')
+          pattern_frase = r'(?m)^\s*["\']MusicoSciamano["\']\s*:\s*["\'].*?["\'],\s*$'
+          nuova = '    "MusicoSciamano": "La tua musica spegne le abilità dei set: durante la sfida né tu né il tuo avversario potete attivare gli effetti del set.",'
+          frasi, n = re.subn(pattern_frase, nuova, frasi, count=1)
+          if n != 1:
+              raise RuntimeError(f'Frase MusicoSciamano trovata {n} volte')
+          frase_path.write_text(frasi, encoding='utf-8')
+
+          # Verifiche semantiche minime.
+          assert "'blocca_set_avversario': True" in bil
+          assert 'proc_val(set, "turno", "blocco_set", "blocca_set_avversario", False)' in nft
+          assert 'proc_val(setN, "turno", "blocco_set", "blocca_set_avversario", False)' in nft
+          assert 'né tu né il tuo avversario' in frasi
+          PY
+
+          python -m py_compile nft.py bilanciamento.py frasi_set.py
+
+      - name: Commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -- .github/workflows/fix-musicosciamano.yml
+          git add nft.py bilanciamento.py frasi_set.py
+          git commit -m "fix: blocca correttamente i set con MusicoSciamano"
+          git push origin HEAD:refactor/bilanciamento-config
