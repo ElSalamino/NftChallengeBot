@@ -1,0 +1,71 @@
+name: Refactor bilanciamento
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Estrai configurazioni da nft.py
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          nft = Path('nft.py')
+          text = nft.read_text(encoding='utf-8')
+
+          import_line = 'from liste import *\n'
+          config_import = 'from bilanciamento import PROC_CLASSI, PROC_ANELLI, DUNGEON_CONFIG\n'
+          start_marker = '# ============================================================\n# DATABASE HARDCODATO PROC CLASSI'
+          end_marker = 'def proc_cfg('
+
+          if config_import in text and Path('bilanciamento.py').exists():
+              print('Refactor gia presente: nessuna modifica necessaria.')
+          else:
+              start = text.index(start_marker)
+              end = text.index(end_marker, start)
+              block = text[start:end].rstrip() + '\n'
+
+              header = '''# -*- coding: utf-8 -*-\n\"\"\"\nConfigurazione centralizzata del bilanciamento di NftChallengeBot.\n\nContiene esclusivamente dati di tuning per classi, anelli e dungeon.\nLa logica applicativa resta in nft.py.\n\"\"\"\n\n'''
+              Path('bilanciamento.py').write_text(header + block, encoding='utf-8')
+
+              new_text = text[:start] + text[end:]
+              if config_import not in new_text:
+                  new_text = new_text.replace(import_line, import_line + config_import, 1)
+              nft.write_text(new_text, encoding='utf-8')
+
+              for name in ('PROC_CLASSI = {', 'PROC_ANELLI = {', 'DUNGEON_CONFIG = {'):
+                  assert name not in new_text, f'{name} ancora presente in nft.py'
+                  assert name in (header + block), f'{name} non presente in bilanciamento.py'
+
+          PY
+
+          python -m py_compile nft.py bilanciamento.py
+
+      - name: Commit del refactor e rimozione workflow temporaneo
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- nft.py bilanciamento.py
+          git rm -- .github/workflows/refactor-bilanciamento.yml
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica da committare"
+            exit 0
+          fi
+          git commit -m "refactor: separa configurazione bilanciamento"
+          git push origin HEAD:refactor/bilanciamento-config
