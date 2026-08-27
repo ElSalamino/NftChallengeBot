@@ -19,19 +19,16 @@ jobs:
           ref: refactor/bilanciamento-config
           fetch-depth: 0
 
-      - name: Adatta matcher Necron
+      - name: Rendi robusto il matcher Necron
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('.github/scripts/centralizza_incantesimi.py')
           s = p.read_text(encoding='utf-8')
-          old = "old_necron = '''elif necron"
-          new = "old_necron = '''    elif necron"
-          old2 = "new_necron = '''elif necron"
-          new2 = "new_necron = '''    elif necron"
-          assert s.count(old) == 1
-          assert s.count(old2) == 1
-          s = s.replace(old, new, 1).replace(old2, new2, 1)
+          start = s.index('# Necron: ripristina')
+          end = s.index('\nnft_path.write_text', start)
+          replacement = '''# Necron: ripristina l'effetto storico corretto, 1000 HP.\nnecron_start = nft.find('elif necron and player["hp"] <= 0:')\nif necron_start < 0:\n    raise SystemExit("ramo Necron non trovato")\nold_necron_hp = 'player["hp"] = proc_val(set, "assalto", "resurrezione", "hp")'\nnecron_hp = nft.find(old_necron_hp, necron_start)\nnext_branch = nft.find('\\n    elif ', necron_start + 1)\nif necron_hp < 0 or (next_branch >= 0 and necron_hp > next_branch):\n    raise SystemExit("assegnazione HP Necron non trovata nel ramo corretto")\nnft = nft[:necron_hp] + 'player["hp"] = 1000' + nft[necron_hp + len(old_necron_hp):]\n'''
+          s = s[:start] + replacement + s[end:]
           p.write_text(s, encoding='utf-8')
           PY
 
