@@ -288,11 +288,12 @@ def premio_exp(a, b, text):
     if "l-streak" in b:
         possibilib += b["l-streak"] / 20
     
+    bonus_fortunello = nft.effetto_val("Fortunello", "sfida", "premio_oggetto", "bonus_probabilita_per_livello_pct") / 100
     if "Fortunello" in a["scheda"]["boost"]["sfida"]:
-        possibilia += 0.05 * a["scheda"]["boost"]["sfida"]["Fortunello"]["lv"]
+        possibilia += bonus_fortunello * a["scheda"]["boost"]["sfida"]["Fortunello"].get("lv", 0)
         
     if "Fortunello" in b["scheda"]["boost"]["sfida"]:
-        possibilib += 0.05 * a["scheda"]["boost"]["sfida"]["Fortunello"]["lv"]
+        possibilib += bonus_fortunello * b["scheda"]["boost"]["sfida"]["Fortunello"].get("lv", 0)
     
     if player[a["scheda"]["Nome"]]["setta"]["benedizione"] == "Guardia reale":
         ga = round(trader["sette"][player[a["scheda"]["Nome"]]["setta"]["loc"]]["power"] * (trader["sette"][player[a["scheda"]["Nome"]]["setta"]["loc"]]["%"]/100))

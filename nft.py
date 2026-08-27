@@ -4,9 +4,10 @@ from pyrogram import Client, ContinuePropagation, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import date
 from liste import *
-from bilanciamento import PROC_CLASSI, PROC_ANELLI, DUNGEON_CONFIG
+from bilanciamento import PROC_CLASSI, PROC_ANELLI, DUNGEON_CONFIG, INCANTESIMI_CONFIG, EFFETTI_CONFIG
 from frasi_set import FRASI_SET_TECNICHE
 from frasi_anelli import FRASI_ANELLI_TECNICHE
+from frasi_incantesimi import FRASI_INCANTESIMI_TECNICHE
 from pyrogram.errors import FloodWait
 
 def proc_cfg(classe, contesto, nome):
@@ -48,6 +49,36 @@ def anello_val(anello, contesto, nome, chiave, default=None):
     """Legge un valore di tuning dell'anello."""
     return anello_cfg(anello, contesto, nome).get(chiave, default)
 
+
+
+def incantesimo_cfg(incantesimo, contesto, nome):
+    """Restituisce la configurazione di un effetto di incantesimo."""
+    return INCANTESIMI_CONFIG.get(incantesimo, {}).get(contesto, {}).get(nome, {})
+
+
+def incantesimo_percent(incantesimo, contesto, nome, default=0):
+    """Probabilità dell'incantesimo espressa in percentuale 0..100."""
+    return incantesimo_cfg(incantesimo, contesto, nome).get("proc", default)
+
+
+def incantesimo_ok(numero_casuale, incantesimo, contesto, nome, default=0):
+    """Usa il random già estratto per mantenere il flow storico."""
+    return numero_casuale < (incantesimo_percent(incantesimo, contesto, nome, default) / 100)
+
+
+def incantesimo_val(incantesimo, contesto, nome, chiave, default=None):
+    """Legge un valore di tuning di un incantesimo."""
+    return incantesimo_cfg(incantesimo, contesto, nome).get(chiave, default)
+
+
+def effetto_cfg(effetto, contesto, nome):
+    """Restituisce la configurazione di un effetto temporaneo."""
+    return EFFETTI_CONFIG.get(effetto, {}).get(contesto, {}).get(nome, {})
+
+
+def effetto_val(effetto, contesto, nome, chiave, default=None):
+    """Legge un valore di tuning di un effetto temporaneo."""
+    return effetto_cfg(effetto, contesto, nome).get(chiave, default)
 
 
 def dungeon_cfg(stanza, azione="evento"):
@@ -294,9 +325,43 @@ def descrizione_anello_tecnica(nome):
     return "\n".join(righe)
 
 
+def _valore_placeholder_incantesimo(nome, percorso):
+    valore = INCANTESIMI_CONFIG.get(nome, {})
+    for parte in percorso.split("."):
+        if not isinstance(valore, dict) or parte not in valore:
+            raise KeyError(f"Placeholder incantesimo non valido: {nome}.{percorso}")
+        valore = valore[parte]
+    return valore
+
+
+def render_frase_incantesimo_tecnica(nome):
+    template = FRASI_INCANTESIMI_TECNICHE.get(nome, "")
+    if not template:
+        return ""
+    parti = []
+    for letterale, campo, formato, conversione in string.Formatter().parse(template):
+        parti.append(letterale)
+        if campo is None:
+            continue
+        if conversione:
+            raise ValueError(f"Conversione placeholder non supportata: {conversione}")
+        valore = _valore_placeholder_incantesimo(nome, campo)
+        parti.append(_format_placeholder_set(valore, formato))
+    return "".join(parti)
+
+
+def descrizione_incantesimo_tecnica(nome):
+    """Descrizione umana dell'incantesimo, allineata a INCANTESIMI_CONFIG."""
+    righe = ["⚙️ Dettagli dell'incantesimo"]
+    frase = render_frase_incantesimo_tecnica(nome)
+    if frase:
+        righe.append(frase)
+    return "\n".join(righe)
+
+
 def aggiorna_descrizioni_bilanciamento(liste_module):
     """Aggiunge alle descrizioni esistenti un blocco tecnico sempre allineato al bilanciamento."""
-    markers = ("\n\n⚙️ Dettagli tecnici", "\n\n⚙️ Dettagli del set", "\n\n⚙️ Dettagli dell'anello")
+    markers = ("\n\n⚙️ Dettagli tecnici", "\n\n⚙️ Dettagli del set", "\n\n⚙️ Dettagli dell'anello", "\n\n⚙️ Dettagli dell'incantesimo")
 
     for nome in liste_module.classi:
         base = liste_module.frasi_set.get(nome, f"Set del {nome}.")
@@ -312,6 +377,17 @@ def aggiorna_descrizioni_bilanciamento(liste_module):
             base = base.split(marker, 1)[0]
         base = base.rstrip()
         liste_module.anelli[nome] = base + "\n\n" + descrizione_anello_tecnica(nome)
+
+
+    for _, dati_libro in getattr(liste_module, "libri", {}).items():
+        effetto = dati_libro.get("ef")
+        if effetto not in INCANTESIMI_CONFIG:
+            continue
+        base = dati_libro.get("descrizione", "")
+        for marker in markers:
+            base = base.split(marker, 1)[0]
+        base = base.rstrip()
+        dati_libro["descrizione"] = base + "\n\n" + descrizione_incantesimo_tecnica(effetto)
 
 
 def testo_lista_set(liste_module):
@@ -2567,7 +2643,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
 
     elif necron and player["hp"] <= 0:
         text += "\n**Il nucleo necron sprigiona un aura oscura che riporta in vita il malcapitato, per ora...**"
-        player["hp"] = proc_val(set, "assalto", "resurrezione", "hp")
+        player["hp"] = 1000
 
     elif (set == "Guardiano del passaggio" and player["hp"] <= 0 and proc_ok(num, set, "assalto", "resurrezione")):
         text += f"\n**{nome} ritorna dalla morte, pronto a combattere ancora!\n"
@@ -2666,9 +2742,9 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
                 text = f"{nome1} incontri {nome2}, un enorme boss, nel dungeon!\nMa riesce ad evocare {nome3} di supporto!\n\n\n"
                 if 'Evocabilità' in user3["incantamenti"]:
                     text += "Evocazione bomba!\n"
-                    user1["atk"] += 40
-                    user1["def"] += 40
-                    user1["agi"] += 10
+                    user1["atk"] += incantesimo_val("Evocabilità", "dungeon", "supporto", "atk")
+                    user1["def"] += incantesimo_val("Evocabilità", "dungeon", "supporto", "def")
+                    user1["agi"] += incantesimo_val("Evocabilità", "dungeon", "supporto", "agi")
                 x = 0
                 while True:
                     x += 1
@@ -4318,47 +4394,47 @@ def turno(main, oppo,cond=None):
     
     if main["incantamenti"] != []:
         num = random.random()
-        if 'Urlo di drago' in main["incantamenti"] and 0.05 > num:
+        if 'Urlo di drago' in main["incantamenti"] and incantesimo_ok(num, "Urlo di drago", "turno", "terrore"):
             text += "ROAAR!\n"
             oppo["terrore"] = True      
             num = random.random()  
-        if "Mimico" in main["incantamenti"]:
+        if "Mimico" in main["incantamenti"] and incantesimo_val("Mimico", "turno", "copia", "attivo", True):
             main["incantamenti"] = oppo["incantamenti"]
             text += f"\n**{nome1} copia gli incantamenti di {nome2}!**\n"
             num = random.random()
-        if 'Legaccio' in main["incantamenti"] and 0.05 > num:
-            oppo["agi"] = oppo["agi"] * 0.75
+        if 'Legaccio' in main["incantamenti"] and incantesimo_ok(num, "Legaccio", "turno", "lega"):
+            oppo["agi"] = oppo["agi"] * incantesimo_val("Legaccio", "turno", "lega", "agi_target_mul")
             text += f"🎋"
             num = random.random()
-        if "Affilatezza" in main["incantamenti"] and 0.1 > num:
+        if "Affilatezza" in main["incantamenti"] and incantesimo_ok(num, "Affilatezza", "turno", "affila"):
             text += "⚔\n"
-            main["atk"] = main["atk"] * 1.2
+            main["atk"] = main["atk"] * incantesimo_val("Affilatezza", "turno", "affila", "atk_mul")
             num = random.random()
         if "Legione" in main["incantamenti"] and "Legione" in oppo["incantamenti"]:
-            dps = dps * 10
+            dps = dps * incantesimo_val("Legione", "turno", "duello_legione", "dps_mul")
         
-        if "Ingrossamento" in main["incantamenti"] and 0.02 > num:
-                main["atk"] += random.randint(20,100)
-                main["agi"] += random.randint(-20,-2)
+        if "Ingrossamento" in main["incantamenti"] and incantesimo_ok(num, "Ingrossamento", "turno", "crescita"):
+                main["atk"] += random.randint(incantesimo_val("Ingrossamento", "turno", "crescita", "atk_min"), incantesimo_val("Ingrossamento", "turno", "crescita", "atk_max"))
+                main["agi"] += random.randint(incantesimo_val("Ingrossamento", "turno", "crescita", "agi_min"), incantesimo_val("Ingrossamento", "turno", "crescita", "agi_max"))
                 text += f"**L'arma di {nome1} diventa enorme**\n"  
                 num = random.random()
                           
-        if "Icore" in main["incantamenti"] and 0.05 > num:
-            difesan = difesan * 0.6
+        if "Icore" in main["incantamenti"] and incantesimo_ok(num, "Icore", "turno", "penetrazione"):
+            difesan = difesan * incantesimo_val("Icore", "turno", "penetrazione", "difesa_target_mul")
             text += "🟡"
 
     if oppo["incantamenti"] != []:
         num = random.random()
         if "Predominio" in oppo["incantamenti"] and main["hp"] <= oppo["hp"]:
-            dps = dps * 0.8
-            agi += 30  
+            dps = dps * incantesimo_val("Predominio", "turno", "difesa", "dps_attaccante_mul")
+            agi += incantesimo_val("Predominio", "turno", "difesa", "agi_attaccante")  
                
-        if "Duraturo" in oppo["incantamenti"] and 0.1 > num:
-            difesan = difesan * 1.7
+        if "Duraturo" in oppo["incantamenti"] and incantesimo_ok(num, "Duraturo", "turno", "difesa"):
+            difesan = difesan * incantesimo_val("Duraturo", "turno", "difesa", "difesa_mul")
             text += "🛡"
             num = random.random()
-        if "Multiplo" in oppo["incantamenti"] and 0.1 > num:
-            agin += 8
+        if "Multiplo" in oppo["incantamenti"] and incantesimo_ok(num, "Multiplo", "turno", "difesa"):
+            agin += incantesimo_val("Multiplo", "turno", "difesa", "agi")
             text += f"💪"
     
     if setN == "Esperto di animali" and oppo["Ap"] == "Fantamsa del ritorno" and proc_ok(num, setN, "turno", "fantasma_ritorno"):
@@ -4486,22 +4562,22 @@ def turno(main, oppo,cond=None):
     if main["incantamenti"] != []:
         if 'Primo impatto' in main["incantamenti"]:
                 main["incantamenti"].remove('Primo impatto')
-                danno = round(danno + (danno * 0.7))
+                danno = round(danno * incantesimo_val("Primo impatto", "turno", "primo_colpo", "danno_mul"))
                 text += "💥\n"
                 try:
                     main["incantamenti"].remove('Primo impatto')
                 except:
                     pass
             
-        if 'Critico' in main["incantamenti"] and 0.08 > num:
+        if 'Critico' in main["incantamenti"] and incantesimo_ok(num, "Critico", "turno", "critico"):
                 text += "\n**Critico!**\n"
-                danno = round(danno + (danno * 0.5))
+                danno = round(danno * incantesimo_val("Critico", "turno", "critico", "danno_mul"))
 
-        if "Velenoso" in main["incantamenti"] and 0.05 > num:
+        if "Velenoso" in main["incantamenti"] and incantesimo_ok(num, "Velenoso", "turno", "veleno"):
             try:
-                oppo["veleno"] += 1
+                oppo["veleno"] += incantesimo_val("Velenoso", "turno", "veleno", "stack")
             except:
-                oppo["veleno"] = 1
+                oppo["veleno"] = incantesimo_val("Velenoso", "turno", "veleno", "stack")
             text += "🟢**Colpo velenoso!**\n"
 
     if setN != None:
@@ -4577,10 +4653,10 @@ def turno(main, oppo,cond=None):
     
     
     if "Minimista" in main["incantamenti"] and mod <= 0:
-        mod = 0.1
+        mod = incantesimo_val("Minimista", "turno", "danno_minimo", "mod_min")
         text += "+"
         if danno <= 0:
-            danno = 10
+            danno = incantesimo_val("Minimista", "turno", "danno_minimo", "danno_base_min")
             text += "+"
     
     
@@ -4875,7 +4951,7 @@ def turno(main, oppo,cond=None):
 
                 
                 text += f"**MUORI INSETTO!**"
-                if "Smateriabile" in oppo["incantamenti"] and num < (proc_val(set, "turno", "muori_insetto", "smateriabile_proc") / 100):
+                if "Smateriabile" in oppo["incantamenti"] and incantesimo_val("Smateriabile", "interazioni", "fire_lord", "blocca", False):
                     text += "🚫"
                 else:
                     oppo["hp"] -= proc_val(set, "turno", "muori_insetto", "danno")
@@ -5089,15 +5165,15 @@ def turno(main, oppo,cond=None):
                 oppo["hp"] -= danno_chiavi
     
     if oppo["incantamenti"] != []:
-        if "Iridescente" in oppo["incantamenti"] and 0.05 > num:
+        if "Iridescente" in oppo["incantamenti"] and incantesimo_ok(num, "Iridescente", "turno", "cura"):
             text += f"☀️ {nome2} prende forza dalla luce\n"
-            oppo["hp"] += 85
+            oppo["hp"] += incantesimo_val("Iridescente", "turno", "cura", "cura")
         
-        if "Speranza" in oppo["incantamenti"] and oppo["hp"] <= 60 and oppo["hp"] >= 1:
-                oppo["hp"] = 100
+        if "Speranza" in oppo["incantamenti"] and oppo["hp"] <= incantesimo_val("Speranza", "turno", "salvezza", "hp_max") and oppo["hp"] >= incantesimo_val("Speranza", "turno", "salvezza", "hp_min"):
+                oppo["hp"] = incantesimo_val("Speranza", "turno", "salvezza", "hp_porta_a")
                 text += "🕊"
         
-        if "Smateriabile" in oppo["incantamenti"] and 0.1 > num:
+        if "Smateriabile" in oppo["incantamenti"] and incantesimo_ok(num, "Smateriabile", "turno", "annulla_colpo"):
                 try:
                     danno = 0
                     mod = 0
@@ -5106,30 +5182,30 @@ def turno(main, oppo,cond=None):
                     
                     pass
     if main["incantamenti"] != []:
-        if "Tocco fantasma" in main["incantamenti"] and 0.02 > num:
+        if "Tocco fantasma" in main["incantamenti"] and incantesimo_ok(num, "Tocco fantasma", "turno", "colpo_schivato"):
                 if "schiva il colpo" in text:
-                    danni = round(dps / 10 * random.uniform(0.5, 1))
-                    if danni <= 30:
-                        danni = 30
+                    danni = round(dps * random.uniform(incantesimo_val("Tocco fantasma", "turno", "colpo_schivato", "dps_percento_min"), incantesimo_val("Tocco fantasma", "turno", "colpo_schivato", "dps_percento_max")) / 100)
+                    if danni <= incantesimo_val("Tocco fantasma", "turno", "colpo_schivato", "danno_min"):
+                        danni = incantesimo_val("Tocco fantasma", "turno", "colpo_schivato", "danno_min")
                     oppo["hp"] -= danni
                     text += f"L'arma fantasma di {nome1} colpisce lo stesso, infliggendo {danni} danni!"
         
         
-        if "Leggiadra" in main["incantamenti"] and 0.1 > num:
+        if "Leggiadra" in main["incantamenti"] and incantesimo_ok(num, "Leggiadra", "turno", "annulla_colpo_proprio"):
                 if "schiva il colpo" not in text:
                     danno = 0
                     mod = 0
                     text += "🎈"
                
     if "veleno" in oppo:
-        oppo["hp"] -= oppo["veleno"] * 5
+        oppo["hp"] -= oppo["veleno"] * incantesimo_val("Velenoso", "turno", "veleno", "danno_per_stack")
     
     if "Insabbiato" in oppo["boost"]["sfida"]:
         sabbia = round(4 * oppo["boost"]["sfida"]["Insabbiato"]["lv"])
         if nome1 == "Leviatano delle sabbie":
                     sabbia = round(sabbia / 3)
                     text += f"La tempesta di sabbia infligge {sabbia} danni a {nome2}!\n"
-                    if "Smateriabile" in oppo["incantamenti"] and 0.3 > num:
+                    if "Smateriabile" in oppo["incantamenti"] and incantesimo_ok(num, "Smateriabile", "turno", "tempesta_sabbia"):
                         text += "🚫"
 
                     else:
@@ -5139,7 +5215,7 @@ def turno(main, oppo,cond=None):
                     if 0.5 > num:
                         sabbia = round(sabbia / 2)
                         text += f"La tempesta di sabbia infligge {sabbia} danni a {nome2}!\n"
-                        if "Smateriabile" in oppo["incantamenti"] and 0.3 > num:
+                        if "Smateriabile" in oppo["incantamenti"] and incantesimo_ok(num, "Smateriabile", "turno", "tempesta_sabbia"):
                             text += "🚫"
 
                         else:

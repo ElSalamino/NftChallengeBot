@@ -2,7 +2,7 @@
 """
 Configurazione centralizzata del bilanciamento di NftChallengeBot.
 
-Contiene esclusivamente dati di tuning per classi, anelli e dungeon.
+Contiene esclusivamente dati di tuning per classi, anelli, dungeon, incantesimi ed effetti temporanei.
 La logica applicativa resta in nft.py.
 """
 
@@ -146,7 +146,7 @@ PROC_CLASSI = {'Cecchino modulare': {'turno': {'powa_per_turno': 1,
                                                   'soglia2': 50,
                                                   'soglia3': 80}},
                            'assalto': {'cannoncino': {'proc': 50, 'def': 70}}},
- 'Fire lord': {'turno': {'muori_insetto': {'proc': 8, 'danno': 80, 'smateriabile_proc': 10}},
+ 'Fire lord': {'turno': {'muori_insetto': {'proc': 8, 'danno': 80}},
                'assalto': {'catena': {'tentativi': 20, 'stop_proc': 60, 'danno': 80, 'hp_min': 80}}},
  'Combattente 2D': {'turno': {'evocazione': {'proc': 33,
                                              'soglia_occhio': 30,
@@ -700,4 +700,111 @@ DUNGEON_CONFIG = {
             },
         },
     },
+}
+
+
+# ============================================================
+# INCANTESIMI
+# Valori numerici usati dagli incantesimi. Le probabilità sono
+# sempre espresse in percentuale 0..100.
+# ============================================================
+INCANTESIMI_CONFIG = {
+    "Icore": {
+        "turno": {"penetrazione": {"proc": 5, "difesa_target_mul": 0.6}},
+    },
+    "Ingrossamento": {
+        "turno": {
+            "crescita": {
+                "proc": 2,
+                "atk_min": 20,
+                "atk_max": 100,
+                "agi_min": -20,
+                "agi_max": -2,
+            }
+        },
+    },
+    "Predominio": {
+        "turno": {
+            "difesa": {
+                "dps_attaccante_mul": 0.8,
+                "agi_attaccante": 30,
+            }
+        },
+    },
+    "Duraturo": {
+        "turno": {"difesa": {"proc": 10, "difesa_mul": 1.7}},
+    },
+    "Smateriabile": {
+        "turno": {
+            "annulla_colpo": {"proc": 10},
+            "tempesta_sabbia": {"proc": 30},
+        },
+        "interazioni": {
+            "fire_lord": {"blocca": True},
+        },
+    },
+    "Tocco fantasma": {
+        "turno": {
+            "colpo_schivato": {
+                "proc": 2,
+                "dps_percento_min": 5,
+                "dps_percento_max": 10,
+                "danno_min": 30,
+            }
+        },
+    },
+    "Leggiadra": {
+        "turno": {"annulla_colpo_proprio": {"proc": 10}},
+    },
+    "Speranza": {
+        "turno": {"salvezza": {"hp_min": 1, "hp_max": 60, "hp_porta_a": 100}},
+    },
+    "Velenoso": {
+        "turno": {"veleno": {"proc": 5, "stack": 1, "danno_per_stack": 5}},
+    },
+    "Iridescente": {
+        "turno": {"cura": {"proc": 5, "cura": 85}},
+    },
+    "Minimista": {
+        "turno": {"danno_minimo": {"mod_min": 0.1, "danno_base_min": 10}},
+    },
+    "Mimico": {
+        "turno": {"copia": {"attivo": True}},
+    },
+    "Affilatezza": {
+        "turno": {"affila": {"proc": 10, "atk_mul": 1.2}},
+    },
+    "Legione": {
+        "turno": {"duello_legione": {"dps_mul": 10}},
+    },
+    "Critico": {
+        "turno": {"critico": {"proc": 8, "danno_mul": 1.5}},
+    },
+    "Primo impatto": {
+        "turno": {"primo_colpo": {"danno_mul": 1.7}},
+    },
+    "Multiplo": {
+        "turno": {"difesa": {"proc": 10, "agi": 8}},
+    },
+    "Legaccio": {
+        "turno": {"lega": {"proc": 5, "agi_target_mul": 0.75}},
+    },
+    "Urlo di drago": {
+        "turno": {"terrore": {"proc": 5}},
+    },
+    "Evocabilità": {
+        "dungeon": {"supporto": {"atk": 40, "def": 40, "agi": 10}},
+    },
+}
+
+
+# Effetti temporanei non legati agli incantesimi.
+EFFETTI_CONFIG = {
+    "Fortunello": {
+        "sfida": {
+            "premio_oggetto": {
+                "bonus_probabilita_per_livello_pct": 5,
+            }
+        }
+    }
 }
