@@ -5,6 +5,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import date
 from liste import *
 from bilanciamento import PROC_CLASSI, PROC_ANELLI, DUNGEON_CONFIG
+from frasi_set import FRASI_SET_TECNICHE
 from pyrogram.errors import FloodWait
 
 def proc_cfg(classe, contesto, nome):
@@ -179,10 +180,71 @@ def _righe_config_tecnica(config):
     return righe
 
 
+def _numero_placeholder_tecnico(valore):
+    if isinstance(valore, float) and valore.is_integer():
+        return str(int(valore))
+    if isinstance(valore, float):
+        return f"{valore:g}"
+    return str(valore)
+
+
+def _valore_placeholder_set(nome, bonus, percorso):
+    parti = percorso.split(".")
+    if parti[0] == "bonus":
+        valore = bonus or {}
+        parti = parti[1:]
+    else:
+        valore = PROC_CLASSI.get(nome, {})
+    for parte in parti:
+        if not isinstance(valore, dict) or parte not in valore:
+            raise KeyError(f"Placeholder set non valido: {nome}.{percorso}")
+        valore = valore[parte]
+    return valore
+
+
+def _format_placeholder_set(valore, formato=""):
+    if formato == "pct":
+        return f"{_numero_placeholder_tecnico(valore)}%"
+    if formato == "x":
+        return f"{_numero_placeholder_tecnico(valore)}x"
+    if formato == "signed":
+        if isinstance(valore, (int, float)) and not isinstance(valore, bool) and valore > 0:
+            return "+" + _numero_placeholder_tecnico(valore)
+        return _numero_placeholder_tecnico(valore)
+    if formato == "abs":
+        return _numero_placeholder_tecnico(abs(valore))
+    if formato == "bool":
+        return "sì" if valore else "no"
+    if formato == "rid_pct":
+        return f"{_numero_placeholder_tecnico((1 - float(valore)) * 100)}%"
+    if formato:
+        raise ValueError(f"Formato placeholder non supportato: {formato}")
+    return _numero_placeholder_tecnico(valore)
+
+
+def render_frase_set_tecnica(nome, bonus=None):
+    template = FRASI_SET_TECNICHE.get(nome, "")
+    if not template:
+        return ""
+    parti = []
+    for letterale, campo, formato, conversione in string.Formatter().parse(template):
+        parti.append(letterale)
+        if campo is None:
+            continue
+        if conversione:
+            raise ValueError(f"Conversione placeholder non supportata: {conversione}")
+        valore = _valore_placeholder_set(nome, bonus or {}, campo)
+        parti.append(_format_placeholder_set(valore, formato))
+    return "".join(parti)
+
+
 def descrizione_set_tecnica(nome, bonus=None):
-    """Descrizione meccanica del set, generata direttamente da PROC_CLASSI."""
+    """Descrizione meccanica del set, con frase custom e dati analitici."""
     righe = ["⚙️ Dettagli tecnici"]
     bonus = bonus or {}
+    frase_custom = render_frase_set_tecnica(nome, bonus)
+    if frase_custom:
+        righe.append("📝 " + frase_custom)
     bonus_testo = []
     for stat in ("hp", "atk", "def", "agi"):
         valore = bonus.get(stat, 0)
