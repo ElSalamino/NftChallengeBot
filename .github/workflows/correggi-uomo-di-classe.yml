@@ -23,14 +23,16 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path('frasi_set.py')
           text = path.read_text(encoding='utf-8')
-          old = '"Uomo di classe": "Lo scontro diventa spumeggiante: in attacco succede nell\'85% dei casi e in difesa nel 88%. In assalto hai il 35% di togliere 40 agilità alla difesa nemica.",'
-          new = '"Uomo di classe": "Quando parte Spumeggiante copi la statistica dell\'avversario per quel calcolo: in attacco hai il {turno.spumeggiante_attacco.proc:pct} di usare il suo attacco al posto del tuo, mentre in difesa hai il {turno.spumeggiante_difesa.proc:pct} di usare la sua difesa al posto della tua. In assalto hai il {assalto.spumeggiante.proc:pct} di usare attacco e difesa della struttura nemica, riducendone anche l\'agilità di {assalto.spumeggiante.agi_difesa:abs}.",'
-          if old not in text:
-              raise RuntimeError('Frase Uomo di classe non trovata')
-          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          pattern = r'(?m)^\s*["\']Uomo di classe["\']\s*:\s*["\'].*?["\'],\s*$'
+          new = '    "Uomo di classe": "Quando parte Spumeggiante copi la statistica dell\'avversario per quel calcolo: in attacco hai il {turno.spumeggiante_attacco.proc:pct} di usare il suo attacco al posto del tuo, mentre in difesa hai il {turno.spumeggiante_difesa.proc:pct} di usare la sua difesa al posto della tua. In assalto hai il {assalto.spumeggiante.proc:pct} di usare attacco e difesa della struttura nemica, riducendone anche l\'agilità di {assalto.spumeggiante.agi_difesa:abs}.",'
+          text, n = re.subn(pattern, new, text, count=1)
+          if n != 1:
+              raise RuntimeError(f'Frase Uomo di classe trovata {n} volte')
+          path.write_text(text, encoding='utf-8')
 
           nft = Path('nft.py').read_text(encoding='utf-8')
           assert 'dps = oppo["atk"]' in nft
