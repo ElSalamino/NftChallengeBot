@@ -1,0 +1,233 @@
+name: Integra frasi tecniche set
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Collega dizionario e renderer
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('nft.py')
+          text = path.read_text(encoding='utf-8')
+
+          old_import = 'from bilanciamento import PROC_CLASSI, PROC_ANELLI, DUNGEON_CONFIG\n'
+          new_import = old_import + 'from frasi_set import FRASI_SET_TECNICHE\n'
+          if 'from frasi_set import FRASI_SET_TECNICHE\n' not in text:
+              if old_import not in text:
+                  raise RuntimeError('Import bilanciamento non trovato')
+              text = text.replace(old_import, new_import, 1)
+
+          marker = 'def descrizione_set_tecnica(nome, bonus=None):\n'
+          renderer = '''def _numero_placeholder_tecnico(valore):
+              """Formatta un numero senza .0 inutili, mantenendo leggibili i decimali."""
+              if isinstance(valore, float) and valore.is_integer():
+                  return str(int(valore))
+              if isinstance(valore, float):
+                  return f"{valore:g}"
+              return str(valore)
+
+
+          def _valore_placeholder_set(nome, bonus, percorso):
+              """Risoluzione sicura di placeholder tipo turno.effetto.proc o bonus.atk."""
+              parti = percorso.split(".")
+              if parti[0] == "bonus":
+                  valore = bonus or {}
+                  parti = parti[1:]
+              else:
+                  valore = PROC_CLASSI.get(nome, {})
+
+              for parte in parti:
+                  if not isinstance(valore, dict) or parte not in valore:
+                      raise KeyError(f"Placeholder set non valido: {nome}.{percorso}")
+                  valore = valore[parte]
+              return valore
+
+
+          def _format_placeholder_set(valore, formato=""):
+              """Formati dichiarativi usati da FRASI_SET_TECNICHE."""
+              if formato == "pct":
+                  return f"{_numero_placeholder_tecnico(valore)}%"
+              if formato == "x":
+                  return f"{_numero_placeholder_tecnico(valore)}x"
+              if formato == "signed":
+                  if isinstance(valore, (int, float)) and not isinstance(valore, bool) and valore > 0:
+                      return "+" + _numero_placeholder_tecnico(valore)
+                  return _numero_placeholder_tecnico(valore)
+              if formato == "abs":
+                  return _numero_placeholder_tecnico(abs(valore))
+              if formato == "bool":
+                  return "sì" if valore else "no"
+              if formato == "rid_pct":
+                  return f"{_numero_placeholder_tecnico((1 - float(valore)) * 100)}%"
+              if formato:
+                  raise ValueError(f"Formato placeholder non supportato: {formato}")
+              return _numero_placeholder_tecnico(valore)
+
+
+          def render_frase_set_tecnica(nome, bonus=None):
+              """Renderizza la frase custom del set usando esclusivamente valori centralizzati."""
+              template = FRASI_SET_TECNICHE.get(nome, "")
+              if not template:
+                  return ""
+
+              parti = []
+              for letterale, campo, formato, conversione in string.Formatter().parse(template):
+                  parti.append(letterale)
+                  if campo is None:
+                      continue
+                  if conversione:
+                      raise ValueError(f"Conversione placeholder non supportata: {conversione}")
+                  valore = _valore_placeholder_set(nome, bonus or {}, campo)
+                  parti.append(_format_placeholder_set(valore, formato))
+              return "".join(parti)
+
+
+          '''
+
+          if 'def render_frase_set_tecnica(' not in text:
+              if marker not in text:
+                  raise RuntimeError('descrizione_set_tecnica non trovata')
+              text = text.replace(marker, renderer + marker, 1)
+
+          old = '''def descrizione_set_tecnica(nome, bonus=None):
+              """Descrizione meccanica del set, generata direttamente da PROC_CLASSI."""
+              righe = ["⚙️ Dettagli tecnici"]
+              bonus = bonus or {}
+              bonus_testo = []
+          '''
+          new = '''def descrizione_set_tecnica(nome, bonus=None):
+              """Descrizione meccanica del set, con frase custom e dati analitici."""
+              righe = ["⚙️ Dettagli tecnici"]
+              bonus = bonus or {}
+
+              frase_custom = render_frase_set_tecnica(nome, bonus)
+              if frase_custom:
+                  righe.append("📝 " + frase_custom)
+
+              bonus_testo = []
+          '''
+          if old in text:
+              text = text.replace(old, new, 1)
+          elif 'frase_custom = render_frase_set_tecnica(nome, bonus)' not in text:
+              raise RuntimeError('Corpo descrizione_set_tecnica inatteso')
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Valida 114 frasi e tutti i placeholder
+        shell: bash
+        run: |
+          python - <<'PY'
+          import ast
+          import string
+          from pathlib import Path
+
+          def literal_assignment(path, name):
+              tree = ast.parse(Path(path).read_text(encoding='utf-8'))
+              for node in tree.body:
+                  if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+                      return ast.literal_eval(node.value)
+              raise RuntimeError(f'{name} non trovato in {path}')
+
+          classi = literal_assignment('liste.py', 'classi')
+          bonus = literal_assignment('liste.py', 'bonus')
+          proc = literal_assignment('bilanciamento.py', 'PROC_CLASSI')
+          frasi = literal_assignment('frasi_set.py', 'FRASI_SET_TECNICHE')
+
+          assert len(classi) == 114, len(classi)
+          assert set(classi) == set(proc), sorted(set(classi) ^ set(proc))
+          assert set(classi) == set(frasi), sorted(set(classi) ^ set(frasi))
+          assert all(isinstance(x, str) and x.strip() for x in frasi.values())
+          assert len(set(frasi.values())) == 114, 'Sono presenti frasi duplicate'
+
+          formati = {'', 'pct', 'x', 'signed', 'abs', 'bool', 'rid_pct'}
+          errori = []
+
+          for nome in classi:
+              template = frasi[nome]
+              for _, campo, formato, conversione in string.Formatter().parse(template):
+                  if campo is None:
+                      continue
+                  if conversione:
+                      errori.append(f'{nome}: conversione !{conversione} non supportata')
+                      continue
+                  if formato not in formati:
+                      errori.append(f'{nome}: formato {formato!r} non supportato')
+                      continue
+
+                  parti = campo.split('.')
+                  if parti[0] == 'bonus':
+                      valore = bonus.get(nome, {})
+                      parti = parti[1:]
+                  else:
+                      valore = proc[nome]
+
+                  for parte in parti:
+                      if not isinstance(valore, dict) or parte not in valore:
+                          errori.append(f'{nome}: placeholder {{{campo}}} non risolto')
+                          break
+                      valore = valore[parte]
+
+                  if formato in {'pct', 'x', 'signed', 'abs', 'rid_pct'} and not isinstance(valore, (int, float)):
+                      errori.append(f'{nome}: {{{campo}:{formato}}} richiede un numero, trovato {type(valore).__name__}')
+
+              # Prova anche un rendering completo indipendente dal bot.
+              renderizzato = template
+              for _, campo, formato, _ in string.Formatter().parse(template):
+                  if campo is None:
+                      continue
+                  parti = campo.split('.')
+                  valore = bonus.get(nome, {}) if parti[0] == 'bonus' else proc[nome]
+                  if parti[0] == 'bonus':
+                      parti = parti[1:]
+                  try:
+                      for parte in parti:
+                          valore = valore[parte]
+                  except Exception:
+                      continue
+                  if formato == 'pct': sost = f'{valore}%'
+                  elif formato == 'x': sost = f'{valore}x'
+                  elif formato == 'signed': sost = f'{valore:+}' if isinstance(valore, (int, float)) else str(valore)
+                  elif formato == 'abs': sost = str(abs(valore))
+                  elif formato == 'bool': sost = 'sì' if valore else 'no'
+                  elif formato == 'rid_pct': sost = f'{(1-float(valore))*100:g}%'
+                  else: sost = str(valore)
+                  renderizzato = renderizzato.replace('{' + campo + ((':' + formato) if formato else '') + '}', sost)
+              if '{' in renderizzato or '}' in renderizzato:
+                  errori.append(f'{nome}: rendering incompleto -> {renderizzato}')
+
+          if errori:
+              raise RuntimeError('\n'.join(errori))
+
+          print(f'OK: {len(frasi)}/114 frasi uniche, tutti i placeholder validi')
+          PY
+
+          python -m py_compile nft.py bilanciamento.py frasi_set.py
+
+      - name: Pulisci report temporanei e commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f snapshot_frasi_set.txt report_frasi_set_compact.txt
+          git rm --ignore-unmatch .github/workflows/integra-frasi-set.yml
+          git add -A
+          git commit -m "feat: integra frasi tecniche custom per 114 set"
+          git push origin HEAD:refactor/bilanciamento-config
