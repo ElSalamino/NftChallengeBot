@@ -3898,6 +3898,15 @@ def turno(main, oppo,cond=None):
             random.seed(PROC_ANELLI["Anello perfezionista"]["generale"]["seed"])
     set = main.get("set",None)
     setN = oppo.get("set",None)
+
+    # I set con blocco_set disattivano le abilità di entrambi prima di qualsiasi proc.
+    blocca_set = (
+        (set is not None and proc_val(set, "turno", "blocco_set", "blocca_set_avversario", False))
+        or (setN is not None and proc_val(setN, "turno", "blocco_set", "blocca_set_avversario", False))
+    )
+    if blocca_set:
+        set = "MusicoSciamano"
+        setN = "MusicoSciamano"
     
     inte = main.get("int",0)
     bonus = (inte * 0.02) + 0.75   
