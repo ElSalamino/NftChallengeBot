@@ -1,0 +1,125 @@
+name: Report frasi complete set
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Genera report completo
+        shell: bash
+        run: |
+          python - <<'PY'
+          import ast
+          import string
+          from pathlib import Path
+
+          def literal(path, name):
+              tree = ast.parse(Path(path).read_text(encoding='utf-8'))
+              for node in tree.body:
+                  if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+                      return ast.literal_eval(node.value)
+              raise RuntimeError(f'{name} non trovato in {path}')
+
+          classi = literal('liste.py', 'classi')
+          frasi_base = literal('liste.py', 'frasi_set')
+          bonus = literal('liste.py', 'bonus')
+          proc = literal('bilanciamento.py', 'PROC_CLASSI')
+          frasi = literal('frasi_set.py', 'FRASI_SET_TECNICHE')
+
+          def num(v):
+              if isinstance(v, float) and v.is_integer():
+                  return str(int(v))
+              if isinstance(v, float):
+                  return f'{v:g}'
+              return str(v)
+
+          def resolve(nome, campo):
+              parti = campo.split('.')
+              if parti[0] == 'bonus':
+                  valore = bonus.get(nome, {})
+                  parti = parti[1:]
+              else:
+                  valore = proc[nome]
+              for parte in parti:
+                  valore = valore[parte]
+              return valore
+
+          def fmt(v, spec):
+              if spec == 'pct':
+                  return f'{num(v)}%'
+              if spec == 'x':
+                  return f'{num(v)}x'
+              if spec == 'signed':
+                  if isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0:
+                      return '+' + num(v)
+                  return num(v)
+              if spec == 'abs':
+                  return num(abs(v))
+              if spec == 'bool':
+                  return 'sì' if v else 'no'
+              if spec == 'rid_pct':
+                  return f'{num((1-float(v))*100)}%'
+              if spec:
+                  raise RuntimeError(f'Formato non supportato: {spec}')
+              return num(v)
+
+          def render(nome):
+              template = frasi[nome]
+              out = []
+              for literal_text, campo, spec, conversion in string.Formatter().parse(template):
+                  out.append(literal_text)
+                  if campo is None:
+                      continue
+                  if conversion:
+                      raise RuntimeError(f'Conversione non supportata: {conversion}')
+                  out.append(fmt(resolve(nome, campo), spec))
+              return ''.join(out)
+
+          righe = []
+          for i, nome in enumerate(classi, 1):
+              base = frasi_base.get(nome, f'Set del {nome}.').strip()
+              custom = render(nome).strip()
+              b = bonus.get(nome, {})
+              bonus_testo = []
+              for stat in ('hp','atk','def','agi'):
+                  val = b.get(stat, 0)
+                  if val:
+                      bonus_testo.append(f'{stat.upper()} {val:+}')
+
+              righe.append(f'{i:03d}. {nome}')
+              righe.append(base)
+              righe.append('')
+              righe.append('⚙️ Dettagli del set')
+              righe.append(custom)
+              if bonus_testo:
+                  righe.append('Bonus base: ' + ' | '.join(bonus_testo))
+              righe.append('')
+              righe.append('---')
+              righe.append('')
+
+          assert len(classi) == 114
+          Path('report_frasi_complete.txt').write_text('\n'.join(righe), encoding='utf-8')
+          PY
+
+      - name: Commit report e pulisci workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add report_frasi_complete.txt
+          git rm .github/workflows/report-frasi-complete.yml
+          git commit -m "chore: genera report frasi complete set"
+          git push origin HEAD:refactor/bilanciamento-config
