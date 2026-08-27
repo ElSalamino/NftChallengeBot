@@ -36,36 +36,22 @@ jobs:
 
           nft_path = Path('nft.py')
           nft = nft_path.read_text(encoding='utf-8')
-          old_code = '''        elif setN == "Forma lunare" and proc_ok(num, setN, "turno", "chip_difesa"):
-              text += "__Chip lunare, attivazione!__\\n"
-              main["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_main")
-              oppo["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_oppo")
-          '''
-          new_code = '''        elif setN == "Forma lunare" and proc_ok(num, setN, "turno", "chip_difesa"):
-              text += "__Chip lunare, attivazione!__\\n"
-              # setN è il difensore: il chip aumenta la sua AGI e riduce quella del nemico.
-              main["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_nemico")
-              oppo["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_propria")
-          '''
-          if old_code in nft:
-              nft = nft.replace(old_code, new_code, 1)
-          elif '"agi_propria"' not in nft or '"agi_nemico"' not in nft:
-              raise RuntimeError('Blocco Forma lunare inatteso')
+          old_main = 'proc_val(setN, "turno", "chip_difesa", "agi_main")'
+          old_oppo = 'proc_val(setN, "turno", "chip_difesa", "agi_oppo")'
+          new_main = 'proc_val(setN, "turno", "chip_difesa", "agi_nemico")'
+          new_oppo = 'proc_val(setN, "turno", "chip_difesa", "agi_propria")'
+          if old_main in nft:
+              nft = nft.replace(old_main, new_main, 1)
+          if old_oppo in nft:
+              nft = nft.replace(old_oppo, new_oppo, 1)
+          if new_main not in nft or new_oppo not in nft:
+              raise RuntimeError('Riferimenti Forma lunare non aggiornati')
 
           nft = nft.replace('righe = ["⚙️ Dettagli tecnici"]', 'righe = ["⚙️ Dettagli del set"]', 1)
           nft = nft.replace('righe.append("📝 " + frase_custom)', 'righe.append(frase_custom)', 1)
-          old_dump = '''    righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))
-              if len(righe) == 1:
-                  righe.append("• Nessun parametro numerico centralizzato per questo set.")
-              return "\\n".join(righe)
-          '''
-          new_dump = '''    return "\\n".join(righe)
-          '''
-          if old_dump in nft:
-              nft = nft.replace(old_dump, new_dump, 1)
-          else:
-              # Variante senza indentazione alterata: rimuove solo il dump automatico dei campi interni.
-              nft = nft.replace('    righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))\n    if len(righe) == 1:\n        righe.append("• Nessun parametro numerico centralizzato per questo set.")\n    return "\\n".join(righe)\n', '    return "\\n".join(righe)\n', 1)
+          dump = '    righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))\n    if len(righe) == 1:\n        righe.append("• Nessun parametro numerico centralizzato per questo set.")\n    return "\\n".join(righe)\n'
+          if dump in nft:
+              nft = nft.replace(dump, '    return "\\n".join(righe)\n', 1)
 
           nft_path.write_text(nft, encoding='utf-8')
           PY
@@ -129,7 +115,8 @@ jobs:
           nft = Path('nft.py').read_text(encoding='utf-8')
           assert 'proc_val(setN, "turno", "chip_difesa", "agi_nemico")' in nft
           assert 'proc_val(setN, "turno", "chip_difesa", "agi_propria")' in nft
-          assert 'righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))' not in nft[nft.index('def descrizione_set_tecnica'):nft.index('def descrizione_anello_tecnica')]
+          sezione_set = nft[nft.index('def descrizione_set_tecnica'):nft.index('def descrizione_anello_tecnica')]
+          assert 'righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))' not in sezione_set
 
           if errori:
               raise RuntimeError('\n'.join(errori))
