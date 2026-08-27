@@ -31,7 +31,7 @@ jobs:
           script = textwrap.dedent(wf[start:end]).lstrip('\n')
           exec(compile(script, '<completa-config-set>', 'exec'), {})
           PY
-          python -m py_compile nft.py bilanciamento.py __init__.py
+          python -m py_compile nft.py bilanciamento.py
 
       - name: Genera snapshot completo per le frasi custom
         shell: bash
