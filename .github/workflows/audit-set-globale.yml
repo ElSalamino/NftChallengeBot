@@ -1,0 +1,85 @@
+name: Audit globale set
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+      - name: Analizza tutti i Python
+        shell: bash
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+
+          def literal_assignment(path, name):
+              tree = ast.parse(Path(path).read_text(encoding='utf-8'))
+              for node in tree.body:
+                  if isinstance(node, ast.Assign):
+                      for t in node.targets:
+                          if isinstance(t, ast.Name) and t.id == name:
+                              return ast.literal_eval(node.value)
+              raise RuntimeError(f'{name} non trovato')
+
+          classi = literal_assignment('liste.py', 'classi')
+          proc = literal_assignment('bilanciamento.py', 'PROC_CLASSI')
+          missing = sorted(set(classi) - set(proc), key=str.lower)
+          files = [p for p in Path('.').glob('*.py') if p.name not in {'liste.py', 'bilanciamento.py'}]
+
+          out = [f'SET TOTALI: {len(classi)}', f'SET SENZA CONFIG: {len(missing)}', '']
+          for name in missing:
+              all_hits = []
+              for p in files:
+                  lines = p.read_text(encoding='utf-8').splitlines()
+                  hits = [i for i,l in enumerate(lines, 1) if name in l]
+                  if hits:
+                      all_hits.append((p.name, hits))
+              out.append(f'- {name}: {all_hits if all_hits else "NESSUNA OCCORRENZA"}')
+
+          out.append('\n' + '='*100)
+          out.append('CONTESTI')
+          out.append('='*100)
+          for name in missing:
+              found = False
+              for p in files:
+                  lines = p.read_text(encoding='utf-8').splitlines()
+                  hits = [i for i,l in enumerate(lines, 1) if name in l]
+                  if not hits:
+                      continue
+                  found = True
+                  out.append(f'\n### {name} — {p.name}')
+                  last_end = -1
+                  for ln in hits:
+                      start=max(1,ln-8); end=min(len(lines),ln+14)
+                      if start <= last_end:
+                          continue
+                      last_end=end
+                      out.append(f'--- riga {ln} ---')
+                      for n in range(start,end+1):
+                          out.append(f'{n:05d}: {lines[n-1]}')
+              if not found:
+                  out.append(f'\n### {name}\nNESSUNA OCCORRENZA NEL MOTORE')
+
+          Path('audit_set_globale.txt').write_text('\n'.join(out), encoding='utf-8')
+          PY
+      - name: Commit report e pulizia
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add audit_set_globale.txt
+          git rm .github/workflows/audit-set-globale.yml
+          git commit -m "chore: audit globale set"
+          git push origin HEAD:refactor/bilanciamento-config
