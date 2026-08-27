@@ -1,0 +1,149 @@
+name: Umanizza frasi set
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Rendi chiara la Forma lunare e semplifica la descrizione
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          bil_path = Path('bilanciamento.py')
+          bil = bil_path.read_text(encoding='utf-8')
+          old_luna = "'Forma lunare': {'turno': {'chip_difesa': {'proc': 16, 'agi_main': -20, 'agi_oppo': 20}}},"
+          new_luna = "'Forma lunare': {'turno': {'chip_difesa': {'proc': 16, 'agi_propria': 20, 'agi_nemico': -20}}},"
+          if old_luna in bil:
+              bil = bil.replace(old_luna, new_luna, 1)
+          elif new_luna not in bil:
+              raise RuntimeError('Configurazione Forma lunare non trovata')
+          bil_path.write_text(bil, encoding='utf-8')
+
+          nft_path = Path('nft.py')
+          nft = nft_path.read_text(encoding='utf-8')
+          old_code = '''        elif setN == "Forma lunare" and proc_ok(num, setN, "turno", "chip_difesa"):
+              text += "__Chip lunare, attivazione!__\\n"
+              main["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_main")
+              oppo["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_oppo")
+          '''
+          new_code = '''        elif setN == "Forma lunare" and proc_ok(num, setN, "turno", "chip_difesa"):
+              text += "__Chip lunare, attivazione!__\\n"
+              # setN è il difensore: il chip aumenta la sua AGI e riduce quella del nemico.
+              main["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_nemico")
+              oppo["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_propria")
+          '''
+          if old_code in nft:
+              nft = nft.replace(old_code, new_code, 1)
+          elif '"agi_propria"' not in nft or '"agi_nemico"' not in nft:
+              raise RuntimeError('Blocco Forma lunare inatteso')
+
+          nft = nft.replace('righe = ["⚙️ Dettagli tecnici"]', 'righe = ["⚙️ Dettagli del set"]', 1)
+          nft = nft.replace('righe.append("📝 " + frase_custom)', 'righe.append(frase_custom)', 1)
+          old_dump = '''    righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))
+              if len(righe) == 1:
+                  righe.append("• Nessun parametro numerico centralizzato per questo set.")
+              return "\\n".join(righe)
+          '''
+          new_dump = '''    return "\\n".join(righe)
+          '''
+          if old_dump in nft:
+              nft = nft.replace(old_dump, new_dump, 1)
+          else:
+              # Variante senza indentazione alterata: rimuove solo il dump automatico dei campi interni.
+              nft = nft.replace('    righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))\n    if len(righe) == 1:\n        righe.append("• Nessun parametro numerico centralizzato per questo set.")\n    return "\\n".join(righe)\n', '    return "\\n".join(righe)\n', 1)
+
+          nft_path.write_text(nft, encoding='utf-8')
+          PY
+
+      - name: Valida i 114 testi e ogni placeholder
+        shell: bash
+        run: |
+          python - <<'PY'
+          import ast
+          import string
+          from pathlib import Path
+
+          def literal(path, name):
+              tree = ast.parse(Path(path).read_text(encoding='utf-8'))
+              for node in tree.body:
+                  if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+                      return ast.literal_eval(node.value)
+              raise RuntimeError(f'{name} non trovato')
+
+          classi = literal('liste.py', 'classi')
+          bonus = literal('liste.py', 'bonus')
+          proc = literal('bilanciamento.py', 'PROC_CLASSI')
+          frasi = literal('frasi_set.py', 'FRASI_SET_TECNICHE')
+
+          assert len(classi) == 114, len(classi)
+          assert set(classi) == set(proc), sorted(set(classi) ^ set(proc))
+          assert set(classi) == set(frasi), sorted(set(classi) ^ set(frasi))
+          assert len(frasi) == 114
+          assert len(set(frasi.values())) == 114, 'Le frasi devono essere tutte custom'
+
+          formati = {'', 'pct', 'x', 'signed', 'abs', 'bool', 'rid_pct'}
+          errori = []
+          for nome, template in frasi.items():
+              if not isinstance(template, str) or not template.strip():
+                  errori.append(f'{nome}: frase vuota')
+                  continue
+              for _, campo, formato, conversione in string.Formatter().parse(template):
+                  if campo is None:
+                      continue
+                  if conversione:
+                      errori.append(f'{nome}: conversione non supportata {conversione}')
+                      continue
+                  if formato not in formati:
+                      errori.append(f'{nome}: formato non supportato {formato}')
+                      continue
+                  parti = campo.split('.')
+                  if parti[0] == 'bonus':
+                      valore = bonus.get(nome, {})
+                      parti = parti[1:]
+                  else:
+                      valore = proc[nome]
+                  for parte in parti:
+                      if not isinstance(valore, dict) or parte not in valore:
+                          errori.append(f'{nome}: placeholder non valido {{{campo}}}')
+                          break
+                      valore = valore[parte]
+
+          luna = proc['Forma lunare']['turno']['chip_difesa']
+          assert luna['agi_propria'] == 20
+          assert luna['agi_nemico'] == -20
+          nft = Path('nft.py').read_text(encoding='utf-8')
+          assert 'proc_val(setN, "turno", "chip_difesa", "agi_nemico")' in nft
+          assert 'proc_val(setN, "turno", "chip_difesa", "agi_propria")' in nft
+          assert 'righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))' not in nft[nft.index('def descrizione_set_tecnica'):nft.index('def descrizione_anello_tecnica')]
+
+          if errori:
+              raise RuntimeError('\n'.join(errori))
+          print('OK: 114/114 frasi umane, placeholder validi, Forma lunare corretta')
+          PY
+
+          python -m py_compile nft.py bilanciamento.py frasi_set.py
+
+      - name: Commit finale
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -- .github/workflows/umanizza-frasi-set.yml
+          git add nft.py bilanciamento.py frasi_set.py
+          git commit -m "refactor: rendi leggibili le descrizioni dei set"
+          git push origin HEAD:refactor/bilanciamento-config
