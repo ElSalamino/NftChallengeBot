@@ -274,17 +274,17 @@ def premio_exp(a, b, text):
     
     if "set" in a["scheda"]:
         if a["scheda"]["set"] == "Pilota":
-            possibilia += 0.1
+            possibilia += nft.proc_val("Pilota", "ricompense", "exp", "bonus_probabilita_pct") / 100
     if "set" in a["scheda"]:
         if a["scheda"]["set"] == "Sopravvissuto":
-            possibilia += 0.25
+            possibilia += nft.proc_val("Sopravvissuto", "ricompense", "exp", "bonus_probabilita_pct") / 100
     if "set" in b["scheda"]:
         if b["scheda"]["set"] == "Sopravvissuto":
-            possibilia += 0.25
+            possibilia += nft.proc_val("Sopravvissuto", "ricompense", "exp", "bonus_probabilita_pct") / 100
 
     if "set" in b["scheda"]:
         if b["scheda"]["set"] == "Pilota":
-            possibilib += 0.1
+            possibilib += nft.proc_val("Pilota", "ricompense", "exp", "bonus_probabilita_pct") / 100
     if "l-streak" in b:
         possibilib += b["l-streak"] / 20
     
@@ -3846,9 +3846,9 @@ async def me(client, message):
                     if ricercato in item_pescatore:
                         fs_w += 1
                     if scheda["set"] == "Pescatore":
-                        fs_w += 1
+                        fs_w += nft.proc_val("Pescatore", "pesca", "rarita", "bonus_rarita")
                     if scheda["set"] == "Pescatore di balene":
-                        fs_w += 2
+                        fs_w += nft.proc_val("Pescatore di balene", "pesca", "rarita", "bonus_rarita")
                     
                 except:
                     pass
@@ -4153,9 +4153,9 @@ async def me(client, message):
                     if ricercato in item_pescatore:
                         fs_w += 1
                     if scheda["set"] == "Pescatore":
-                        fs_w += 1
+                        fs_w += nft.proc_val("Pescatore", "pesca", "rarita", "bonus_rarita")
                     if scheda["set"] == "Pescatore di balene":
-                        fs_w += 2
+                        fs_w += nft.proc_val("Pescatore di balene", "pesca", "rarita", "bonus_rarita")
                     
                 except:
                     pass
@@ -4344,14 +4344,14 @@ def sfide_brain():
                                     pass
 
                     if user1["set"] == "Paladino":
-                                user1["Scudo"] = 800
+                                user1["Scudo"] = nft.proc_val("Paladino", "arena", "scudo", "hp_scudo")
 
                     if user2["set"] == "Paladino":
-                                user2["Scudo"] = 800
+                                user2["Scudo"] = nft.proc_val("Paladino", "arena", "scudo", "hp_scudo")
                     if user1["set"] == "Serial killer":
-                                user2["hp"] = round(user2["hp"] * 0.75)
+                                user2["hp"] = round(user2["hp"] * (nft.proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
                     if user2["set"] == "Serial killer":
-                                user1["hp"] = round(user1["hp"] * 0.75)
+                                user1["hp"] = round(user1["hp"] * (nft.proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
                     
                     nft.boost(user1,liste.Approcci)
                     nft.boost(user2,liste.Approcci)
@@ -4504,12 +4504,12 @@ def sfide_brain():
                                 if a["scheda"]["anello"] == "Anello d'oro fortissimo":
                                     punti += 2
                                 if a["scheda"]["set"] == "Pilota":
-                                    punti += 2
+                                    punti += nft.proc_val("Pilota", "ricompense", "duello", "punti_bonus")
                             if "set" in b["scheda"]:
                                 if b["scheda"]["anello"] == "Anello d'oro fortissimo":
                                     punti -= 2
                                 if b["scheda"]["set"] == "Lupo di mare":
-                                    punti -= 2
+                                    punti += nft.proc_val("Lupo di mare", "ricompense", "duello", "punti_malus")
 
                             b["punti"] -= punti
                             if b["punti"] < 0:
@@ -6098,7 +6098,7 @@ async def equip(client, message):
                         to_c = [coso, ricercato]
                         if nft.is_in(to_c,item_pescatore):
                             scheda["set"] = "Pescatore"
-                            t += "Set del Pescatore equipaggiato!\nStats extra e pesca migliorata!"
+                            t += liste.frasi_set["Pescatore"]
                             
                             if "Pescatore" in player[username]["setvisti"]:
                                 pass
@@ -6404,13 +6404,13 @@ async def amichevole(client, message):
                         
                         
                         if user1["set"] == "Paladino":
-                            user1["Scudo"] = 800
+                            user1["Scudo"] = nft.proc_val("Paladino", "arena", "scudo", "hp_scudo")
                         if user2["set"] == "Paladino":
-                            user2["Scudo"] = 800
+                            user2["Scudo"] = nft.proc_val("Paladino", "arena", "scudo", "hp_scudo")
                         if user1["set"] == "Serial killer":
-                            user2["hp"] = round(user2["hp"] * 0.75)
+                            user2["hp"] = round(user2["hp"] * (nft.proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
                         if user2["set"] == "Serial killer":
-                            user1["hp"] = round(user1["hp"] * 0.75)
+                            user1["hp"] = round(user1["hp"] * (nft.proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
 
                         text = f"Sfida tra {nome1} e {nome2}!\n{nome1} sceglie: {liste.approccio1}, mentre {nome2} su {liste.approccio2}!\n\n"
                         if user1["anello"] == "Pegno di amicizia":
@@ -6638,13 +6638,13 @@ async def amichevole(client, message):
                         
                         
                         if user1["set"] == "Paladino":
-                            user1["Scudo"] = 800
+                            user1["Scudo"] = nft.proc_val("Paladino", "arena", "scudo", "hp_scudo")
                         if user2["set"] == "Paladino":
-                            user2["Scudo"] = 800
+                            user2["Scudo"] = nft.proc_val("Paladino", "arena", "scudo", "hp_scudo")
                         if user1["set"] == "Serial killer":
-                            user2["hp"] = round(user2["hp"] * 0.75)
+                            user2["hp"] = round(user2["hp"] * (nft.proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
                         if user2["set"] == "Serial killer":
-                            user1["hp"] = round(user1["hp"] * 0.75)
+                            user1["hp"] = round(user1["hp"] * (nft.proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
 
                         text = f"Sfida MEKA tra {nome1} e {nome2}!\n"
                         if user1["anello"] == "Pegno di amicizia":
@@ -6956,9 +6956,9 @@ async def pesca_callback(client, message):
                 if ricercato in item_pescatore:
                     fs_w += 1
                 if scheda["set"] == "Pescatore":
-                    fs_w += 1
+                    fs_w += nft.proc_val("Pescatore", "pesca", "rarita", "bonus_rarita")
                 if scheda["set"] == "Pescatore di balene":
-                    fs_w += 2
+                    fs_w += nft.proc_val("Pescatore di balene", "pesca", "rarita", "bonus_rarita")
                 
                 
             except:
@@ -6991,9 +6991,9 @@ async def pesca_callback(client, message):
                         user1["incantamenti"] = nft.get_ench(player[username])
                         user2 = copy.deepcopy(liste.Nautici[bossina])
                         if user1["set"] == "Paladino":
-                            user1["Scudo"] = 1000
+                            user1["Scudo"] = nft.proc_val("Paladino", "boss", "scudo", "hp_scudo")
                         if user1["set"] == "Serial killer":
-                            user2["hp"] = round(user2["hp"] * 0.75)
+                            user2["hp"] = round(user2["hp"] * (nft.proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
 
                         nft.controllo_effetti_sfida(username,player)
                         bostabile = ["hp", "def", "atk", "agi"]
@@ -7299,11 +7299,11 @@ async def assalto(client, message):
                                                 matx += 1
                                                 
                                         serv = matx
-                                        if matx < 2 and giocatore["set"] == 'Eroe caduto':
-                                            serv += 2
+                                        if matx < nft.proc_val("Eroe caduto", "assalto", "supporto_clan", "compagni_soglia") and giocatore["set"] == 'Eroe caduto':
+                                            serv += nft.proc_val("Eroe caduto", "assalto", "supporto_clan", "serv_bonus_bot")
                                             
                                         if giocatore["set"] == 'Eroe della rivolta':
-                                            serv = serv * 1.2
+                                            serv = serv * nft.proc_val("Eroe della rivolta", "assalto", "supporto_clan", "serv_mul")
                                         
                                         if player[username]["setta"]["benedizione"] == 'Orso polare' and  matx > 2:
                                             

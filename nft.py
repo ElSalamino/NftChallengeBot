@@ -821,11 +821,11 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                             matx += 1
                                             
                                     serv = matx
-                                    if matx < 2 and giocatore["set"] == 'Eroe caduto':
-                                        serv += 1
+                                    if matx < proc_val("Eroe caduto", "assalto", "supporto_clan", "compagni_soglia") and giocatore["set"] == 'Eroe caduto':
+                                        serv += proc_val("Eroe caduto", "assalto", "supporto_clan", "serv_bonus_nft")
                                         
                                     if giocatore["set"] == 'Eroe della rivolta':
-                                        serv = serv * 1.2
+                                        serv = serv * proc_val("Eroe della rivolta", "assalto", "supporto_clan", "serv_mul")
                                     if player[username]["setta"]["benedizione"] == 'Orso polare' and  matx > 2:
                                         
                                         a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
@@ -1347,9 +1347,9 @@ async def bossata(scelta,player,username,app,message,last_boss,inabilitati,armi,
                         user1 = copy.deepcopy(player[username]["scheda"])
                         user2 = copy.deepcopy(Boss[scelta])
                         if user1["set"] == "Paladino":
-                            user1["Scudo"] = 1000
+                            user1["Scudo"] = proc_val("Paladino", "boss", "scudo", "hp_scudo")
                         if user1["set"] == "Serial killer":
-                            user2["hp"] = round(user2["hp"] * 0.75)
+                            user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
 
                         controllo_effetti_sfida(username,player)
                         bostabile = ["hp", "def", "atk", "agi"]
@@ -1686,12 +1686,12 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
             bonus["agi"] -= 30
             text += "Il caldo sovraccarica le difese!\n"
             if set == "Re del raaave":
-                bonus["agi"] -= 30
+                bonus["agi"] += proc_val(set, "assalto", "meteo", "caldo_infernale_agi")
         elif meteo == 'Caldo torrido':
             bonus["atk"] -= 50
             text += "Il caldo blocca le difese!\n"
             if set == "Re del raaave":
-                bonus["atk"] -= 100
+                bonus["atk"] += proc_val(set, "assalto", "meteo", "caldo_torrido_atk")
         elif meteo == 'Tempesta':
             bonus["agi"] += 30
             text += f"La tempesta blocca {nome} a terra!\n"
@@ -1703,7 +1703,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
             player["atk"] += 75
             bonus["atk"] += 75
             if set == "Re del raaave":
-                player["atk"] += 100
+                player["atk"] += proc_val(set, "assalto", "meteo", "arcobaleno_atk")
         elif meteo == "Arieggiato":
             text += f"Il meteo è troppo forte, {nome} non riesce a tenere il proprio equip!\n"
             set = None
@@ -1711,8 +1711,8 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
     if set != None:
         num = random.random()
         if set == "Inferno risvegliato":
-            bonus["atk"] += 100
-            player["atk"] += 100
+            bonus["atk"] += proc_val(set, "assalto", "inferno", "atk_bonus")
+            player["atk"] += proc_val(set, "assalto", "inferno", "atk_player")
         elif set == "Thunderlord" and proc_ok(num, set, "assalto", "tuono"):
             for g in range(proc_val(set, "assalto", "tuono", "colpi")):
                 try:
@@ -1753,7 +1753,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
             target = "Bersaglio enorme"
             if set == "Serial killer":
                 text += f"Anche se sa di aver sbagliato bersaglio {nome} è deciso ad arrivarci!"
-                player["agi"] += 30
+                player["agi"] += proc_val(set, "assalto", "bersaglio_enorme", "agi")
     
     if "Divino" in effetti:
         player["atk"] = player["atk"] * 10
@@ -1774,7 +1774,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                     text += "L'anello si raddoppia!\n"
 
             if playerg[pl]["scheda"]["set"] == "Re dei pirati" and pl != nome:
-                dmg = round(max(20,playerg[pl]["scheda"]["atk"]//15))
+                dmg = round(max(proc_val("Re dei pirati", "assalto", "supporto_ciurma", "danno_min"), playerg[pl]["scheda"]["atk"] // proc_val("Re dei pirati", "assalto", "supporto_ciurma", "atk_divisore")))
                 cosa = news = random.choice(list(nemico))
                 nemico[cosa]["hp"] -= dmg
                 text += f"**I\'M IN CHARGEEE NOW, {pl} infligge {dmg} a {cosa}**\n"
@@ -1816,11 +1816,11 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                         text += "__Il fatto che non sei morto spaventa i nemici!__\n"
                         bonus["def"] += proc_val(set, "assalto", "paura", "bonus_def_nemico")
                     elif set == "Macellaio":
-                        defense += player["hp"] / 20
+                        defense += player["hp"] / proc_val(set, "assalto", "carne", "hp_divisore")
                     elif set == 'Spadaccino Musashi':
-                        defense = defense * 1.2                    
+                        defense = defense * proc_val(set, "assalto", "difesa", "def_mul")                    
                     elif set == "Proiettile":
-                        defense += 40
+                        defense += proc_val(set, "assalto", "difesa", "def")
                     elif set == "Illusionista" and proc_ok(num, set, "assalto", "copie"):
                         agin += proc_val(set, "assalto", "copie", "agi_difesa")
                         text += f"Copie di {nome} si spargono a caso!\n"
@@ -1840,7 +1840,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                         text += f"__{nome} viene supportato dalla fauna ittica!__\n"
 
                     elif set == "Uomo di un tempo":
-                        player["hp"] += 5
+                        player["hp"] += proc_val(set, "assalto", "vitalita", "hp")
 
                     elif set == "Chierico" and proc_ok(num, set, "assalto", "cura"):
                         player["hp"] += proc_val(set, "assalto", "cura", "cura")
@@ -2367,7 +2367,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                         dannissimi = round(float(dps) * (100 / (float(1 + difesan)) * random.uniform(0.7, 1.3)))
 
                         if set == "Cavaliere d'argento":
-                            dannissimi += 15
+                            dannissimi += proc_val(set, "assalto", "danno_fisso", "danno")
 
                         elif set == "Orrido":
                             dannissimi = proc_val(set, "assalto", "sgignolo", "danno")
@@ -2476,11 +2476,11 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
 
     elif necron and player["hp"] <= 0:
         text += "\n**Il nucleo necron sprigiona un aura oscura che riporta in vita il malcapitato, per ora...**"
-        player["hp"] = 1000
+        player["hp"] = proc_val(set, "assalto", "resurrezione", "hp")
 
     elif (set == "Guardiano del passaggio" and player["hp"] <= 0 and proc_ok(num, set, "assalto", "resurrezione")):
         text += f"\n**{nome} ritorna dalla morte, pronto a combattere ancora!\n"
-        player["hp"] = 1000
+        player["hp"] = proc_val(set, "assalto", "resurrezione", "hp")
 
     elif set == "Fiamma pura" and player["hp"] <= 0 and proc_ok(num, set, "assalto", "esplosione_morte"):
         text += f"\n{nome} esplode in un esplosione di fuoco dannegiando tutte le strutture!"
@@ -2528,13 +2528,13 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
 
             nome2 = user2["Nome"]
             if user1["set"] == "Paladino":
-                user1["Scudo"] = 200
+                user1["Scudo"] = proc_val("Paladino", "dungeon", "scudo", "hp_scudo")
             if user2["set"] == "Paladino":
-                user2["Scudo"] = 200
+                user2["Scudo"] = proc_val("Paladino", "dungeon", "scudo", "hp_scudo")
             if user1["set"] == "Serial killer":
-                user2["hp"] = round(user2["hp"] * 0.75)
+                user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
             if user2["set"] == "Serial killer":
-                user1["hp"] = round(user1["hp"] * 0.75)
+                user1["hp"] = round(user1["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
             if "supporto" in player[username]:
                 if nome1 != player[username]["supporto"]["Nome"]:
                     user3 = copy.deepcopy(player[username]["supporto"])
@@ -2542,9 +2542,9 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
                     nome3 = user3["Nome"]
                     user3["fatto"] = 0
                     if user3["set"] == "Paladino":
-                        user3["Scudo"] = 200
+                        user3["Scudo"] = proc_val("Paladino", "dungeon", "scudo", "hp_scudo")
                     if user3["set"] == "Serial killer":
-                        user2["hp"] = round(user2["hp"] * 0.75)
+                        user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
                     classe(user3,user3["set"],bonus)
                 else:
                     player[username].pop("supporto")
@@ -2807,13 +2807,13 @@ async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dun
             user1 = copy.deepcopy(player[username]["scheda"])
             user2 = copy.deepcopy(nemici[scelta])
             if user1["set"] == "Paladino":
-                user1["Scudo"] = 200
+                user1["Scudo"] = proc_val("Paladino", "dungeon", "scudo", "hp_scudo")
             if user2["set"] == "Paladino":
-                user2["Scudo"] = 200
+                user2["Scudo"] = proc_val("Paladino", "dungeon", "scudo", "hp_scudo")
             if user1["set"] == "Serial killer":
-                user2["hp"] = round(user2["hp"] * 0.75)
+                user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
             if user2["set"] == "Serial killer":
-                user1["hp"] -= 150
+                user1["hp"] -= proc_val("Serial killer", "dungeon", "contro_serial", "danno")
             controllo_effetti_sfida(username,player)
             inizio = user1["hp"]
             user1["hp"] -= player[username]["dungeon"]["danno"]
@@ -3209,14 +3209,14 @@ Anello: {anello}
                     pass
 
             if user1["set"] == "Paladino":
-                user1["Scudo"] = 800
+                user1["Scudo"] = proc_val("Paladino", "arena", "scudo", "hp_scudo")
 
             if user2["set"] == "Paladino":
-                    user2["Scudo"] = 800
+                    user2["Scudo"] = proc_val("Paladino", "arena", "scudo", "hp_scudo")
             if user1["set"] == "Serial killer":
-                    user2["hp"] = round(user2["hp"] * 0.75)
+                    user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
             if user2["set"] == "Serial killer":
-                    user1["hp"] = round(user1["hp"] * 0.75)
+                    user1["hp"] = round(user1["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
             boost(user1, Approcci)
             boost(user2, Approcci)
             user1["fatto"] = 0
@@ -3878,21 +3878,21 @@ def turno(main, oppo,cond=None):
                 text += "Colpo perforante!\n"
                 difesan = cfg["difesa_target"]
         elif set == "Inferno risvegliato":
-            main["atk"] += 200
-            oppo["atk"] += 200
+            main["atk"] += proc_val(set, "turno", "inferno", "atk_main")
+            oppo["atk"] += proc_val(set, "turno", "inferno", "atk_target")
         elif set == "MusicoSciamano":
             setN = "MusicoSciamano"
         elif set == "Uomo di un tempo":
-            main["hp"] += 22
+            main["hp"] += proc_val(set, "turno", "vitalita", "hp")
         elif set == "Juggernaut":
             agin *= 0.3
         elif set == "Corvo":
-            dogebonus -= 10
-        elif set == "Scudiero del boschett" and main["fatto"] <= 300:
-            main["hp"] += 30
-            main["atk"] += 10
-            main["def"] += 10
-            main["agi"] += 3
+            dogebonus += proc_val(set, "turno", "pressione_evasiva", "dogebonus")
+        elif set == "Scudiero del boschetto" and main["fatto"] <= proc_val("Scudiero del boschetto", "turno", "recupero", "fatto_max"):
+            main["hp"] += proc_val("Scudiero del boschetto", "turno", "recupero", "hp")
+            main["atk"] += proc_val("Scudiero del boschetto", "turno", "recupero", "atk")
+            main["def"] += proc_val("Scudiero del boschetto", "turno", "recupero", "def")
+            main["agi"] += proc_val("Scudiero del boschetto", "turno", "recupero", "agi")
         elif set == "Uomo di classe" and proc_ok(num, set, "turno", "spumeggiante_attacco"):
             if setN == "Ombra silenziosa" and proc_ok(num, setN, "turno", "silenzio_spumeggiante"):
                 text += "(Silenziato)\n"
@@ -4155,11 +4155,11 @@ def turno(main, oppo,cond=None):
         num = random.random()
         if setN == "MusicoSciamano":
             set = "MusicoSciamano"
-        elif setN == "Cacciatore della feccia" and  oppo["fatto"] <= 300:
-            agin += 45
-            difesan += 375
+        elif setN == "Cacciatore della feccia" and oppo["fatto"] <= proc_val(setN, "turno", "difesa_sotto_soglia", "fatto_max"):
+            agin += proc_val(setN, "turno", "difesa_sotto_soglia", "agi_difesa")
+            difesan += proc_val(setN, "turno", "difesa_sotto_soglia", "def_difesa")
         elif setN == "Elfo silvano":
-            dogebonus += 40
+            dogebonus += proc_val(setN, "turno", "evasione", "dogebonus")
         elif setN == "Uomo di classe" and proc_ok(num, setN, "turno", "spumeggiante_difesa"):
             text += "**Spumeggiante!**\n"
             difesan = main["def"]
@@ -4293,7 +4293,7 @@ def turno(main, oppo,cond=None):
                 text += "🩸 "
                 num = random.random()
             if setN == "Guerriero 3D":
-                mod -= 0.55
+                mod += proc_val(setN, "turno", "atterraggio", "mod_delta")
                 text += "💧 "
             if anello == "Fascette luminose" and anello_ok(num, anello, "turno", "atterraggio"):
                 mod += anello_val(anello, "turno", "atterraggio", "mod")
@@ -4312,10 +4312,10 @@ def turno(main, oppo,cond=None):
 
     if set != None:
         num = random.random()
-        if set == "Cavaliere d'argento" and mod <= 0.8:
-            mod += 0.2
+        if set == "Cavaliere d'argento" and mod <= proc_val(set, "turno", "recupero_colpo", "mod_massimo"):
+            mod += proc_val(set, "turno", "recupero_colpo", "mod_bonus")
         elif set == "Spacca Mostri":
-            dps += oppo["hp"] / 4
+            dps += oppo["hp"] / proc_val(set, "turno", "mostro_enorme", "hp_divisore")
         elif set == "IppoFan" and proc_ok(num, set, "turno", "copia_attacco"):
             dps = oppo["atk"]
             text += f"__{nome1} copia l'attacco nemico per attaccare!__\n" 
@@ -4344,9 +4344,9 @@ def turno(main, oppo,cond=None):
     if setN != None:
         num = random.random()
         if setN == "Proiettile":
-            mod -= 0.3
+            mod += proc_val(setN, "turno", "difesa", "mod_delta")
         elif setN == "Macellaio":
-            difesan += oppo["hp"] // 10
+            difesan += oppo["hp"] // proc_val(setN, "turno", "difesa_sangue", "hp_divisore")
         elif setN == "Segna ombre" and proc_ok(num, setN, "turno", "mimica_difesa"):
             difesan = main["def"]
             text += f"__{nome2} mimica la difesa avversaria!__\n"
@@ -4487,7 +4487,7 @@ def turno(main, oppo,cond=None):
     dannov = round(danno * mod)
     main["fatto"] += dannov
     if setN == 'Spadaccino Musashi':
-                danno = danno * .7
+                danno = danno * proc_val(setN, "turno", "riduzione_danno", "danno_mul")
     if anello == "Coda demoniaca":
         oppo["lastD"] = dannov
     
@@ -4516,7 +4516,7 @@ def turno(main, oppo,cond=None):
             num = random.random()
             if setN == "Paladino" and oppo["Scudo"] >= 0:
 
-                    oppo["Scudo"] -= round(float(danno) * (mod +0.5))
+                    oppo["Scudo"] -= round(float(danno) * (mod + proc_val(setN, "turno", "scudo", "mod_bonus")))
                     vita = oppo["Scudo"]
                     text += f"{nome1} infligge {dannov} danno allo scudo di {nome2} ({vita} scudo)!\n"
                     if oppo["Scudo"] <= 0:
@@ -6182,7 +6182,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                                     seet = None         
                     if seet == None or dungeon_under(num, "Armeria", "evento", "nessun_evento_pct"):
                         text += "Il tuo set non richiama nessun evento, vabbè succede"
-                    elif "Forma" in seet or "Pescatore" == seet:
+                    elif "Forma" in seet or ("Pescatore" == seet and not proc_val("Pescatore", "dungeon", "armeria", "compatibile")):
                         text += "Il tuo set è troppo recente, non può interagire con questi rottami..."
                     else:
                         cosa = random.choice(classi[seet]) + " LV0"
