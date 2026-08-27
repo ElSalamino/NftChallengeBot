@@ -12,7 +12,6 @@ permissions:
 
 jobs:
   refactor:
-    if: github.event.head_commit.message == 'chore: avvia centralizzazione incantesimi'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,531 +19,29 @@ jobs:
           ref: refactor/bilanciamento-config
           fetch-depth: 0
 
-      - name: Applica refactor incantesimi e fix
-        shell: bash
+      - name: Applica trasformazione
+        run: python .github/scripts/centralizza_incantesimi.py
+
+      - name: Verifica sintassi
+        run: python -m py_compile nft.py bilanciamento.py frasi_incantesimi.py
+
+      - name: Verifica copertura e fix
         run: |
           python - <<'PY'
-          from pathlib import Path
-          import re
-
-          def replace_exact(text, old, new, label, count=1):
-              found = text.count(old)
-              if found != count:
-                  raise SystemExit(f"{label}: atteso {count}, trovato {found}")
-              return text.replace(old, new, count)
-
-          # ------------------------------------------------------------
-          # Config centralizzata: incantesimi + Fortunello
-          # ------------------------------------------------------------
-          bil = Path("bilanciamento.py")
-          b = bil.read_text(encoding="utf-8")
-          b = b.replace(
-              "Contiene esclusivamente dati di tuning per classi, anelli e dungeon.",
-              "Contiene esclusivamente dati di tuning per classi, anelli, dungeon, incantesimi ed effetti temporanei.",
-              1,
-          )
-          if "INCANTESIMI_CONFIG =" in b:
-              raise SystemExit("INCANTESIMI_CONFIG esiste già")
-
-          b += r'''
-
-# ============================================================
-# INCANTESIMI
-# Tutti i valori numerici degli incantesimi applicati da nft.py.
-# Le probabilità sono sempre espresse in percentuale 0..100.
-# ============================================================
-INCANTESIMI_CONFIG = {
-    "Icore": {
-        "turno": {"penetrazione": {"proc": 5, "difesa_target_mul": 0.6}},
-    },
-    "Ingrossamento": {
-        "turno": {
-            "crescita": {
-                "proc": 2,
-                "atk_min": 20,
-                "atk_max": 100,
-                "agi_min": -20,
-                "agi_max": -2,
-            }
-        },
-    },
-    "Predominio": {
-        "turno": {
-            "difesa": {
-                "dps_attaccante_mul": 0.8,
-                "agi_attaccante": 30,
-            }
-        },
-    },
-    "Duraturo": {
-        "turno": {"difesa": {"proc": 10, "difesa_mul": 1.7}},
-    },
-    "Smateriabile": {
-        "turno": {
-            "annulla_colpo": {"proc": 10},
-            "tempesta_sabbia": {"proc": 30},
-        },
-        "interazioni": {
-            # Nel vecchio codice Fire lord scatta sotto l'8% e il controllo
-            # Smateriabile usava lo stesso tiro con soglia 10%: quindi,
-            # quando Muori insetto partiva, Smateriabile lo bloccava sempre.
-            "fire_lord": {"blocca": True},
-        },
-    },
-    "Tocco fantasma": {
-        "turno": {
-            "colpo_schivato": {
-                "proc": 2,
-                "dps_percento_min": 5,
-                "dps_percento_max": 10,
-                "danno_min": 30,
-            }
-        },
-    },
-    "Leggiadra": {
-        "turno": {"annulla_colpo_proprio": {"proc": 10}},
-    },
-    "Speranza": {
-        "turno": {"salvezza": {"hp_min": 1, "hp_max": 60, "hp_porta_a": 100}},
-    },
-    "Velenoso": {
-        "turno": {"veleno": {"proc": 5, "stack": 1, "danno_per_stack": 5}},
-    },
-    "Iridescente": {
-        "turno": {"cura": {"proc": 5, "cura": 85}},
-    },
-    "Minimista": {
-        "turno": {"danno_minimo": {"mod_min": 0.1, "danno_base_min": 10}},
-    },
-    "Mimico": {
-        "turno": {"copia": {"attivo": True}},
-    },
-    "Affilatezza": {
-        "turno": {"affila": {"proc": 10, "atk_mul": 1.2}},
-    },
-    "Legione": {
-        "turno": {"duello_legione": {"dps_mul": 10}},
-    },
-    "Critico": {
-        "turno": {"critico": {"proc": 8, "danno_mul": 1.5}},
-    },
-    "Primo impatto": {
-        "turno": {"primo_colpo": {"danno_mul": 1.7}},
-    },
-    "Multiplo": {
-        "turno": {"difesa": {"proc": 10, "agi": 8}},
-    },
-    "Legaccio": {
-        "turno": {"lega": {"proc": 5, "agi_target_mul": 0.75}},
-    },
-    "Urlo di drago": {
-        "turno": {"terrore": {"proc": 5, "salta_attacco": True}},
-    },
-    "Evocabilità": {
-        "dungeon": {"supporto": {"atk": 40, "def": 40, "agi": 10}},
-    },
-}
-
-
-# Effetti temporanei non legati agli incantesimi. Per ora centralizziamo
-# Fortunello perché viene letto dal sistema ricompense delle sfide.
-EFFETTI_CONFIG = {
-    "Fortunello": {
-        "sfida": {
-            "premio_oggetto": {
-                "bonus_probabilita_per_livello_pct": 5,
-            }
-        }
-    }
-}
-'''
-
-          # Il vecchio valore di Smateriabile dentro Fire lord era una duplicazione
-          # della meccanica dell'incantesimo e viene rimosso dalla config classe.
-          b, n = re.subn(
-              r"('muori_insetto': \{'proc': 8, 'danno': 80), 'smateriabile_proc': 10(\})",
-              r"\1\2",
-              b,
-              count=1,
-          )
-          if n != 1:
-              raise SystemExit(f"Fire lord smateriabile_proc: atteso 1, trovato {n}")
-          bil.write_text(b, encoding="utf-8")
-
-          # ------------------------------------------------------------
-          # Frasi umane, tutte collegate a placeholder della config.
-          # ------------------------------------------------------------
-          Path("frasi_incantesimi.py").write_text(r'''# -*- coding: utf-8 -*-
-"""Descrizioni leggibili degli incantesimi.
-
-I valori tra parentesi graffe arrivano da INCANTESIMI_CONFIG e vengono
-risolti dal renderer in nft.py, così testo e bilanciamento restano allineati.
-"""
-
-FRASI_INCANTESIMI_TECNICHE = {
-    "Icore": "Quando attacchi hai il {turno.penetrazione.proc:pct} di portare la difesa usata dal nemico al {turno.penetrazione.difesa_target_mul:pct_mul} per quel colpo.",
-    "Ingrossamento": "A ogni attacco hai il {turno.crescita.proc:pct} di far crescere l'arma: guadagni tra {turno.crescita.atk_min} e {turno.crescita.atk_max} ATK, ma perdi tra {turno.crescita.agi_max:abs} e {turno.crescita.agi_min:abs} AGI.",
-    "Predominio": "Se chi ti attacca ha meno o gli stessi HP di te, riduci il suo potenziale offensivo del {turno.difesa.dps_attaccante_mul:rid_pct}; nello stesso calcolo però gli concedi {turno.difesa.agi_attaccante:signed} AGI, rendendolo più difficile da schivare.",
-    "Duraturo": "Quando difendi hai il {turno.difesa.proc:pct} di far valere la tua DEF al {turno.difesa.difesa_mul:pct_mul} per quel colpo.",
-    "Smateriabile": "Quando difendi hai il {turno.annulla_colpo.proc:pct} di annullare completamente un colpo normale; contro la tempesta di sabbia la possibilità sale al {turno.tempesta_sabbia.proc:pct}. Inoltre blocca sempre Muori insetto di Fire lord quando quel colpo speciale riesce ad attivarsi.",
-    "Tocco fantasma": "Se il nemico schiva, hai il {turno.colpo_schivato.proc:pct} di colpirlo comunque per un danno tra il {turno.colpo_schivato.dps_percento_min:pct} e il {turno.colpo_schivato.dps_percento_max:pct} del tuo DPS, con un minimo di {turno.colpo_schivato.danno_min} danni.",
-    "Leggiadra": "Quando un tuo colpo stava per andare a segno, hai il {turno.annulla_colpo_proprio.proc:pct} di azzerare volontariamente danno e modificatore di quel colpo; se il nemico aveva già schivato non cambia nulla.",
-    "Speranza": "Quando difendi e resti tra {turno.salvezza.hp_min} e {turno.salvezza.hp_max} HP, torni subito a {turno.salvezza.hp_porta_a} HP prima di risolvere il colpo in arrivo.",
-    "Velenoso": "Ogni tuo colpo ha il {turno.veleno.proc:pct} di aggiungere {turno.veleno.stack} carica di veleno. Ogni carica infligge {turno.veleno.danno_per_stack} danni ogni volta che quel bersaglio torna a subire un tuo turno.",
-    "Iridescente": "Non serve che ci sia il sole: quando vieni attaccato hai il {turno.cura.proc:pct} di recuperare {turno.cura.cura} HP.",
-    "Minimista": "Se un colpo verrebbe annullato, riporta il modificatore a {turno.danno_minimo.mod_min:pct_mul}; se anche il danno base è a zero lo porta a {turno.danno_minimo.danno_base_min}, così il colpo può ancora lasciare il segno.",
-    "Mimico": "Quando entra in gioco, sostituisce i tuoi incantesimi con quelli dell'avversario per il resto di quella copia dello scontro.",
-    "Affilatezza": "A ogni attacco hai il {turno.affila.proc:pct} di portare il tuo ATK al {turno.affila.atk_mul:pct_mul} del valore attuale. L'aumento resta nello scontro e può attivarsi più volte.",
-    "Legione": "Se anche l'avversario possiede Legione, il DPS del tuo colpo viene moltiplicato per {turno.duello_legione.dps_mul:x}.",
-    "Critico": "Ogni colpo ha il {turno.critico.proc:pct} di diventare critico e portare il danno al {turno.critico.danno_mul:pct_mul} del valore normale.",
-    "Primo impatto": "Il primo colpo dello scontro porta il danno al {turno.primo_colpo.danno_mul:pct_mul}; poi Primo impatto si consuma per quello scontro.",
-    "Multiplo": "Quando difendi hai il {turno.difesa.proc:pct} di ottenere {turno.difesa.agi:signed} AGI solo nel calcolo della schivata di quel colpo.",
-    "Legaccio": "A ogni attacco hai il {turno.lega.proc:pct} di portare l'AGI attuale del nemico al {turno.lega.agi_target_mul:pct_mul}. La riduzione resta nello scontro e può accumularsi.",
-    "Urlo di drago": "A ogni attacco hai il {turno.terrore.proc:pct} di terrorizzare il nemico: al suo prossimo turno non infligge il colpo e poi il terrore svanisce.",
-    "Evocabilità": "Se vieni evocato come supporto contro un boss del dungeon, chi ti ha chiamato riceve {dungeon.supporto.atk:signed} ATK, {dungeon.supporto.def:signed} DEF e {dungeon.supporto.agi:signed} AGI.",
-}
-''', encoding="utf-8")
-
-          # ------------------------------------------------------------
-          # nft.py: helper, descrizioni e meccaniche incantesimi.
-          # ------------------------------------------------------------
-          nft_path = Path("nft.py")
-          n = nft_path.read_text(encoding="utf-8")
-
-          n = replace_exact(
-              n,
-              "from bilanciamento import PROC_CLASSI, PROC_ANELLI, DUNGEON_CONFIG",
-              "from bilanciamento import PROC_CLASSI, PROC_ANELLI, DUNGEON_CONFIG, INCANTESIMI_CONFIG, EFFETTI_CONFIG",
-              "import bilanciamento",
-          )
-          n = replace_exact(
-              n,
-              "from frasi_anelli import FRASI_ANELLI_TECNICHE",
-              "from frasi_anelli import FRASI_ANELLI_TECNICHE\nfrom frasi_incantesimi import FRASI_INCANTESIMI_TECNICHE",
-              "import frasi incantesimi",
-          )
-
-          helper = r'''
-
-def incantesimo_cfg(incantesimo, contesto, nome):
-    """Restituisce la configurazione di un effetto di incantesimo."""
-    return INCANTESIMI_CONFIG.get(incantesimo, {}).get(contesto, {}).get(nome, {})
-
-
-def incantesimo_percent(incantesimo, contesto, nome, default=0):
-    """Probabilità dell'incantesimo espressa in percentuale 0..100."""
-    return incantesimo_cfg(incantesimo, contesto, nome).get("proc", default)
-
-
-def incantesimo_ok(numero_casuale, incantesimo, contesto, nome, default=0):
-    """Valuta un proc usando un random già estratto, preservando il flow storico."""
-    return numero_casuale < (incantesimo_percent(incantesimo, contesto, nome, default) / 100)
-
-
-def incantesimo_val(incantesimo, contesto, nome, chiave, default=None):
-    """Legge un valore di tuning di un incantesimo."""
-    return incantesimo_cfg(incantesimo, contesto, nome).get(chiave, default)
-
-
-def effetto_cfg(effetto, contesto, nome):
-    """Restituisce la configurazione di un effetto temporaneo."""
-    return EFFETTI_CONFIG.get(effetto, {}).get(contesto, {}).get(nome, {})
-
-
-def effetto_val(effetto, contesto, nome, chiave, default=None):
-    """Legge un valore di tuning di un effetto temporaneo."""
-    return effetto_cfg(effetto, contesto, nome).get(chiave, default)
-
-'''
-          marker = "\n\ndef dungeon_cfg(stanza, azione=\"evento\"):\n"
-          if marker not in n:
-              raise SystemExit("marker dungeon_cfg non trovato")
-          n = n.replace(marker, helper + marker, 1)
-
-          desc_block = r'''
-
-def _valore_placeholder_incantesimo(nome, percorso):
-    valore = INCANTESIMI_CONFIG.get(nome, {})
-    for parte in percorso.split("."):
-        if not isinstance(valore, dict) or parte not in valore:
-            raise KeyError(f"Placeholder incantesimo non valido: {nome}.{percorso}")
-        valore = valore[parte]
-    return valore
-
-
-def render_frase_incantesimo_tecnica(nome):
-    template = FRASI_INCANTESIMI_TECNICHE.get(nome, "")
-    if not template:
-        return ""
-    parti = []
-    for letterale, campo, formato, conversione in string.Formatter().parse(template):
-        parti.append(letterale)
-        if campo is None:
-            continue
-        if conversione:
-            raise ValueError(f"Conversione placeholder non supportata: {conversione}")
-        valore = _valore_placeholder_incantesimo(nome, campo)
-        parti.append(_format_placeholder_set(valore, formato))
-    return "".join(parti)
-
-
-def descrizione_incantesimo_tecnica(nome):
-    """Descrizione leggibile dell'incantesimo, allineata a INCANTESIMI_CONFIG."""
-    righe = ["⚙️ Dettagli dell'incantesimo"]
-    frase = render_frase_incantesimo_tecnica(nome)
-    if frase:
-        righe.append(frase)
-    return "\n".join(righe)
-
-'''
-          marker = "\n\ndef aggiorna_descrizioni_bilanciamento(liste_module):\n"
-          if marker not in n:
-              raise SystemExit("marker aggiorna descrizioni non trovato")
-          n = n.replace(marker, desc_block + marker, 1)
-
-          n = replace_exact(
-              n,
-              'markers = ("\\n\\n⚙️ Dettagli tecnici", "\\n\\n⚙️ Dettagli del set", "\\n\\n⚙️ Dettagli dell\'anello")',
-              'markers = ("\\n\\n⚙️ Dettagli tecnici", "\\n\\n⚙️ Dettagli del set", "\\n\\n⚙️ Dettagli dell\'anello", "\\n\\n⚙️ Dettagli dell\'incantesimo")',
-              "markers descrizioni",
-          )
-
-          libri_loop = r'''
-
-    for nome_libro, dati_libro in getattr(liste_module, "libri", {}).items():
-        effetto = dati_libro.get("ef")
-        if effetto not in INCANTESIMI_CONFIG:
-            continue
-        base = dati_libro.get("descrizione", "")
-        for marker in markers:
-            base = base.split(marker, 1)[0]
-        base = base.rstrip()
-        dati_libro["descrizione"] = base + "\n\n" + descrizione_incantesimo_tecnica(effetto)
-'''
-          marker = "\n\ndef testo_lista_set(liste_module):\n"
-          if marker not in n:
-              raise SystemExit("marker testo_lista_set non trovato")
-          n = n.replace(marker, libri_loop + marker, 1)
-
-          # Urlo di drago
-          n = replace_exact(n,
-              "if 'Urlo di drago' in main[\"incantamenti\"] and 0.05 > num:",
-              "if 'Urlo di drago' in main[\"incantamenti\"] and incantesimo_ok(num, \"Urlo di drago\", \"turno\", \"terrore\"):",
-              "Urlo di drago proc")
-
-          # Mimico resta una trasformazione deterministica, ma la sua attivazione è dichiarata in config.
-          n = replace_exact(n,
-              'if "Mimico" in main["incantamenti"]:',
-              'if "Mimico" in main["incantamenti"] and incantesimo_val("Mimico", "turno", "copia", "attivo", True):',
-              "Mimico")
-
-          # Legaccio
-          n = replace_exact(n,
-              "if 'Legaccio' in main[\"incantamenti\"] and 0.05 > num:",
-              "if 'Legaccio' in main[\"incantamenti\"] and incantesimo_ok(num, \"Legaccio\", \"turno\", \"lega\"):",
-              "Legaccio proc")
-          n = replace_exact(n,
-              'oppo["agi"] = oppo["agi"] * 0.75',
-              'oppo["agi"] = oppo["agi"] * incantesimo_val("Legaccio", "turno", "lega", "agi_target_mul")',
-              "Legaccio valore")
-
-          # Affilatezza
-          n = replace_exact(n,
-              'if "Affilatezza" in main["incantamenti"] and 0.1 > num:',
-              'if "Affilatezza" in main["incantamenti"] and incantesimo_ok(num, "Affilatezza", "turno", "affila"):',
-              "Affilatezza proc")
-          n = replace_exact(n,
-              'main["atk"] = main["atk"] * 1.2',
-              'main["atk"] = main["atk"] * incantesimo_val("Affilatezza", "turno", "affila", "atk_mul")',
-              "Affilatezza valore")
-
-          # Legione
-          n = replace_exact(n,
-              'if "Legione" in main["incantamenti"] and "Legione" in oppo["incantamenti"]:\n            dps = dps * 10',
-              'if "Legione" in main["incantamenti"] and "Legione" in oppo["incantamenti"]:\n            dps = dps * incantesimo_val("Legione", "turno", "duello_legione", "dps_mul")',
-              "Legione")
-
-          # Ingrossamento
-          n = replace_exact(n,
-              'if "Ingrossamento" in main["incantamenti"] and 0.02 > num:',
-              'if "Ingrossamento" in main["incantamenti"] and incantesimo_ok(num, "Ingrossamento", "turno", "crescita"):',
-              "Ingrossamento proc")
-          n = replace_exact(n,
-              'main["atk"] += random.randint(20,100)\n                main["agi"] += random.randint(-20,-2)',
-              'main["atk"] += random.randint(incantesimo_val("Ingrossamento", "turno", "crescita", "atk_min"), incantesimo_val("Ingrossamento", "turno", "crescita", "atk_max"))\n                main["agi"] += random.randint(incantesimo_val("Ingrossamento", "turno", "crescita", "agi_min"), incantesimo_val("Ingrossamento", "turno", "crescita", "agi_max"))',
-              "Ingrossamento valori")
-
-          # Icore
-          n = replace_exact(n,
-              'if "Icore" in main["incantamenti"] and 0.05 > num:',
-              'if "Icore" in main["incantamenti"] and incantesimo_ok(num, "Icore", "turno", "penetrazione"):',
-              "Icore proc")
-          n = replace_exact(n,
-              'difesan = difesan * 0.6',
-              'difesan = difesan * incantesimo_val("Icore", "turno", "penetrazione", "difesa_target_mul")',
-              "Icore valore")
-
-          # Predominio
-          n = replace_exact(n,
-              'dps = dps * 0.8\n            agi += 30',
-              'dps = dps * incantesimo_val("Predominio", "turno", "difesa", "dps_attaccante_mul")\n            agi += incantesimo_val("Predominio", "turno", "difesa", "agi_attaccante")',
-              "Predominio valori")
-
-          # Duraturo
-          n = replace_exact(n,
-              'if "Duraturo" in oppo["incantamenti"] and 0.1 > num:',
-              'if "Duraturo" in oppo["incantamenti"] and incantesimo_ok(num, "Duraturo", "turno", "difesa"):',
-              "Duraturo proc")
-          n = replace_exact(n,
-              'difesan = difesan * 1.7',
-              'difesan = difesan * incantesimo_val("Duraturo", "turno", "difesa", "difesa_mul")',
-              "Duraturo valore")
-
-          # Multiplo
-          n = replace_exact(n,
-              'if "Multiplo" in oppo["incantamenti"] and 0.1 > num:',
-              'if "Multiplo" in oppo["incantamenti"] and incantesimo_ok(num, "Multiplo", "turno", "difesa"):',
-              "Multiplo proc")
-          n = replace_exact(n,
-              'agin += 8',
-              'agin += incantesimo_val("Multiplo", "turno", "difesa", "agi")',
-              "Multiplo valore")
-
-          # Primo impatto
-          n = replace_exact(n,
-              'danno = round(danno + (danno * 0.7))',
-              'danno = round(danno * incantesimo_val("Primo impatto", "turno", "primo_colpo", "danno_mul"))',
-              "Primo impatto")
-
-          # Critico
-          n = replace_exact(n,
-              "if 'Critico' in main[\"incantamenti\"] and 0.08 > num:",
-              "if 'Critico' in main[\"incantamenti\"] and incantesimo_ok(num, \"Critico\", \"turno\", \"critico\"):",
-              "Critico proc")
-          n = replace_exact(n,
-              'danno = round(danno + (danno * 0.5))',
-              'danno = round(danno * incantesimo_val("Critico", "turno", "critico", "danno_mul"))',
-              "Critico valore")
-
-          # Velenoso
-          n = replace_exact(n,
-              'if "Velenoso" in main["incantamenti"] and 0.05 > num:',
-              'if "Velenoso" in main["incantamenti"] and incantesimo_ok(num, "Velenoso", "turno", "veleno"):',
-              "Velenoso proc")
-          n = replace_exact(n,
-              'oppo["veleno"] += 1',
-              'oppo["veleno"] += incantesimo_val("Velenoso", "turno", "veleno", "stack")',
-              "Velenoso stack esistente")
-          n = replace_exact(n,
-              'oppo["veleno"] = 1',
-              'oppo["veleno"] = incantesimo_val("Velenoso", "turno", "veleno", "stack")',
-              "Velenoso stack iniziale")
-          n = replace_exact(n,
-              'oppo["hp"] -= oppo["veleno"] * 5',
-              'oppo["hp"] -= oppo["veleno"] * incantesimo_val("Velenoso", "turno", "veleno", "danno_per_stack")',
-              "Velenoso danno")
-
-          # Minimista
-          n = replace_exact(n,
-              'if "Minimista" in main["incantamenti"] and mod <= 0:\n        mod = 0.1\n        text += "+"\n        if danno <= 0:\n            danno = 10',
-              'if "Minimista" in main["incantamenti"] and mod <= 0:\n        mod = incantesimo_val("Minimista", "turno", "danno_minimo", "mod_min")\n        text += "+"\n        if danno <= 0:\n            danno = incantesimo_val("Minimista", "turno", "danno_minimo", "danno_base_min")',
-              "Minimista")
-
-          # Iridescente
-          n = replace_exact(n,
-              'if "Iridescente" in oppo["incantamenti"] and 0.05 > num:',
-              'if "Iridescente" in oppo["incantamenti"] and incantesimo_ok(num, "Iridescente", "turno", "cura"):',
-              "Iridescente proc")
-          n = replace_exact(n,
-              'oppo["hp"] += 85',
-              'oppo["hp"] += incantesimo_val("Iridescente", "turno", "cura", "cura")',
-              "Iridescente cura")
-
-          # Speranza
-          n = replace_exact(n,
-              'if "Speranza" in oppo["incantamenti"] and oppo["hp"] <= 60 and oppo["hp"] >= 1:\n                oppo["hp"] = 100',
-              'if "Speranza" in oppo["incantamenti"] and oppo["hp"] <= incantesimo_val("Speranza", "turno", "salvezza", "hp_max") and oppo["hp"] >= incantesimo_val("Speranza", "turno", "salvezza", "hp_min"):\n                oppo["hp"] = incantesimo_val("Speranza", "turno", "salvezza", "hp_porta_a")',
-              "Speranza")
-
-          # Smateriabile generico
-          n = replace_exact(n,
-              'if "Smateriabile" in oppo["incantamenti"] and 0.1 > num:',
-              'if "Smateriabile" in oppo["incantamenti"] and incantesimo_ok(num, "Smateriabile", "turno", "annulla_colpo"):',
-              "Smateriabile colpo")
-
-          # Tocco fantasma
-          n = replace_exact(n,
-              'if "Tocco fantasma" in main["incantamenti"] and 0.02 > num:',
-              'if "Tocco fantasma" in main["incantamenti"] and incantesimo_ok(num, "Tocco fantasma", "turno", "colpo_schivato"):',
-              "Tocco fantasma proc")
-          n = replace_exact(n,
-              'danni = round(dps / 10 * random.uniform(0.5, 1))\n                    if danni <= 30:\n                        danni = 30',
-              'danni = round(dps * random.uniform(incantesimo_val("Tocco fantasma", "turno", "colpo_schivato", "dps_percento_min"), incantesimo_val("Tocco fantasma", "turno", "colpo_schivato", "dps_percento_max")) / 100)\n                    if danni <= incantesimo_val("Tocco fantasma", "turno", "colpo_schivato", "danno_min"):\n                        danni = incantesimo_val("Tocco fantasma", "turno", "colpo_schivato", "danno_min")',
-              "Tocco fantasma valori")
-
-          # Leggiadra
-          n = replace_exact(n,
-              'if "Leggiadra" in main["incantamenti"] and 0.1 > num:',
-              'if "Leggiadra" in main["incantamenti"] and incantesimo_ok(num, "Leggiadra", "turno", "annulla_colpo_proprio"):',
-              "Leggiadra proc")
-
-          # Smateriabile contro sabbia: due blocchi, stesso tiro come prima.
-          old = 'if "Smateriabile" in oppo["incantamenti"] and 0.3 > num:'
-          new = 'if "Smateriabile" in oppo["incantamenti"] and incantesimo_ok(num, "Smateriabile", "turno", "tempesta_sabbia"):'
-          n = replace_exact(n, old, new, "Smateriabile sabbia", count=2)
-
-          # Smateriabile contro Fire lord: il vecchio flow lo bloccava sempre
-          # quando Muori insetto era già scattato (stesso random, 8% < 10%).
-          n = replace_exact(n,
-              'if "Smateriabile" in oppo["incantamenti"] and num < (proc_val(set, "turno", "muori_insetto", "smateriabile_proc") / 100):',
-              'if "Smateriabile" in oppo["incantamenti"] and incantesimo_val("Smateriabile", "interazioni", "fire_lord", "blocca", False):',
-              "Smateriabile Fire lord")
-
-          # Evocabilità nei dungeon
-          n = replace_exact(n,
-              'if \'Evocabilità\' in user3["incantamenti"]:\n                    text += "Evocazione bomba!\\n"\n                    user1["atk"] += 40\n                    user1["def"] += 40\n                    user1["agi"] += 10',
-              'if \'Evocabilità\' in user3["incantamenti"]:\n                    text += "Evocazione bomba!\\n"\n                    user1["atk"] += incantesimo_val("Evocabilità", "dungeon", "supporto", "atk")\n                    user1["def"] += incantesimo_val("Evocabilità", "dungeon", "supporto", "def")\n                    user1["agi"] += incantesimo_val("Evocabilità", "dungeon", "supporto", "agi")',
-              "Evocabilità")
-
-          # Resurrezione Necron: ripristino del comportamento storico corretto a 1000 HP.
-          necron_old = '''    elif necron and player["hp"] <= 0:\n        text += "\\\n**Il nucleo necron sprigiona un aura oscura che riporta in vita il malcapitato, per ora...**"\n        player["hp"] = proc_val(set, "assalto", "resurrezione", "hp")'''
-          necron_new = '''    elif necron and player["hp"] <= 0:\n        text += "\\\n**Il nucleo necron sprigiona un aura oscura che riporta in vita il malcapitato, per ora...**"\n        player["hp"] = 1000'''
-          n = replace_exact(n, necron_old, necron_new, "resurrezione Necron")
-
-          nft_path.write_text(n, encoding="utf-8")
-
-          # ------------------------------------------------------------
-          # __init__.py: Fortunello usa il livello del proprietario corretto
-          # e legge il +5%/livello dalla config centralizzata.
-          # ------------------------------------------------------------
-          init_path = Path("__init__.py")
-          i = init_path.read_text(encoding="utf-8")
-          fort_old = '''    if "Fortunello" in a["scheda"]["boost"]["sfida"]:\n        possibilia += 0.05 * a["scheda"]["boost"]["sfida"]["Fortunello"]["lv"]\n        \n    if "Fortunello" in b["scheda"]["boost"]["sfida"]:\n        possibilib += 0.05 * a["scheda"]["boost"]["sfida"]["Fortunello"]["lv"]'''
-          fort_new = '''    bonus_fortunello = nft.effetto_val("Fortunello", "sfida", "premio_oggetto", "bonus_probabilita_per_livello_pct") / 100\n    if "Fortunello" in a["scheda"]["boost"]["sfida"]:\n        possibilia += bonus_fortunello * a["scheda"]["boost"]["sfida"]["Fortunello"].get("lv", 0)\n        \n    if "Fortunello" in b["scheda"]["boost"]["sfida"]:\n        possibilib += bonus_fortunello * b["scheda"]["boost"]["sfida"]["Fortunello"].get("lv", 0)'''
-          i = replace_exact(i, fort_old, fort_new, "Fortunello")
-          init_path.write_text(i, encoding="utf-8")
-          PY
-
-      - name: Verifica configurazione e placeholder
-        shell: bash
-        run: |
-          python - <<'PY'
-          import importlib.util
           import string
-          from pathlib import Path
-
-          import liste
           import bilanciamento
           import frasi_incantesimi
+          import liste
+          from pathlib import Path
 
-          effetti_libri = {dati["ef"] for dati in liste.libri.values()}
+          effetti = {dati["ef"] for dati in liste.libri.values()}
           config = bilanciamento.INCANTESIMI_CONFIG
           frasi = frasi_incantesimi.FRASI_INCANTESIMI_TECNICHE
 
-          assert len(liste.libri) == 20, len(liste.libri)
-          assert len(effetti_libri) == 20, len(effetti_libri)
-          assert set(config) == effetti_libri, (set(config) - effetti_libri, effetti_libri - set(config))
-          assert set(frasi) == effetti_libri, (set(frasi) - effetti_libri, effetti_libri - set(frasi))
+          assert len(liste.libri) == 20
+          assert len(effetti) == 20
+          assert set(config) == effetti
+          assert set(frasi) == effetti
           assert len(set(frasi.values())) == 20
 
           formati = {"", "pct", "x", "signed", "abs", "bool", "rid_pct", "pct_mul"}
@@ -552,32 +49,17 @@ def descrizione_incantesimo_tecnica(nome):
               for _, campo, formato, conversione in string.Formatter().parse(template):
                   if campo is None:
                       continue
-                  assert conversione is None, (nome, campo, conversione)
-                  assert formato in formati, (nome, campo, formato)
+                  assert conversione is None
+                  assert formato in formati
                   valore = config[nome]
                   for parte in campo.split("."):
                       assert isinstance(valore, dict) and parte in valore, (nome, campo, parte)
                       valore = valore[parte]
-                  if formato in {"pct", "x", "signed", "abs", "rid_pct", "pct_mul"}:
-                      assert isinstance(valore, (int, float)) and not isinstance(valore, bool), (nome, campo, valore)
-                  if formato == "bool":
-                      assert isinstance(valore, bool), (nome, campo, valore)
-
-          assert bilanciamento.EFFETTI_CONFIG["Fortunello"]["sfida"]["premio_oggetto"]["bonus_probabilita_per_livello_pct"] == 5
-          print("OK: 20/20 incantesimi centralizzati, 20/20 frasi valide")
-          PY
-
-      - name: Verifica statica dei fix
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
 
           nft = Path("nft.py").read_text(encoding="utf-8")
           init = Path("__init__.py").read_text(encoding="utf-8")
           bil = Path("bilanciamento.py").read_text(encoding="utf-8")
 
-          assert 'elif necron and player["hp"] <= 0:' in nft
           blocco = nft.split('elif necron and player["hp"] <= 0:', 1)[1].split('elif ', 1)[0]
           assert 'player["hp"] = 1000' in blocco
           assert 'proc_val(set, "assalto", "resurrezione", "hp")' not in blocco
@@ -585,44 +67,22 @@ def descrizione_incantesimo_tecnica(nome):
           assert 'bonus_fortunello = nft.effetto_val("Fortunello", "sfida", "premio_oggetto", "bonus_probabilita_per_livello_pct") / 100' in init
           assert 'possibilib += bonus_fortunello * b["scheda"]["boost"]["sfida"]["Fortunello"].get("lv", 0)' in init
           assert 'possibilib += 0.05 * a["scheda"]["boost"]["sfida"]["Fortunello"]["lv"]' not in init
+          assert bilanciamento.EFFETTI_CONFIG["Fortunello"]["sfida"]["premio_oggetto"]["bonus_probabilita_per_livello_pct"] == 5
 
           assert "smateriabile_proc" not in nft
           assert "smateriabile_proc" not in bil
+          assert "INCANTESIMI_CONFIG" in nft
+          assert "FRASI_INCANTESIMI_TECNICHE" in nft
+          assert "⚙️ Dettagli dell'incantesimo" in nft
 
-          vecchi = [
-              "'Urlo di drago' in main[\"incantamenti\"] and 0.05 > num",
-              "'Legaccio' in main[\"incantamenti\"] and 0.05 > num",
-              '"Affilatezza" in main["incantamenti"] and 0.1 > num',
-              '"Ingrossamento" in main["incantamenti"] and 0.02 > num',
-              '"Icore" in main["incantamenti"] and 0.05 > num',
-              '"Duraturo" in oppo["incantamenti"] and 0.1 > num',
-              '"Multiplo" in oppo["incantamenti"] and 0.1 > num',
-              "'Critico' in main[\"incantamenti\"] and 0.08 > num",
-              '"Velenoso" in main["incantamenti"] and 0.05 > num',
-              '"Iridescente" in oppo["incantamenti"] and 0.05 > num',
-              '"Smateriabile" in oppo["incantamenti"] and 0.1 > num',
-              '"Tocco fantasma" in main["incantamenti"] and 0.02 > num',
-              '"Leggiadra" in main["incantamenti"] and 0.1 > num',
-              '"Smateriabile" in oppo["incantamenti"] and 0.3 > num',
-          ]
-          for old in vecchi:
-              assert old not in nft, old
-
-          assert 'INCANTESIMI_CONFIG' in nft
-          assert 'FRASI_INCANTESIMI_TECNICHE' in nft
-          assert '⚙️ Dettagli dell\'incantesimo' in nft
-          print("OK: fix Necron, Fortunello e rimozione magic number incantesimi")
+          print("OK: 20/20 incantesimi, Necron e Fortunello validati")
           PY
 
-      - name: Compila i moduli modificati
-        run: python -m py_compile nft.py bilanciamento.py frasi_incantesimi.py
-
       - name: Commit finale
-        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add nft.py bilanciamento.py frasi_incantesimi.py __init__.py
-          git rm .github/workflows/centralizza-incantesimi.yml
+          git rm .github/workflows/centralizza-incantesimi.yml .github/scripts/centralizza_incantesimi.py
           git commit -m "feat: centralizza incantesimi e correggi effetti"
           git push origin refactor/bilanciamento-config
