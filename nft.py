@@ -91,6 +91,153 @@ def dungeon_global(sezione, chiave, default=None):
     return DUNGEON_CONFIG.get(sezione, {}).get(chiave, default)
 
 
+def _titolo_parametro_tecnico(chiave):
+    """Converte le chiavi del database in etichette leggibili senza alterarne il significato."""
+    speciali = {
+        "proc": "Probabilità",
+        "atk": "ATK",
+        "def": "DEF",
+        "agi": "AGI",
+        "hp": "HP",
+        "dps": "DPS",
+        "powa_min": "POWA minima",
+        "powe_min": "POWE minima",
+        "powa_per_turno": "POWA per turno",
+        "powe_per_turno": "POWE per turno",
+        "cura": "Cura",
+        "danno": "Danno",
+        "moltiplicatore": "Moltiplicatore",
+        "divisore": "Divisore",
+        "hp_max": "HP massimi",
+        "hp_min": "HP minimi",
+        "hp_target_max": "HP bersaglio max",
+        "hp_target_min": "HP bersaglio min",
+        "danno_fatto_min": "Danno fatto minimo",
+        "random_min": "Random minimo",
+        "random_max": "Random massimo",
+    }
+    return speciali.get(chiave, str(chiave).replace("_", " ").strip().capitalize())
+
+
+def _is_percentuale_tecnica(chiave):
+    chiave = str(chiave).lower()
+    return (
+        chiave == "proc"
+        or chiave.startswith("proc_")
+        or chiave.endswith("_proc")
+        or "percento" in chiave
+        or chiave.endswith("_pct")
+        or chiave.startswith("soglia")
+        or (len(chiave) > 1 and chiave[0] == "s" and chiave[1:].isdigit())
+    )
+
+
+def _format_valore_tecnico(chiave, valore):
+    if isinstance(valore, bool):
+        return "sì" if valore else "no"
+    if isinstance(valore, (list, tuple, set)):
+        return ", ".join(str(x) for x in valore)
+    if isinstance(valore, float) and valore.is_integer():
+        valore = int(valore)
+    if _is_percentuale_tecnica(chiave) and isinstance(valore, (int, float)):
+        return f"{valore}%"
+    return str(valore)
+
+
+def _righe_config_tecnica(config):
+    righe = []
+    for contesto, dati in config.items():
+        if not isinstance(dati, dict):
+            continue
+
+        titolo_contesto = str(contesto).replace("_", " ").capitalize()
+        effetti = [(nome, parametri) for nome, parametri in dati.items() if isinstance(parametri, dict)]
+        diretti = [(chiave, valore) for chiave, valore in dati.items() if not isinstance(valore, dict)]
+
+        for effetto, parametri in effetti:
+            dettagli = []
+            for chiave, valore in parametri.items():
+                if chiave == "nomi_equivalenti":
+                    continue
+                dettagli.append(
+                    f"{_titolo_parametro_tecnico(chiave)}: {_format_valore_tecnico(chiave, valore)}"
+                )
+            if dettagli:
+                nome_effetto = str(effetto).replace("_", " ").capitalize()
+                righe.append(f"• {titolo_contesto} / {nome_effetto}: " + "; ".join(dettagli))
+
+        if diretti:
+            dettagli = []
+            for chiave, valore in diretti:
+                if chiave == "nomi_equivalenti":
+                    continue
+                dettagli.append(
+                    f"{_titolo_parametro_tecnico(chiave)}: {_format_valore_tecnico(chiave, valore)}"
+                )
+            if dettagli:
+                righe.append(f"• {titolo_contesto}: " + "; ".join(dettagli))
+    return righe
+
+
+def descrizione_set_tecnica(nome, bonus=None):
+    """Descrizione meccanica del set, generata direttamente da PROC_CLASSI."""
+    righe = ["⚙️ Dettagli tecnici"]
+    bonus = bonus or {}
+    bonus_testo = []
+    for stat in ("hp", "atk", "def", "agi"):
+        valore = bonus.get(stat, 0)
+        if valore:
+            segno = "+" if valore > 0 else ""
+            bonus_testo.append(f"{stat.upper()} {segno}{valore}")
+    if bonus_testo:
+        righe.append("• Bonus base: " + " | ".join(bonus_testo))
+
+    righe.extend(_righe_config_tecnica(PROC_CLASSI.get(nome, {})))
+    if len(righe) == 1:
+        righe.append("• Nessun parametro numerico centralizzato per questo set.")
+    return "\n".join(righe)
+
+
+def descrizione_anello_tecnica(nome):
+    """Descrizione meccanica dell'anello, generata direttamente da PROC_ANELLI."""
+    righe = ["⚙️ Dettagli tecnici"]
+    righe.extend(_righe_config_tecnica(PROC_ANELLI.get(nome, {})))
+    if len(righe) == 1:
+        righe.append("• Nessun parametro numerico centralizzato per questo anello.")
+    return "\n".join(righe)
+
+
+def aggiorna_descrizioni_bilanciamento(liste_module):
+    """Aggiunge alle descrizioni esistenti un blocco tecnico sempre allineato al bilanciamento."""
+    marker = "\n\n⚙️ Dettagli tecnici"
+
+    for nome in liste_module.classi:
+        base = liste_module.frasi_set.get(nome, f"Set del {nome}.")
+        base = base.split(marker, 1)[0].rstrip()
+        bonus_set = getattr(liste_module, "bonus", {}).get(nome, {})
+        liste_module.frasi_set[nome] = base + "\n\n" + descrizione_set_tecnica(nome, bonus_set)
+
+    for nome in list(liste_module.anelli):
+        base = liste_module.anelli[nome]
+        base = base.split(marker, 1)[0].rstrip()
+        liste_module.anelli[nome] = base + "\n\n" + descrizione_anello_tecnica(nome)
+
+
+def testo_lista_set(liste_module):
+    """Catalogo completo dei set con i componenti richiesti per completarli."""
+    righe = ["🧩 **SET E COMPONENTI**", ""]
+    for nome in sorted(liste_module.classi, key=lambda x: str(x).lower()):
+        componenti = liste_module.classi[nome]
+        righe.append(f"**{nome}**")
+        if componenti:
+            for componente in componenti:
+                righe.append(f"• `{componente}`")
+        else:
+            righe.append("• _Nessun componente definito_")
+        righe.append("")
+    return "\n".join(righe)
+
+
 def take_boss(lista, numero):
     copi = copy.deepcopy(list(lista))
     out = list()

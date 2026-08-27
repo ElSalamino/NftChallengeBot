@@ -8,6 +8,7 @@ from pyrogram.types import ReplyKeyboardMarkup,ReplyKeyboardRemove
 from pyrogram.errors import FloodWait
 nft = importlib.import_module("nft")
 liste = importlib.import_module("liste")
+nft.aggiorna_descrizioni_bilanciamento(liste)
 
 
 me = "ElSalamino"
@@ -496,6 +497,13 @@ non_qui = [-438830562, -1001476172565]
 
 bannatim = {'Verity_Ice_Ocean':"Multi di Sun_landae", 'Sun_Landar':"Utilizzo di multi","Giecklosquartatoree":"Automatismo, 35 secondi puliti intersfida!","TheRealDioBrando":"Preciso al millisecodno, 35 secondi a sfida per ben 12 ore consecutive.\n2 volte!"}
 bannati = ['Verity_Ice_Ocean', 'Sun_Landar',"Giecklosquartatoree"]
+
+@app.on_message(filters.command("set") & filters.private & ~filters.user(bannati))
+async def catalogo_set(client, message):
+    testo = nft.testo_lista_set(liste)
+    for blocco in nft.separatore(testo):
+        await app.send_message(message.chat.id, blocco)
+
 
 @app.on_message(filters.command(["start"]) & filters.private & ~filters.user(bannati))
 async def start(client, message):
