@@ -1,0 +1,80 @@
+name: Sistema modificatori weekend
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - tools/sistema_mod_weekend.py
+      - .github/workflows/sistema-mod-weekend.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Applica patch
+        run: python tools/sistema_mod_weekend.py
+
+      - name: Valida moduli Python
+        run: |
+          python -m py_compile nft.py bilanciamento.py liste.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
+          python - <<'PY'
+          from pathlib import Path
+          import ast
+          from bilanciamento import WEEKEND_MOD_CONFIG, WEEKEND_MOD_POOL
+
+          richiesti = {
+              'ricchezze_sparse',
+              'senza_frontiere',
+              'dungeon_brutti_sporti_cattivi',
+              'piovono_incantesimi',
+              'grazie_partecipato',
+          }
+          assert richiesti <= set(WEEKEND_MOD_CONFIG)
+          assert WEEKEND_MOD_CONFIG['ricchezze_sparse']['quantita_drop_pvp'] == 2
+          assert WEEKEND_MOD_CONFIG['senza_frontiere']['tempo_movimento'] == 5
+          assert WEEKEND_MOD_CONFIG['dungeon_brutti_sporti_cattivi']['moltiplicatore_premi_dungeon'] == 2
+          assert WEEKEND_MOD_CONFIG['dungeon_brutti_sporti_cattivi']['moltiplicatore_stat_dungeon'] == 3
+          assert WEEKEND_MOD_CONFIG['piovono_incantesimi']['quantita_libri'] == 3
+          assert WEEKEND_MOD_CONFIG['grazie_partecipato']['quantita_usabili'] == 20
+          assert WEEKEND_MOD_POOL.count(None) == 6
+
+          init = Path('__init__.py').read_text(encoding='utf-8')
+          nft = Path('nft.py').read_text(encoding='utf-8')
+          assert 'minimo - 450' not in init
+          assert 'furto += 5' not in init
+          assert init.count('random.choice(nft.WEEKEND_MOD_POOL)') >= 2
+          assert 'quantita_drop = int(nft.weekend_mod_val' in init
+          assert 'if _mod_weekend_corrente() == "piovono_incantesimi"' in init
+          assert 'nft.set_weekend_mod(None)' in init
+          assert nft.count('_applica_stat_dungeon_evento(user2, evento)') >= 2
+          assert 'ccc = weekend_mod_val(_WEEKEND_MOD_ATTIVO, "tempo_movimento", 5)' in nft
+          print('Validazione weekend OK')
+          PY
+
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add __init__.py nft.py bilanciamento.py
+          if ! git diff --cached --quiet; then
+            git commit -m "feat: amplia e corregge modificatori weekend"
+          fi
+
+      - name: Rimuovi strumenti temporanei
+        run: |
+          git rm -f tools/sistema_mod_weekend.py .github/workflows/sistema-mod-weekend.yml
+          git commit -m "chore: rimuovi patcher weekend temporaneo"
+          git push origin refactor/bilanciamento-config
