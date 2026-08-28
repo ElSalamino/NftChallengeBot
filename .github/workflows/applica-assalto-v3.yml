@@ -26,7 +26,6 @@ jobs:
         run: |
           python - <<'PY'
           import string
-          import nft
           from bilanciamento import PROC_CLASSI, PROC_ANELLI, NUCLEI_CONFIG
           from frasi_set import FRASI_SET_TECNICHE
           from frasi_anelli import FRASI_ANELLI_TECNICHE
@@ -68,24 +67,38 @@ jobs:
           assert NUCLEI_CONFIG['Nucleo marittimo instabile']['assalto']['stat_per_membro']['hp'] == 300
           assert NUCLEI_CONFIG['Nucleo demoniaco instabile']['assalto']['stat_per_membro']['atk'] == 80
           assert NUCLEI_CONFIG['Nucleo terrestre instabile']['assalto']['stat_per_membro']['def'] == 80
+          assert NUCLEI_CONFIG['Nucleo selvaggio instabile']['assalto']['stat_per_membro'] == {'hp': 30, 'atk': 30, 'def': 30, 'agi': 5}
+          assert NUCLEI_CONFIG['Nucleo di bacon instabile']['assalto']['cura_per_struttura'] == 11
           assert NUCLEI_CONFIG['Nucleo Necron instabile']['assalto']['resurrezione'] == {'proc': 8, 'hp': 1000}
 
           src = open('nft.py', encoding='utf-8').read()
           assert 'stat_proprietario * cfg_anello["percento_stat"] / 100' in src
-          assert 'L\'anello di {pl} ti dona {bonus_testo} {stat_anello.upper()}!' in src
+          assert "L'anello di {pl} ti dona {bonus_testo} {stat_anello.upper()}!" in src
           assert 'numero_membri_clan = len(clan[team].get("membri", []))' in src
           assert 'dps += dps * proc_val(set, "assalto", "muraglione", "moltiplicatore_extra")' in src
           assert 'hp_massimi_assalto / cfg_argento["hp_massimi_divisore"]' in src
           assert 'hp_massimi_assalto / cfg_fiamma["hp_massimi_divisore"]' in src
+          assert 'order.index(difesa) < indice_target_ordine' in src
 
-          # Verifica placeholder delle frasi modificate.
-          nft.render_frase_set_tecnica("Cavaliere d'argento", {})
-          nft.render_frase_set_tecnica("Fiamma pura", {})
-          nft.render_frase_set_tecnica("Crociato", {})
-          nft.render_frase_anello_tecnica("Stemma del leader")
-          nft.render_frase_anello_tecnica("Scudo levitante")
-          nft.render_frase_anello_tecnica("Occhio del falco")
-          nft.render_frase_anello_tecnica("Carica mobile")
+          def resolve(cfg, path):
+              value = cfg
+              for part in path.split('.'):
+                  assert isinstance(value, dict) and part in value, path
+                  value = value[part]
+              return value
+
+          for nome in ["Cavaliere d'argento", "Fiamma pura", "Crociato"]:
+              for _, campo, _, conversione in string.Formatter().parse(FRASI_SET_TECNICHE[nome]):
+                  if campo is not None:
+                      assert not conversione
+                      resolve(PROC_CLASSI[nome], campo)
+
+          for nome in ["Stemma del leader", "Scudo levitante", "Occhio del falco", "Carica mobile"]:
+              for _, campo, _, conversione in string.Formatter().parse(FRASI_ANELLI_TECNICHE[nome]):
+                  if campo is not None:
+                      assert not conversione
+                      resolve(PROC_ANELLI[nome], campo)
+
           print('Validazione assalto v3 OK')
           PY
           python -m py_compile nft.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
