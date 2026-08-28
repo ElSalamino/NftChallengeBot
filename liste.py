@@ -136,7 +136,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0"],
+             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "scelta variagate" : ['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -187,7 +187,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0"],
+             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "nulla per tutto" : ['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -238,7 +238,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0"],
+             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "la classe è acqua": ['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -289,7 +289,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0"],
+             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "scontro magico":['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -301,7 +301,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Compasso', 'Roccia viva', 'Vincastro', 'Fascette luminose', 'Fantasmino luminoso', 'Corteccia naturale', 'Scudiero fidato', "Vasetto all'orlo",'Palla Ombra LV0',
              'Spuntoni', 'Anello di totano', 'Pozione di furia', 'Aureola', 'Ali di luminite', 'Proteina brullicanti', 'Uncino rituale LV0', 'Copricapo maori LV0',
               'Totem spirituale LV0', 'Stecca tori LV0', 'Fiamma bluastra LV0', 'Mantello rosso LV0', 'Blasfemia LV0', 'Un terzo occhio LV0', 'Marchio del dannato LV0', 'Totem spirituale LV0',"Il ciondolo della creazione LV0"
-             ],
+             , 'Fumetto hot degli anni 70'],
 
              "scelta speciale":['Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
@@ -377,7 +377,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV5', 'Un teschio antico', 'Uncino rituale LV5', 'Copricapo maori LV5', 'Totem spirituale LV5', 'Stecca tori LV5','Sgabello da bar LV5', 'Un tavolo speziato LV5',
              'Una mazza ferrata LV5', 'Un machete LV5', 'Scudo del paladino LV5', "Scudo d'ossidiana LV5", "Teschio d'ossidiana LV5", 'Coltelli da lancio LV5', 'Arco pesante LV5', 'Bomba sneaky LV5',
              'Palla Ombra LV5', 'Palla chiodata LV5', 'Bastone sferico LV5', 'NotteSferza LV5', 'Lama temporale LV5',"Centro temporale LV5","Benda maledetta LV5","Armatura di carne LV5","Anima dispersa LV5",
-             "Nucleo della tempesta LV5","Corona maledetta LV5","Il ciondolo della creazione LV5","Zanna del aliena LV5"],
+             "Nucleo della tempesta LV5","Corona maledetta LV5","Il ciondolo della creazione LV5","Zanna del aliena LV5", 'Fumetto hot degli anni 70'],
              
              "rissa in arena":['Base +', 'Aggressivo+', 'Agile +','Compasso', 'Roccia viva', 'Vincastro', 'Fascette luminose', 'Fantasmino luminoso', 'Corteccia naturale', 'Scudiero fidato',
               "Vasetto all'orlo",'Sgabello da bar LV5', 'Un tavolo speziato LV5',
@@ -437,7 +437,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV-5', 'Un teschio antico', 'Uncino rituale LV-5', 'Copricapo maori LV-5', 'Totem spirituale LV-5', 'Stecca tori LV-5','Sgabello da bar LV-5', 'Un tavolo speziato LV-5',
              'Una mazza ferrata LV-5', 'Un machete LV-5', 'Scudo del paladino LV-5', "Scudo d'ossidiana LV-5", "Teschio d'ossidiana LV-5", 'Coltelli da lancio LV-5', 'Arco pesante LV-5', 'Bomba sneaky LV-5',
              'Palla Ombra LV-5', 'Palla chiodata LV-5', 'Bastone sferico LV-5', 'NotteSferza LV-5', 'Lama temporale LV-5',"Centro temporale LV-5","Benda maledetta LV-5","Armatura di carne LV-5","Anima dispersa LV-5",
-             "Nucleo della tempesta LV-5","Corona maledetta LV-5","Il ciondolo della creazione LV-5","Zanna del aliena LV-5"],
+             "Nucleo della tempesta LV-5","Corona maledetta LV-5","Il ciondolo della creazione LV-5","Zanna del aliena LV-5", 'Fumetto hot degli anni 70'],
 
              "vecchi tempi" : ['Chiavi' 'Effige della tribe', 'Scarica di adrenalina', 'Lapsus vitale', 'Elsa vitale', 'Benedizione sanguinolenta',
              'Corna da toro', 'Sassolino scintillante', "Pegno di amicizia", 'Veleno del folle', 'Guanto del falco', 'Testuggine del vecchio saggio', 'Campanellina concentrante', "Bilanciere",
@@ -1346,18 +1346,18 @@ decoro = { "Una tortina di compleanno alla fragola, ciliegia, totano, banana, pa
 
 nuclei = ["Nucleo Necron instabile","Nucleo elettrico instabile","Nucleo marittimo instabile","Nucleo demoniaco instabile","Nucleo terrestre instabile","Nucleo selvaggio instabile","Nucleo di bacon instabile"]
 
-pool = {'Dune di rione': ['Spada del crociato LV0','Spada del crociato LV0','Spada corta LV0', 'Spada corta LV0', 'Manto del vampiro LV0', 'Manto del vampiro LV0', 'Mannaia del cacciatore LV0', 'Mannaia del cacciatore LV0', 'Spina insanguinata LV0', 'Spina insanguinata LV0', 'Aureola', 'Muschio Selvaggio',"Vasetto all'orlo"],
-        'Delta del fiume Vern': ['Scudo con cose attaccate LV0','Scudo con cose attaccate LV0','Lancia celeste LV0', 'Lancia celeste LV0', 'Secchio di ferro LV0', 'Secchio di ferro LV0', 'Radice vitale LV0', 'Radice vitale LV0', 'Corazza spuntata LV0', 'Corazza spuntata LV0', 'Scarica di adrenalina', 'Fantasmino luminoso','Testuggine del vecchio saggio'],
-         'Monte cashmere': ['Ascia del cacciatore LV0', 'Ascia del cacciatore LV0', 'Cannoncino carapace LV0', 'Cannoncino carapace LV0', 'Armatura leggera versak LV0', 'Armatura leggera versak LV0', 'Spada della vitalità LV0', 'Spada della vitalità LV0', 'Scudo levitante', 'Compasso'],
-        'Allevamento spettrale': ['Giubba logora LV0', 'Giubba logora LV0', 'Mazzuolo acculturato LV0', 'Mazzuolo acculturato LV0', 'Bastone filettato LV0', 'Bastone filettato LV0', 'Bastone del folle LV0', 'Bastone del folle LV0', 'Veleno del folle', 'Anello di totano'],
+pool = {'Dune di rione': ['Spada del crociato LV0','Spada del crociato LV0','Spada corta LV0', 'Spada corta LV0', 'Manto del vampiro LV0', 'Manto del vampiro LV0', 'Mannaia del cacciatore LV0', 'Mannaia del cacciatore LV0', 'Spina insanguinata LV0', 'Spina insanguinata LV0', 'Aureola', 'Muschio Selvaggio',"Vasetto all'orlo", 'Dance Dance Revolution'],
+        'Delta del fiume Vern': ['Scudo con cose attaccate LV0','Scudo con cose attaccate LV0','Lancia celeste LV0', 'Lancia celeste LV0', 'Secchio di ferro LV0', 'Secchio di ferro LV0', 'Radice vitale LV0', 'Radice vitale LV0', 'Corazza spuntata LV0', 'Corazza spuntata LV0', 'Scarica di adrenalina', 'Fantasmino luminoso','Testuggine del vecchio saggio', 'Sasso rotolante'],
+         'Monte cashmere': ['Ascia del cacciatore LV0', 'Ascia del cacciatore LV0', 'Cannoncino carapace LV0', 'Cannoncino carapace LV0', 'Armatura leggera versak LV0', 'Armatura leggera versak LV0', 'Spada della vitalità LV0', 'Spada della vitalità LV0', 'Scudo levitante', 'Compasso', 'Polimerizzazione'],
+        'Allevamento spettrale': ['Giubba logora LV0', 'Giubba logora LV0', 'Mazzuolo acculturato LV0', 'Mazzuolo acculturato LV0', 'Bastone filettato LV0', 'Bastone filettato LV0', 'Bastone del folle LV0', 'Bastone del folle LV0', 'Veleno del folle', 'Anello di totano', 'Roulette russa'],
          'Città di mezzo': ['Armatura del folle LV0', 'Armatura del folle LV0', 'Uncino da piarata LV0', 'Uncino da piarata LV0', 'Mannaia pazza LV0', 'Mannaia pazza LV0', 'Protezione della beta LV0', 'Protezione della beta LV0', 'Scudiero fidato', 'Proteina brullicanti'],
-         'Ordine della rocca': ['Picca di diamante LV0','Picca di diamante LV0','Zanna maledetta LV0', 'Zanna maledetta LV0', "Foulard dell'ombra LV0", "Foulard dell'ombra LV0", 'Ascia bipenne LV0', 'Ascia bipenne LV0', 'Scudo spinato LV0', 'Scudo spinato LV0', 'Ali di luminite', 'Pozione di furia','Sassolino scintillante'],
+         'Ordine della rocca': ['Picca di diamante LV0','Picca di diamante LV0','Zanna maledetta LV0', 'Zanna maledetta LV0', "Foulard dell'ombra LV0", "Foulard dell'ombra LV0", 'Ascia bipenne LV0', 'Ascia bipenne LV0', 'Scudo spinato LV0', 'Scudo spinato LV0', 'Ali di luminite', 'Pozione di furia','Sassolino scintillante', 'Roulette tibetana'],
         "Piana dell'inzio": ['Arco lunghissimo LV0','Arco lunghissimo LV0','Maschera del folle LV0', 'Maschera del folle LV0', 'Spada delle fiamme LV0', 'Spada delle fiamme LV0', 'Mazza chiodata LV0', 'Mazza chiodata LV0', 'Scaglie di Drago LV0', 'Scaglie di Drago LV0', 'Corna da toro', 'Vincastro'],
-        'Antico deserto': ['Pugnale del vampiro LV0', 'Pugnale del vampiro LV0', 'Cappa delle selve LV0', 'Cappa delle selve LV0', 'Armatura maledetta LV0', 'Armatura maledetta LV0', 'Caestus LV0', 'Caestus LV0', 'Spuntoni', "Pegno di amicizia"],
+        'Antico deserto': ['Pugnale del vampiro LV0', 'Pugnale del vampiro LV0', 'Cappa delle selve LV0', 'Cappa delle selve LV0', 'Armatura maledetta LV0', 'Armatura maledetta LV0', 'Caestus LV0', 'Caestus LV0', 'Spuntoni', "Pegno di amicizia", 'GDR semplificato'],
         'Selva dei predatori': ['Zweihander LV0', 'Zweihander LV0', 'Lama spezzata LV0', 'Lama spezzata LV0', 'Frusta di salsiccia LV0', 'Frusta di salsiccia LV0', 'Armatura del macellaio LV0', 'Armatura del macellaio LV0', 'Benedizione sanguinolenta', 'Lapsus vitale'],
         'Grotte tori': ['Una chitarra acustica LV0', 'Una chitarra acustica LV0', 'Spada della beta LV0', 'Spada della beta LV0', 'Guscio di tartaruga LV0', 'Guscio di tartaruga LV0', 'Corazza a piastre LV0', 'Corazza a piastre LV0', 'Elsa vitale', 'Occhio del falco'],
-         'Circolo polare': ['Artiglio di Drago LV0', 'Artiglio di Drago LV0', 'Frusta telaia LV0', 'Frusta telaia LV0', 'Armatura pesantissima LV0', 'Armatura pesantissima LV0', 'Barilotto di birra LV0', 'Barilotto di birra LV0', 'Corteccia naturale', 'Stemma del leader'],
-        'Sentieri spersi': ['Cappello messicano LV0', 'Cappello messicano LV0', 'Lama del ricercato LV0', 'Lama del ricercato LV0', 'Piuma celeste LV0', 'Piuma celeste LV0', 'Stendardo del crociato LV0', 'Stendardo del crociato LV0', "Bilanciere", 'Carica mobile'],
+         'Circolo polare': ['Artiglio di Drago LV0', 'Artiglio di Drago LV0', 'Frusta telaia LV0', 'Frusta telaia LV0', 'Armatura pesantissima LV0', 'Armatura pesantissima LV0', 'Barilotto di birra LV0', 'Barilotto di birra LV0', 'Corteccia naturale', 'Stemma del leader', 'Valvola da 4"'],
+        'Sentieri spersi': ['Cappello messicano LV0', 'Cappello messicano LV0', 'Lama del ricercato LV0', 'Lama del ricercato LV0', 'Piuma celeste LV0', 'Piuma celeste LV0', 'Stendardo del crociato LV0', 'Stendardo del crociato LV0', "Bilanciere", 'Carica mobile', 'WuWuWuuurm'],
          'Labirintico inizio': ['BoomerAng LV0', 'BoomerAng LV0', 'Globo magico LV0', 'Globo magico LV0', 'Stecca di ferro LV0', 'Stecca di ferro LV0', 'Nudità incontrastata LV0', 'Nudità incontrastata LV0','Spada lunga quanto serve LV0','Spada lunga quanto serve LV0', 'Campanellina concentrante', 'Roccia viva','Guanto del falco',"Un biglietto polivalente"],
          'Lootonia': ['Stocco magico LV0', 'Stocco magico LV0', 'Armatura pesante versak LV0', 'Armatura pesante versak LV0', 'Martello del folle LV0', 'Martello del folle LV0', 'Piuma vulcanica LV0', 'Piuma vulcanica LV0', 'Uno smoking elegante LV0', 'Uno smoking elegante LV0', 'Fascette luminose', 'Stemma della rocca','Cuffia da boia']}
 
