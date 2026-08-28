@@ -4,7 +4,7 @@ from pyrogram import Client, ContinuePropagation, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import date
 from liste import *
-from bilanciamento import PROC_CLASSI, PROC_ANELLI, DUNGEON_CONFIG, INCANTESIMI_CONFIG, EFFETTI_CONFIG
+from bilanciamento import PROC_CLASSI, PROC_ANELLI, NUCLEI_CONFIG, DUNGEON_CONFIG, INCANTESIMI_CONFIG, EFFETTI_CONFIG
 from frasi_set import FRASI_SET_TECNICHE
 from frasi_anelli import FRASI_ANELLI_TECNICHE
 from frasi_incantesimi import FRASI_INCANTESIMI_TECNICHE
@@ -1881,29 +1881,23 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
     num = random.random()
     bacon = False
     necron = False
-    if "nucleo" in clan[team]:
-        nuc = clan[team]["nucleo"]
+    nuc = clan[team].get("nucleo")
+    numero_membri_clan = len(clan[team].get("membri", []))
+    if nuc is not None:
         text += f"\nIl nucleo {nuc} sprigiona la sua forza!\n\n"
-        
-        if nuc not in nuclei:
+        cfg_nucleo = NUCLEI_CONFIG.get(nuc, {}).get("assalto", {})
+        if not cfg_nucleo:
             print(nuc)
-        elif nuc == "Nucleo elettrico instabile":
-                player["agi"] += 25
-        elif nuc == "Nucleo marittimo instabile":
-                player["hp"] += 300
-        elif nuc == "Nucleo demoniaco instabile":
-                player["atk"] += 185
-        elif nuc == "Nucleo terrestre instabile":
-                player["def"] += 185
-        elif nuc == "Nucleo selvaggio instabile":
-                player["agi"] += 5
-                player["hp"] += 30
-                player["atk"] += 25
-                player["def"] += 25
-        elif clan[team]["nucleo"] == "Nucleo di bacon instabile":
-                bacon = True
-        elif nuc == "Nucleo Necron instabile" and 0.08 > num:
+        for stat_nucleo, valore_per_membro in cfg_nucleo.get("stat_per_membro", {}).items():
+            player[stat_nucleo] += numero_membri_clan * valore_per_membro
+        if "cura_per_struttura" in cfg_nucleo:
+            bacon = True
+        cfg_necron = cfg_nucleo.get("resurrezione")
+        if cfg_necron and num < (cfg_necron.get("proc", 0) / 100):
             necron = True
+
+    # HP massimi dell'assalto: includono omini/set già applicati dal chiamante e il nucleo.
+    hp_massimi_assalto = player["hp"]
 
     if meteo in ["Arieggiato","Caldo infernale","Caldo torrido","Tempesta","Arcobaleno","Pioggia"]:
         if meteo == 'Caldo infernale':
@@ -2017,19 +2011,25 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
     
     if clan[team].get("membri"):
         for pl in clan[team]['membri']:
-            aniel = playerg[pl]["scheda"]["anello"]
+            scheda_membro = playerg[pl]["scheda"]
+            aniel = scheda_membro["anello"]
             if aniel in PROC_ANELLI and "aura" in PROC_ANELLI[aniel].get("assalto", {}):
                 cfg_anello = anello_cfg(aniel, "assalto", "aura")
                 stat_anello = cfg_anello["stat"]
-                valore_anello = cfg_anello["valore"]
+                stat_proprietario = scheda_membro.get(stat_anello, 0)
+                valore_anello = max(
+                    cfg_anello["minimo"],
+                    stat_proprietario * cfg_anello["percento_stat"] / 100,
+                )
                 moltiplicatore = 1
                 if set == "Portatore di morte":
                     moltiplicatore = proc_val(set, "assalto", "bonus_gadget", "moltiplicatore", 2)
-                player[stat_anello] += valore_anello * moltiplicatore
-                if set == "Portatore di morte" and aniel == "Occhio del falco":
-                    text += "L'anello si raddoppia!\n"
+                bonus_aura = valore_anello * moltiplicatore
+                player[stat_anello] += bonus_aura
+                bonus_testo = _numero_placeholder_tecnico(bonus_aura)
+                text += f"L'anello di {pl} ti dona {bonus_testo} {stat_anello.upper()}!\n"
 
-            if playerg[pl]["scheda"]["set"] == "Re dei pirati" and pl != nome:
+            if scheda_membro["set"] == "Re dei pirati" and pl != nome:
                 dmg = round(max(proc_val("Re dei pirati", "assalto", "supporto_ciurma", "danno_min"), playerg[pl]["scheda"]["atk"] // proc_val("Re dei pirati", "assalto", "supporto_ciurma", "atk_divisore")))
                 cosa = news = random.choice(list(nemico))
                 nemico[cosa]["hp"] -= dmg
@@ -2050,12 +2050,16 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
             text += "Fabbro potenziato dal set "
         text += "⚔️"
     text += "\n"
+    try:
+        indice_target_ordine = order.index(target)
+    except ValueError:
+        indice_target_ordine = len(order)
     for difesa in order:
         
         if difesa in nemico:
             text += "\n"
             if bacon:
-                player["hp"] += 11
+                player["hp"] += NUCLEI_CONFIG["Nucleo di bacon instabile"]["assalto"]["cura_per_struttura"]
             if nemico[difesa]["hp"] <= 0:
                 nemico.pop(difesa)
             else:
@@ -2544,7 +2548,11 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                             player["def"] += dannissimi / proc_val(set, "assalto", "sangue", "divisore_def")
                             text += f"**{nome} si potenzia con il sangue sul campo di battaglia!**\n"
 
-                        elif set == "Orrido" and proc_ok(num, set, "assalto", "sgignolo"):
+                        elif (
+                            set == "Orrido"
+                            and order.index(difesa) < indice_target_ordine
+                            and proc_ok(num, set, "assalto", "sgignolo")
+                        ):
                             nemico[difesa]["hp"] -= proc_val(set, "assalto", "sgignolo", "danno")
                             text += f"**{nome} non riesce a tenere sgignolo, infligge 33 danni alla difesa!**\n"
                             player["fatto"] += proc_val(set, "assalto", "sgignolo", "danno")
@@ -2588,7 +2596,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
 
                         elif (set == "Crociato" and target == "Muraglione extra" and proc_ok(num, set, "assalto", "muraglione")):
                             text += f"__{nome} grazie al potere della luce incendia questo blocco!__\n"
-                            dps += dps + dps + dps + dps
+                            dps += dps * proc_val(set, "assalto", "muraglione", "moltiplicatore_extra")
 
                         elif (set == "Primo alla bandiera" and target == "Cannoncino" and proc_ok(num, set, "assalto", "cannoncino")):
                             text += f"__{nome} grazie al suo cannoncino copisce fortissimo il Cannoncino!__\n"
@@ -2623,7 +2631,12 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                         dannissimi = round(float(dps) * (100 / (float(1 + difesan)) * random.uniform(0.7, 1.3)))
 
                         if set == "Cavaliere d'argento":
-                            dannissimi += proc_val(set, "assalto", "danno_fisso", "danno")
+                            cfg_argento = proc_cfg(set, "assalto", "danno_fisso")
+                            danno_argento = round(max(
+                                hp_massimi_assalto / cfg_argento["hp_massimi_divisore"],
+                                cfg_argento["danno_minimo"],
+                            ))
+                            dannissimi += danno_argento
 
                         elif set == "Orrido":
                             dannissimi = proc_val(set, "assalto", "sgignolo", "danno")
@@ -2748,7 +2761,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
 
     elif necron and player["hp"] <= 0:
         text += "\n**Il nucleo necron sprigiona un aura oscura che riporta in vita il malcapitato, per ora...**"
-        player["hp"] = 1000
+        player["hp"] = NUCLEI_CONFIG["Nucleo Necron instabile"]["assalto"]["resurrezione"]["hp"]
 
     elif (set == "Guardiano del passaggio" and player["hp"] <= 0 and proc_ok(num, set, "assalto", "resurrezione")):
         text += f"\n**{nome} ritorna dalla morte, pronto a combattere ancora!\n"
@@ -2756,13 +2769,17 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
 
     elif set == "Fiamma pura" and player["hp"] <= 0 and proc_ok(num, set, "assalto", "esplosione_morte"):
         text += f"\n{nome} esplode in un esplosione di fuoco dannegiando tutte le strutture!"
-        for dife in nemico:
+        cfg_fiamma = proc_cfg(set, "assalto", "esplosione_morte")
+        danno_fiamma = round(max(
+            hp_massimi_assalto / cfg_fiamma["hp_massimi_divisore"],
+            cfg_fiamma["danno_minimo"],
+        ))
+        for dife in list(nemico):
             if dife == "inguerra":
-                pass
-            else:
-                if nemico[dife]["hp"] > proc_val(set, "assalto", "esplosione_morte", "hp_min_struttura"):
-                    nemico[dife]["hp"] -= proc_val(set, "assalto", "esplosione_morte", "danno_struttura")
-            player["fatto"] += proc_val(set, "assalto", "esplosione_morte", "danno_struttura")
+                continue
+            if nemico[dife]["hp"] > danno_fiamma:
+                nemico[dife]["hp"] -= danno_fiamma
+                player["fatto"] += danno_fiamma
 
     return text               
               
