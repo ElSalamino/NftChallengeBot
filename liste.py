@@ -516,7 +516,7 @@ libri = {'Libro del bene e del male': {'ef': 'Icore', 'descrizione': 'Riduci la 
            "101 pattern sociali": {"ef": "Cangiante", "descrizione": "Impara a mimetizzarti tra le persone e le giungle ti lasceranno in pace."},
            "Misture storiche e dove trovarle": {"ef": "Inevitabile", "descrizione": "Le tue armi sono velenose, forse fin troppo."},
            "The mask: Il libro": {"ef": "Spumeggiante", "descrizione": "Proprio come nel film!"},
-           "Le migliori location per il surf": {"ef": "Onde dell'abisso", "descrizione": "Impara a mimetizzarti tra le persone e le giungle ti lasceranno in pace."},
+           "Le migliori location per il surf": {"ef": "Onde dell'abisso", "descrizione": "Cavalca le onde dell'abisso e lascia che sia il mare a sfondare le difese davanti a te."},
            "Yoga estremo per persone comuni ma non troppo": {"ef": "Armadillibilità", "descrizione": "Combattere è un arte tanto quanto morire con stile."},
            "Il re in giallo": {"ef": "Giallo", "descrizione": "Essere gialli è un arte, tanto quanto avere altri 9 amici gialli."},
            "Cerficato della nuova ombra": {"ef": "Dominio semplice", "descrizione": "Nuova ombra acquisita, per poca forza vitale blocca tecniche strane nemiche"},

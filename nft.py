@@ -71,6 +71,21 @@ def incantesimo_val(incantesimo, contesto, nome, chiave, default=None):
     return incantesimo_cfg(incantesimo, contesto, nome).get(chiave, default)
 
 
+def set_cangiante_disponibili():
+    """Set copiabili da Cangiante: esclude quelli che forniscono solo bonus base alle statistiche."""
+    escludi_solo_bonus = incantesimo_val(
+        "Cangiante", "generale", "selezione_set", "escludi_solo_bonus_base", True
+    )
+    return [
+        nome_set
+        for nome_set in classi
+        if not (
+            escludi_solo_bonus
+            and proc_val(nome_set, "generale", "set_base", "solo_bonus_base", False)
+        )
+    ]
+
+
 def effetto_cfg(effetto, contesto, nome):
     """Restituisce la configurazione di un effetto temporaneo."""
     return EFFETTI_CONFIG.get(effetto, {}).get(contesto, {}).get(nome, {})
@@ -4065,14 +4080,14 @@ def turno(main, oppo,cond=None):
     # Incantesimi che devono risolversi prima di qualsiasi abilità di set.
     # Cangiante assegna il set alla sola copia di combattimento.
     if "Cangiante" in main.get("incantamenti", []) and incantesimo_ok(random.random(), "Cangiante", "turno", "attacco"):
-        set = random.choice(list(classi))
+        set = random.choice(set_cangiante_disponibili())
         main["set"] = set
         if set == "Paladino":
             main.setdefault("Scudo", 0)
         text += f"Per {nome1} è ora di comportarsi come {set}!\n"
 
     if "Cangiante" in oppo.get("incantamenti", []) and incantesimo_ok(random.random(), "Cangiante", "turno", "difesa"):
-        setN = random.choice(list(classi))
+        setN = random.choice(set_cangiante_disponibili())
         oppo["set"] = setN
         if setN == "Paladino":
             oppo.setdefault("Scudo", 0)

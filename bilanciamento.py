@@ -802,6 +802,9 @@ INCANTESIMI_CONFIG = {
         "dungeon": {"supporto": {"atk": 40, "def": 40, "agi": 10}},
     },
     "Cangiante": {
+        "generale": {
+            "selezione_set": {"escludi_solo_bonus_base": True},
+        },
         "turno": {
             "attacco": {"proc": 99},
             "difesa": {"proc": 99},
