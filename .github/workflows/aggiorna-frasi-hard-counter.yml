@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
 
       - name: Aggiorna frasi
-        run: python tools/aggiorna_frasi_hard_counter.py
+        run: PYTHONPATH=. python tools/aggiorna_frasi_hard_counter.py
 
       - name: Valida
         run: |
