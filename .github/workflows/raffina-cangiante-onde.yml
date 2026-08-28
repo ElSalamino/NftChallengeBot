@@ -44,7 +44,8 @@ jobs:
           nft = Path('nft.py').read_text(encoding='utf-8')
           assert 'def set_cangiante_disponibili()' in nft
           assert nft.count('random.choice(set_cangiante_disponibili())') == 2
-          assert 'random.choice(list(classi))' not in nft
+          # Le altre estrazioni casuali di set del gioco restano intatte.
+          assert nft.count('random.choice(list(classi))') == 2
 
           frase = frasi_incantesimi.FRASI_INCANTESIMI_TECNICHE['Cangiante']
           assert 'soltanto statistiche base' in frase
