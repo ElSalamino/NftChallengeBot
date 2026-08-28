@@ -1,0 +1,45 @@
+name: Semplifica bandiera
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - tools/semplifica_bandiera.py
+      - .github/workflows/semplifica-bandiera.yml
+
+permissions:
+  contents: write
+
+jobs:
+  aggiorna:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Applica modifica
+        run: python tools/semplifica_bandiera.py
+
+      - name: Verifica blocco editor
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          t = Path('__init__.py').read_text(encoding='utf-8')
+          assert 'async def sovrascrivi_bandiera_da_risposta' in t
+          assert 'clan[team]["Bandiera"] = nuova' in t
+          assert 'emoji = message.command[3][0]' not in t
+          assert 'Rispondi A QUESTO MESSAGGIO con la nuova bandiera completa.' in t
+          print('OK editor bandiera')
+          PY
+
+      - name: Commit e pulizia workflow temporaneo
+        run: |
+          git config user.name "ElSalamino"
+          git config user.email "86099774+ElSalamino@users.noreply.github.com"
+          rm -f tools/semplifica_bandiera.py .github/workflows/semplifica-bandiera.yml
+          git add __init__.py tools/semplifica_bandiera.py .github/workflows/semplifica-bandiera.yml
+          git commit -m "feat: semplifica modifica bandiera clan"
+          git push origin refactor/bilanciamento-config
