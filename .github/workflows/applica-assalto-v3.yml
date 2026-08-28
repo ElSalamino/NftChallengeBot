@@ -1,0 +1,100 @@
+name: Applica assalto v3
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - '.github/workflows/applica-assalto-v3.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Applica patch
+        run: python tools/applica_assalto_v3.py
+
+      - name: Valida
+        run: |
+          python - <<'PY'
+          import string
+          import nft
+          from bilanciamento import PROC_CLASSI, PROC_ANELLI, NUCLEI_CONFIG
+          from frasi_set import FRASI_SET_TECNICHE
+          from frasi_anelli import FRASI_ANELLI_TECNICHE
+
+          assert PROC_CLASSI['Ghoul']['assalto']['terrore_clone']['proc'] == 100
+          assert PROC_CLASSI['Contrabbandiere']['assalto']['laser']['proc'] == 100
+          assert PROC_CLASSI['IppoFan']['assalto']['cannoncino']['proc'] == 100
+          assert PROC_CLASSI['Campione del sole']['assalto']['fabbro']['proc'] == 100
+          assert PROC_CLASSI['Anima oscura']['assalto']['fabbro']['proc'] == 100
+          assert PROC_CLASSI['Drago']['assalto']['cucciolo']['proc'] == 100
+          assert PROC_CLASSI['PiroIncantatore']['assalto']['cucciolo_drago']['proc'] == 100
+          assert PROC_CLASSI['Guerriero 3D']['assalto']['cucciolo']['proc'] == 100
+          assert PROC_CLASSI['Cercatore']['assalto']['accampamento']['proc'] == 100
+          assert PROC_CLASSI['Juggernaut']['assalto']['cane']['proc'] == 100
+          assert PROC_CLASSI['Regina golgari']['assalto']['clone']['proc'] == 100
+          assert PROC_CLASSI['Ombra silenziosa']['assalto']['centrale']['proc'] == 100
+          assert PROC_CLASSI['Cavaliere delle spine']['assalto']['spuntone_schivato']['proc'] == 100
+          assert PROC_CLASSI['Cavaliere delle spine']['assalto']['spuntone_colpito']['proc'] == 100
+          assert PROC_CLASSI['Crociato']['assalto']['muraglione'] == {'proc': 100, 'moltiplicatore_extra': 9}
+          assert PROC_CLASSI['Cacciatore']['assalto']['draghetto']['proc'] == 100
+          assert PROC_CLASSI['Spacca Mostri']['assalto']['clone']['proc'] == 100
+          assert PROC_CLASSI['Primo alla bandiera']['assalto']['cannoncino']['proc'] == 100
+          assert PROC_CLASSI['Ice and fire']['assalto']['drago_scaccia_drago']['proc'] == 100
+          assert PROC_CLASSI['Betatester']['assalto']['spada_beta'] == {'proc': 20, 'dps': 1333}
+          assert PROC_CLASSI['Maledetto']['assalto']['maledizione']['proc'] == 100
+          assert PROC_CLASSI['Bug Abuser']['assalto']['target']['proc'] == 80
+          assert PROC_CLASSI['Shogun moderno']['assalto']['doppio_colpo']['proc'] == 100
+          assert PROC_CLASSI['Combattente 2D']['assalto']['raggio_lunare']['proc'] == 100
+          assert PROC_CLASSI['Pazzoide glamour']['assalto']['cura_target']['proc'] == 80
+          assert PROC_CLASSI['Cultista pazzo']['assalto']['ultimo_colpo']['proc'] == 80
+          assert PROC_CLASSI['Fiamma pura']['assalto']['esplosione_morte']['proc'] == 1000
+
+          assert PROC_ANELLI['Stemma del leader']['assalto']['aura'] == {'stat': 'atk', 'minimo': 20, 'percento_stat': 1}
+          assert PROC_ANELLI['Scudo levitante']['assalto']['aura'] == {'stat': 'def', 'minimo': 20, 'percento_stat': 1}
+          assert PROC_ANELLI['Occhio del falco']['assalto']['aura'] == {'stat': 'agi', 'minimo': 20, 'percento_stat': 1}
+          assert PROC_ANELLI['Carica mobile']['assalto']['esplosione']['proc'] == 50
+
+          assert NUCLEI_CONFIG['Nucleo elettrico instabile']['assalto']['stat_per_membro']['agi'] == 30
+          assert NUCLEI_CONFIG['Nucleo marittimo instabile']['assalto']['stat_per_membro']['hp'] == 300
+          assert NUCLEI_CONFIG['Nucleo demoniaco instabile']['assalto']['stat_per_membro']['atk'] == 80
+          assert NUCLEI_CONFIG['Nucleo terrestre instabile']['assalto']['stat_per_membro']['def'] == 80
+          assert NUCLEI_CONFIG['Nucleo Necron instabile']['assalto']['resurrezione'] == {'proc': 8, 'hp': 1000}
+
+          src = open('nft.py', encoding='utf-8').read()
+          assert 'stat_proprietario * cfg_anello["percento_stat"] / 100' in src
+          assert 'L\'anello di {pl} ti dona {bonus_testo} {stat_anello.upper()}!' in src
+          assert 'numero_membri_clan = len(clan[team].get("membri", []))' in src
+          assert 'dps += dps * proc_val(set, "assalto", "muraglione", "moltiplicatore_extra")' in src
+          assert 'hp_massimi_assalto / cfg_argento["hp_massimi_divisore"]' in src
+          assert 'hp_massimi_assalto / cfg_fiamma["hp_massimi_divisore"]' in src
+
+          # Verifica placeholder delle frasi modificate.
+          nft.render_frase_set_tecnica("Cavaliere d'argento", {})
+          nft.render_frase_set_tecnica("Fiamma pura", {})
+          nft.render_frase_set_tecnica("Crociato", {})
+          nft.render_frase_anello_tecnica("Stemma del leader")
+          nft.render_frase_anello_tecnica("Scudo levitante")
+          nft.render_frase_anello_tecnica("Occhio del falco")
+          nft.render_frase_anello_tecnica("Carica mobile")
+          print('Validazione assalto v3 OK')
+          PY
+          python -m py_compile nft.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
+
+      - name: Commit e pulizia
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f .github/workflows/applica-assalto-v3.yml tools/applica_assalto_v3.py
+          git add nft.py bilanciamento.py frasi_set.py frasi_anelli.py
+          git commit -m "feat: potenzia meccaniche assalto v3"
+          git push origin refactor/bilanciamento-config
