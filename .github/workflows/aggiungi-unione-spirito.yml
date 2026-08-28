@@ -1,0 +1,69 @@
+name: Aggiungi Unione dello spirito
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - tools/add_unione_spirito.py
+      - .github/workflows/aggiungi-unione-spirito.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Applica modifica
+        run: python tools/add_unione_spirito.py
+
+      - name: Valida sintassi e copertura incantesimi
+        run: |
+          python -m py_compile bilanciamento.py frasi_incantesimi.py liste.py nft.py
+          python - <<'PY'
+          import bilanciamento
+          import frasi_incantesimi
+          import liste
+
+          libro = 'Fumetto hot degli anni 70'
+          effetto = 'Unione dello spirito'
+          assert libro in liste.libri
+          assert liste.libri[libro]['ef'] == effetto
+          assert effetto in bilanciamento.INCANTESIMI_CONFIG
+          assert effetto in frasi_incantesimi.FRASI_INCANTESIMI_TECNICHE
+          cfg = bilanciamento.INCANTESIMI_CONFIG[effetto]['assalto']['unione']
+          assert cfg['proc'] == 100
+          assert cfg['percento_stat'] == 20
+          assert cfg['stats'] == ['atk', 'def', 'agi']
+
+          effetti_libri = {dati['ef'] for dati in liste.libri.values()}
+          assert effetti_libri == set(bilanciamento.INCANTESIMI_CONFIG)
+          assert effetti_libri == set(frasi_incantesimi.FRASI_INCANTESIMI_TECNICHE)
+
+          testo_nft = open('nft.py', encoding='utf-8').read()
+          assert '"Unione dello spirito" in player.get("incantamenti", [])' in testo_nft
+          assert '"Unione dello spirito" in get_ench(playerg[pl])' in testo_nft
+          assert 'cfg_unione["percento_stat"] / 100' in testo_nft
+          assert "L'unione dello spirito di {pl} risuona" in testo_nft
+          print(f'OK: {len(effetti_libri)} incantesimi coperti')
+          PY
+
+      - name: Commit finale e pulizia temporanei
+        run: |
+          rm tools/add_unione_spirito.py
+          rm .github/workflows/aggiungi-unione-spirito.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: aggiungi Unione dello spirito"
+          git push origin refactor/bilanciamento-config
