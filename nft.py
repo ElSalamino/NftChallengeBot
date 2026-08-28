@@ -1178,6 +1178,9 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                     )
 
                                     serv = matx
+                                    # Anima della festa potenzia solo il contributo di last.
+                                    if giocatore.get("set") == "Anima della festa":
+                                        serv *= proc_val("Anima della festa", "assalto", "last", "moltiplicatore")
                                     if matx < proc_val("Eroe caduto", "assalto", "supporto_clan", "compagni_soglia") and giocatore["set"] == 'Eroe caduto':
                                         serv += proc_val("Eroe caduto", "assalto", "supporto_clan", "serv_bonus_nft")
                                         
@@ -2221,6 +2224,12 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
     for difesa in order:
         
         if difesa in nemico:
+            # Mente centrale: alieno per struttura attraversata.
+            if set == "Mente centrale" and proc_ok(random.random(), set, "assalto", "alieno"):
+                danno_alieno = round(player["atk"] / proc_val(set, "assalto", "alieno", "divisore_atk"))
+                nemico[difesa]["hp"] -= danno_alieno
+                player["fatto"] += danno_alieno
+                text += f"👽 Un alieno della mente centrale colpisce {difesa} per {danno_alieno} danni!\n"
             text += "\n"
             if bacon:
                 player["hp"] += NUCLEI_CONFIG["Nucleo di bacon instabile"]["assalto"]["cura_per_struttura"]
@@ -2229,6 +2238,12 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
             else:
                 defense = player["def"]
                 dps = player["atk"]
+                # Amletico: sacrificio vita per il singolo colpo d'assalto.
+                if set == "Amletico" and proc_ok(random.random(), set, "assalto", "sacrificio"):
+                    costo_amletico = max(1, round(max(0, player["hp"]) * proc_val(set, "assalto", "sacrificio", "percento_hp") / 100))
+                    player["hp"] -= costo_amletico
+                    dps += costo_amletico
+                    text += f"🎭 {nome} sacrifica {costo_amletico} HP e li trasforma in attacco!\n"
                 agi = player["agi"]
                 attaccon = (starmi[difesa]["atk"] + starmi[difesa]["atk"] * (nemico[difesa]["lv"] / 10) + bonus["atk"])
                 difesan = (starmi[difesa]["def"] + starmi[difesa]["def"] * (nemico[difesa]["lv"] / 10) + bonus["def"])
@@ -6893,3 +6908,237 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
         else:
             await message.answer(f"Mancano {manca} secondi!")
     _duplica_premi_dungeon_da_snapshot(player[username], _snapshot_premi_weekend, evento)
+
+# --- SET EROI DELLA TEMPESTA: RUNTIME ---
+_turno_eroi_base = turno
+_assedio_eroi_base = assedio
+
+def _nomi_pve_conosciuti():
+    nomi = set()
+    for raccolta in (Boss, nemici, Nautici):
+        try:
+            valori = raccolta.values()
+        except Exception:
+            continue
+        for dati in valori:
+            if isinstance(dati, dict) and dati.get("Nome"):
+                nomi.add(dati["Nome"])
+    return nomi
+
+def _e_sfida_pvp(main, oppo, cond):
+    # I flussi PvP principali passano sempre un cond (anche stringa vuota).
+    # Il fallback sui nomi copre le amichevoli storiche che chiamano turno() senza cond.
+    pve = _nomi_pve_conosciuti()
+    if main.get("Nome") in pve or oppo.get("Nome") in pve:
+        return False
+    return True
+
+def _prepara_set_pvp(personaggio):
+    text = ""
+    nome_set = personaggio.get("set")
+
+    if nome_set == "Guerriero Temporale":
+        cfg = proc_cfg(nome_set, "sfida", "ciclo_temporale")
+        if not personaggio.get("_temporale_inizializzato"):
+            personaggio["hp"] = cfg["hp"]
+            personaggio["_temporale_resurrezioni"] = 0
+            personaggio["_temporale_inizializzato"] = True
+            text += f"⏳ {personaggio['Nome']} entra nel ciclo temporale con {cfg['hp']} HP!\\n"
+        elif personaggio["hp"] > cfg["hp"]:
+            personaggio["hp"] = cfg["hp"]
+
+    if nome_set == "Dannato primordiale" and not personaggio.get("_dannato_conversione"):
+        difesa = personaggio.get("def", 0)
+        personaggio["atk"] += difesa
+        personaggio["def"] = 0
+        personaggio["_dannato_conversione"] = True
+        text += f"😈 {personaggio['Nome']} converte {difesa} DEF in ATK!\\n"
+
+    if nome_set == "Monarca della tempesta di fuoco" and not personaggio.get("_monarca_inizializzato"):
+        innati = proc_val(nome_set, "sfida", "incantamenti", "nomi", [])
+        incantamenti = personaggio.setdefault("incantamenti", [])
+        for incantesimo in innati:
+            if incantesimo not in incantamenti:
+                incantamenti.append(incantesimo)
+        personaggio["_monarca_inizializzato"] = True
+
+    return text
+
+def _resurrezione_temporale(personaggio):
+    if personaggio.get("set") != "Guerriero Temporale" or personaggio.get("hp", 0) > 0:
+        return ""
+    cfg = proc_cfg("Guerriero Temporale", "sfida", "ciclo_temporale")
+    usate = personaggio.get("_temporale_resurrezioni", 0)
+    if usate >= cfg["resurrezioni"]:
+        return ""
+    usate += 1
+    personaggio["_temporale_resurrezioni"] = usate
+    personaggio["hp"] = cfg["hp"]
+    return f"⏳ {personaggio['Nome']} riavvolge il tempo e rivive! ({usate}/{cfg['resurrezioni']})\\n"
+
+def _oggetto_accumulatore():
+    oggetti = proc_val("Accumulatore di meraviglie", "sfida", "evocazione", "oggetti", {})
+    nomi = list(oggetti)
+    pesi = [1 / max(1, oggetti[nome]) for nome in nomi]
+    scelto = random.choices(nomi, weights=pesi, k=1)[0]
+    return scelto, oggetti[scelto]
+
+def _danno_normale_macellatore(main, oppo):
+    dps = max(0, float(main.get("atk", 0)))
+    difesa = max(0, float(oppo.get("def", 0)))
+    minimo = dps * (100 / ((100 + difesa * 1.5) + 1))
+    massimo = dps * (100 / ((100 + difesa) + 1))
+    danno = random.uniform(minimo, massimo)
+    return max(20, danno)
+
+def turno(main, oppo, cond=None):
+    if not _e_sfida_pvp(main, oppo, cond):
+        return _turno_eroi_base(main, oppo, cond)
+
+    prefisso = _prepara_set_pvp(main) + _prepara_set_pvp(oppo)
+
+    # Il Guerriero Temporale non può mai conservare cure oltre il proprio tetto di 100 HP.
+    for combattente in (main, oppo):
+        if combattente.get("set") == "Guerriero Temporale":
+            combattente["hp"] = min(combattente["hp"], proc_val("Guerriero Temporale", "sfida", "ciclo_temporale", "hp"))
+
+    # Anima della festa recupera un seguace a ogni proprio turno.
+    if main.get("set") == "Anima della festa":
+        cfg = proc_cfg("Anima della festa", "sfida", "seguaci")
+        if "_anima_festa_base" not in main:
+            main["_anima_festa_base"] = {stat: main.get(stat, 0) for stat in ("hp", "atk", "def", "agi")}
+        main["_anima_festa_seguaci"] = main.get("_anima_festa_seguaci", 0) + cfg["seguaci_per_turno"]
+        for stat in ("hp", "atk", "def", "agi"):
+            main[stat] += main["_anima_festa_base"][stat] * cfg["percento_stat_per_seguace"] / 100
+        prefisso += f"🎉 {main['Nome']} recupera un seguace! ({main['_anima_festa_seguaci']} seguaci)\\n"
+
+    # Mecha sciamano: costo fisso e nuovo passaggio sul moltiplicatore dell'approccio.
+    if main.get("set") == "Mecha sciamano":
+        costo = proc_val("Mecha sciamano", "sfida", "riuso_approccio", "danno_hp")
+        main["hp"] -= costo
+        try:
+            boost(main, Approcci)
+        except Exception:
+            pass
+        prefisso += f"🤖 {main['Nome']} perde {costo} HP e riusa {main.get('Ap', 'Base')}!\\n"
+
+    # Amletico: il bonus ATK vale solo per questo attacco.
+    bonus_amletico = 0
+    if main.get("set") == "Amletico" and proc_ok(random.random(), "Amletico", "sfida", "sacrificio"):
+        pct = proc_val("Amletico", "sfida", "sacrificio", "percento_hp")
+        bonus_amletico = max(1, round(max(0, main["hp"]) * pct / 100))
+        main["hp"] -= bonus_amletico
+        main["atk"] += bonus_amletico
+        prefisso += f"🎭 {main['Nome']} sacrifica {bonus_amletico} HP e li aggiunge al proprio ATK!\\n"
+
+    # Accumulatore: ogni possessore tira indipendentemente nel turno in cui attacca/difende.
+    oggetto_attacco = None
+    oggetto_difesa = None
+    if main.get("set") == "Accumulatore di meraviglie" and proc_ok(random.random(), "Accumulatore di meraviglie", "sfida", "evocazione"):
+        oggetto_attacco = _oggetto_accumulatore()
+    if oppo.get("set") == "Accumulatore di meraviglie" and proc_ok(random.random(), "Accumulatore di meraviglie", "sfida", "evocazione"):
+        oggetto_difesa = _oggetto_accumulatore()
+
+    hp_oppo_prima = oppo.get("hp", 0)
+    testo = _turno_eroi_base(main, oppo, cond)
+
+    if bonus_amletico:
+        main["atk"] -= bonus_amletico
+
+    danno_corrente = max(0, hp_oppo_prima - oppo.get("hp", 0))
+    if oggetto_attacco is not None:
+        nome_oggetto, valore = oggetto_attacco
+        if danno_corrente > 0:
+            oppo["hp"] -= valore
+            main["fatto"] = main.get("fatto", 0) + valore
+            testo += f"🧳 Il tuo colpo è potenziato da {nome_oggetto}: +{valore} danni!\\n"
+        else:
+            testo += f"🧳 {nome_oggetto} esce dalla valigia, ma il colpo non arriva a segno.\\n"
+
+    if oggetto_difesa is not None:
+        nome_oggetto, valore = oggetto_difesa
+        danno_totale = max(0, hp_oppo_prima - oppo.get("hp", 0))
+        ridotto = min(valore, danno_totale)
+        if ridotto > 0:
+            oppo["hp"] += ridotto
+            main["fatto"] = max(0, main.get("fatto", 0) - ridotto)
+            testo += f"🧳 Il colpo nemico è ridotto grazie all'uso di {nome_oggetto}: -{ridotto} danni!\\n"
+        else:
+            testo += f"🧳 {nome_oggetto} viene evocato, ma non c'è danno da ridurre.\\n"
+
+    # Macellatore punisce una schivata appena risolta.
+    if main.get("set") == "Macellatore" and oppo.get("schivato") is True and proc_ok(random.random(), "Macellatore", "sfida", "presa_schivata"):
+        mol = proc_val("Macellatore", "sfida", "presa_schivata", "moltiplicatore_danno")
+        danno = round(_danno_normale_macellatore(main, oppo) * mol)
+        oppo["hp"] -= danno
+        main["fatto"] = main.get("fatto", 0) + danno
+        testo += f"🪝 {main['Nome']} riacciuffa {oppo['Nome']} dopo la schivata e infligge {danno} danni!\\n"
+
+    # Uditore del profondo scatta ogni volta che si entra esattamente a 1 HP.
+    trigger = []
+    for proprietario, bersaglio in ((main, oppo), (oppo, main)):
+        if proprietario.get("hp") != 1:
+            proprietario["_uditore_a_uno"] = False
+        if proprietario.get("set") == "Uditore del profondo" and proprietario.get("hp") == 1 and not proprietario.get("_uditore_a_uno"):
+            proprietario["_uditore_a_uno"] = True
+            trigger.append((proprietario, bersaglio))
+    for proprietario, bersaglio in trigger:
+        danno = proc_val("Uditore del profondo", "sfida", "richiamo", "danno")
+        bersaglio["hp"] -= danno
+        proprietario["fatto"] = proprietario.get("fatto", 0) + danno
+        testo += f"🌊 Il profondo risponde a {proprietario['Nome']}: {danno} danni a {bersaglio['Nome']}!\\n"
+
+    # Le resurrezioni temporali si risolvono prima che il loop esterno controlli is_dead().
+    testo += _resurrezione_temporale(main)
+    testo += _resurrezione_temporale(oppo)
+    for combattente in (main, oppo):
+        if combattente.get("set") == "Guerriero Temporale" and combattente.get("hp", 0) > 0:
+            combattente["hp"] = min(combattente["hp"], proc_val("Guerriero Temporale", "sfida", "ciclo_temporale", "hp"))
+
+    return prefisso + testo
+
+def assedio(playerg, player, nemico, target, team, order, clan, meteo=None, setting=dict()):
+    nome_set = player.get("set")
+    prefisso = ""
+
+    if nome_set == "Dannato primordiale" and not player.get("_dannato_conversione"):
+        difesa = player.get("def", 0)
+        player["atk"] += difesa
+        player["def"] = 0
+        player["_dannato_conversione"] = True
+        prefisso += f"😈 {player['Nome']} converte {difesa} DEF in ATK prima dell'assalto!\\n"
+
+    if nome_set == "Evocatore delle maree":
+        incantesimo = proc_val(nome_set, "assalto", "onda", "incantesimo")
+        incantamenti = player.setdefault("incantamenti", [])
+        if incantesimo not in incantamenti:
+            incantamenti.append(incantesimo)
+
+    testo = _assedio_eroi_base(playerg, player, nemico, target, team, order, clan, meteo, setting)
+
+    if nome_set == "Uditore del profondo" and player.get("hp") == proc_val(nome_set, "assalto", "richiamo", "hp_trigger"):
+        bersaglio = target if target in nemico else next((x for x in order if x in nemico), None)
+        if bersaglio is not None and isinstance(nemico.get(bersaglio), dict):
+            danno = proc_val(nome_set, "assalto", "richiamo", "danno")
+            nemico[bersaglio]["hp"] -= danno
+            player["fatto"] = player.get("fatto", 0) + danno
+            testo += f"🌊 Il profondo risponde: {danno} danni a {bersaglio}!\\n"
+            if nemico[bersaglio].get("hp", 0) <= 0:
+                nemico.pop(bersaglio, None)
+
+    if nome_set == "Evocatore delle maree" and player.get("hp", 0) <= 0:
+        pct = proc_val(nome_set, "assalto", "tsunami", "percento_atk")
+        danno = round(player.get("atk", 0) * pct / 100)
+        colpite = 0
+        for struttura, dati in list(nemico.items()):
+            if struttura == "inguerra" or not isinstance(dati, dict) or dati.get("hp", 0) <= 0:
+                continue
+            dati["hp"] -= danno
+            colpite += 1
+            if dati["hp"] <= 0:
+                nemico.pop(struttura, None)
+        if colpite:
+            player["fatto"] = player.get("fatto", 0) + (danno * colpite)
+            testo += f"🌊 Cadendo, {player['Nome']} genera uno tsunami: {danno} danni a ciascuna delle {colpite} strutture rimaste!\\n"
+
+    return prefisso + testo

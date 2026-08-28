@@ -3513,6 +3513,13 @@ Ne possiedi {qt} copie.
                     t += f"\n**{eventoz}**"
             except:
                 pass
+
+            try:
+                set_oggetto = liste.set_per_oggetto(risultati[0])
+                if set_oggetto:
+                    t += "\n🧩 **Set:** " + ", ".join(set_oggetto)
+            except:
+                pass
             
             try:
 

@@ -130,3 +130,19 @@ FRASI_SET_TECNICHE = {
     "Re dei pirati": "Durante gli assalti dei tuoi compagni puoi cannonare da fuori: il colpo fa almeno {assalto.supporto_ciurma.danno_min} danni e cresce con il tuo attacco.",
     "Thunderlord": "In assalto hai l'{assalto.tuono.proc:pct} di scatenare {assalto.tuono.colpi} fulmini da {assalto.tuono.danno} danni ciascuno sulla struttura nemica.",
 }
+
+# --- SET EROI DELLA TEMPESTA: FRASI TECNICHE ---
+FRASI_SET_TECNICHE.update({
+    "Guerriero Temporale": "Sfida: HP fissati a {sfida.ciclo_temporale.hp}; fino a {sfida.ciclo_temporale.resurrezioni} resurrezioni, ciascuna di nuovo a 100 HP. Assalto: nessun effetto.",
+    "Dannato primordiale": "Sfida/Assalto: converte il 100% della DEF posseduta in ATK e porta la DEF a 0.",
+    "Macellatore": "Sfida: quando l'avversario schiva, {sfida.presa_schivata.proc:pct} di riacciuffarlo e infliggere {sfida.presa_schivata.moltiplicatore_danno:x} il danno normale. Assalto: nessun effetto.",
+    "Mente centrale": "Assalto: per ogni struttura attraversata, {assalto.alieno.proc:pct} che un alieno infligga ATK/{assalto.alieno.divisore_atk}. Sfida: nessun effetto.",
+    "Amletico": "Bonus base: +50 HP. Sfida/Assalto: {sfida.sacrificio.proc:pct} per sacrificare il {sfida.sacrificio.percento_hp:pct} degli HP correnti e aggiungerlo all'ATK del colpo.",
+    "Accumulatore di meraviglie": "Sfida: ogni turno {sfida.evocazione.proc:pct} di evocare un oggetto. Il valore dell'oggetto aumenta il danno del proprio colpo o riduce quello nemico; gli oggetti di valore alto sono più rari.",
+    "Anima della festa": "Sfida: +1 seguace per turno e +{sfida.seguaci.percento_stat_per_seguace:pct} HP/ATK/DEF/AGI per ogni seguace. Assalto: il contributo degli aiutanti recenti è moltiplicato per {assalto.last.moltiplicatore:x}.",
+    "Zanno": "Bonus base permanente del set: +300 ATK.",
+    "Uditore del profondo": "Sfida/Assalto: entrando esattamente a {sfida.richiamo.hp_trigger} HP infligge {sfida.richiamo.danno} danni al bersaglio.",
+    "Monarca della tempesta di fuoco": "Sfida: possiede sempre Iridescente, Minimista, Primo impatto e Icore come incantamenti innati. Assalto: nessun effetto.",
+    "Evocatore delle maree": "Assalto: attiva sempre Onde dell'abisso; alla morte infligge a tutte le strutture il {assalto.tsunami.percento_atk:pct} del proprio ATK. Sfida: nessun effetto.",
+    "Mecha sciamano": "Sfida: perde {sfida.riuso_approccio.danno_hp} HP a ogni proprio turno e riapplica il moltiplicatore dell'approccio. Assalto: nessun effetto.",
+})

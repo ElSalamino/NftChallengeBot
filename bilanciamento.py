@@ -989,3 +989,63 @@ EFFETTI_CONFIG = {
         }
     }
 }
+
+# --- SET EROI DELLA TEMPESTA: BILANCIAMENTO ---
+PROC_CLASSI.update({
+    "Guerriero Temporale": {
+        "sfida": {"ciclo_temporale": {"hp": 100, "resurrezioni": 5}},
+    },
+    "Dannato primordiale": {
+        "sfida": {"conversione": {"proc": 100}},
+        "assalto": {"conversione": {"proc": 100}},
+    },
+    "Macellatore": {
+        "sfida": {"presa_schivata": {"proc": 50, "moltiplicatore_danno": 2}},
+    },
+    "Mente centrale": {
+        "assalto": {"alieno": {"proc": 50, "divisore_atk": 20}},
+    },
+    "Amletico": {
+        "sfida": {"sacrificio": {"proc": 50, "percento_hp": 50}},
+        "assalto": {"sacrificio": {"proc": 50, "percento_hp": 50}},
+    },
+    "Accumulatore di meraviglie": {
+        "sfida": {
+            "evocazione": {
+                "proc": 50,
+                "oggetti": {
+                    "Un vaso": 5,
+                    "Un sasso di medie dimensioni": 10,
+                    "Un idropulitrice": 15,
+                    "cento fiammiferi": 20,
+                    "una mustang": 30,
+                    "Sei cammelli": 40,
+                    "LA LUNA": 100,
+                },
+            }
+        },
+    },
+    "Anima della festa": {
+        "sfida": {"seguaci": {"seguaci_per_turno": 1, "percento_stat_per_seguace": 2}},
+        "assalto": {"last": {"moltiplicatore": 1.5}},
+    },
+    "Zanno": {
+        "generale": {"set_base": {"solo_bonus_base": True}},
+    },
+    "Uditore del profondo": {
+        "sfida": {"richiamo": {"hp_trigger": 1, "danno": 1000000000}},
+        "assalto": {"richiamo": {"hp_trigger": 1, "danno": 1000000000}},
+    },
+    "Monarca della tempesta di fuoco": {
+        "sfida": {"incantamenti": {"nomi": ["Iridescente", "Minimista", "Primo impatto", "Icore"]}},
+    },
+    "Evocatore delle maree": {
+        "assalto": {
+            "onda": {"incantesimo": "Onde dell'abisso"},
+            "tsunami": {"percento_atk": 10},
+        },
+    },
+    "Mecha sciamano": {
+        "sfida": {"riuso_approccio": {"danno_hp": 10}},
+    },
+})

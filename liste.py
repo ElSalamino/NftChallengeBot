@@ -136,7 +136,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "scelta variagate" : ['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -187,7 +187,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "nulla per tutto" : ['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -238,7 +238,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "la classe è acqua": ['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -289,7 +289,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "scontro magico":['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -377,7 +377,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV5', 'Un teschio antico', 'Uncino rituale LV5', 'Copricapo maori LV5', 'Totem spirituale LV5', 'Stecca tori LV5','Sgabello da bar LV5', 'Un tavolo speziato LV5',
              'Una mazza ferrata LV5', 'Un machete LV5', 'Scudo del paladino LV5', "Scudo d'ossidiana LV5", "Teschio d'ossidiana LV5", 'Coltelli da lancio LV5', 'Arco pesante LV5', 'Bomba sneaky LV5',
              'Palla Ombra LV5', 'Palla chiodata LV5', 'Bastone sferico LV5', 'NotteSferza LV5', 'Lama temporale LV5',"Centro temporale LV5","Benda maledetta LV5","Armatura di carne LV5","Anima dispersa LV5",
-             "Nucleo della tempesta LV5","Corona maledetta LV5","Il ciondolo della creazione LV5","Zanna del aliena LV5", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV5","Corona maledetta LV5","Il ciondolo della creazione LV5","Zanna del aliena LV5", 'Fumetto hot degli anni 70'],
              
              "rissa in arena":['Base +', 'Aggressivo+', 'Agile +','Compasso', 'Roccia viva', 'Vincastro', 'Fascette luminose', 'Fantasmino luminoso', 'Corteccia naturale', 'Scudiero fidato',
               "Vasetto all'orlo",'Sgabello da bar LV5', 'Un tavolo speziato LV5',
@@ -437,7 +437,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV-5', 'Un teschio antico', 'Uncino rituale LV-5', 'Copricapo maori LV-5', 'Totem spirituale LV-5', 'Stecca tori LV-5','Sgabello da bar LV-5', 'Un tavolo speziato LV-5',
              'Una mazza ferrata LV-5', 'Un machete LV-5', 'Scudo del paladino LV-5', "Scudo d'ossidiana LV-5", "Teschio d'ossidiana LV-5", 'Coltelli da lancio LV-5', 'Arco pesante LV-5', 'Bomba sneaky LV-5',
              'Palla Ombra LV-5', 'Palla chiodata LV-5', 'Bastone sferico LV-5', 'NotteSferza LV-5', 'Lama temporale LV-5',"Centro temporale LV-5","Benda maledetta LV-5","Armatura di carne LV-5","Anima dispersa LV-5",
-             "Nucleo della tempesta LV-5","Corona maledetta LV-5","Il ciondolo della creazione LV-5","Zanna del aliena LV-5", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV-5","Corona maledetta LV-5","Il ciondolo della creazione LV-5","Zanna del aliena LV-5", 'Fumetto hot degli anni 70'],
 
              "vecchi tempi" : ['Chiavi' 'Effige della tribe', 'Scarica di adrenalina', 'Lapsus vitale', 'Elsa vitale', 'Benedizione sanguinolenta',
              'Corna da toro', 'Sassolino scintillante', "Pegno di amicizia", 'Veleno del folle', 'Guanto del falco', 'Testuggine del vecchio saggio', 'Campanellina concentrante', "Bilanciere",
@@ -1580,11 +1580,11 @@ usabilitutti = [
 ]
 
 eventi = {
-    "Velo di catena": "Magia antica 💫",
-    "Spada del dio della fucina": "Magia antica 💫",
-    "Fuoco purificatore": "Magia antica 💫",
-    "Bussola taumaturgica": "Magia antica 💫",
-    "Lama Mentale": "Magia antica 💫",
+    "Velo di catena": "Eroi di altrove 💫",
+    "Spada del dio della fucina": "Eroi di altrove 💫",
+    "Fuoco purificatore": "Eroi di altrove 💫",
+    "Bussola taumaturgica": "Eroi di altrove 💫",
+    "Lama Mentale": "Eroi di altrove 💫",
     "Neo blaster": "Cyberarena 🤖",
     "Spada a protoni": "Cyberarena 🤖",
     "Z-Saber": "Cyberarena 🤖",
@@ -2154,3 +2154,75 @@ protezioniextra = {
     "Corona maledetta":{"hp": 0, "atk": 80, "def": 80, "agi": 8, "type": "🛡"},
     "Il ciondolo della creazione":{"hp": 0, "atk": 95, "def": 95, "agi": 2, "type": "🛡"},
 }
+
+# --- SET EROI DELLA TEMPESTA: CATALOGO ---
+classi.update({
+    "Guerriero Temporale": ["Centro temporale", "Assetto mecha"],
+    "Dannato primordiale": ["Benda maledetta", "Il ciondolo della creazione"],
+    "Macellatore": ["Armatura di carne", "Anima dispersa"],
+    "Mente centrale": ["Zanna del aliena", "Benda maledetta"],
+    "Amletico": ["Origine della tempesta", "Corona maledetta"],
+    "Accumulatore di meraviglie": ["Una valigia senza fine", "Il ciondolo della creazione"],
+    "Anima della festa": ["Staffa da rave", "Centro temporale"],
+    "Zanno": ["Zanna maledetta", "Zanna del aliena"],
+    "Uditore del profondo": ["Tentacolo viscido", "Armatura di carne"],
+    "Monarca della tempesta di fuoco": ["Un copricapo rossastro", "Anima dispersa"],
+    "Evocatore delle maree": ["Il ciondolo della creazione", "Chela animata"],
+    "Mecha sciamano": ["Stecca tori", "Assetto mecha"],
+})
+
+Approccini.update({
+    "Guerriero Temporale": ["Difensivo", "Schivo", "Impavido"],
+    "Dannato primordiale": ["Aggressivo", "Rabbioso", "Spinto"],
+    "Macellatore": ["Conservativo", "Difensivo", "Spinto"],
+    "Mente centrale": ["Aggressivo", "Spavaldo", "Rischioso"],
+    "Amletico": ["Conservativo", "Spinto", "Malevolo"],
+    "Accumulatore di meraviglie": ["Spinto", "Autorevole", "Conservativo"],
+    "Anima della festa": ["Aggressivo", "Agile", "Spinto"],
+    "Zanno": ["Rabbioso", "Aggressivo", "Spavaldo"],
+    "Uditore del profondo": ["Conservativo", "Difensivo", "Rischioso"],
+    "Monarca della tempesta di fuoco": ["Difensivo", "Conservativo", "Impavido"],
+    "Evocatore delle maree": ["Aggressivo", "Rabbioso", "Spavaldo"],
+    "Mecha sciamano": ["Difensivo", "Impavido", "Spinto"],
+})
+
+bonus.update({
+    "Guerriero Temporale": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Dannato primordiale": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Macellatore": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Mente centrale": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Amletico": {"hp": 50, "def": 0, "atk": 0, "agi": 0},
+    "Accumulatore di meraviglie": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Anima della festa": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Zanno": {"hp": 0, "def": 0, "atk": 300, "agi": 0},
+    "Uditore del profondo": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Monarca della tempesta di fuoco": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Evocatore delle maree": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Mecha sciamano": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+})
+
+frasi_set.update({
+    "Guerriero Temporale": "Il tempo non ti lascia morire facilmente: in sfida combatti con soli 100 HP, ma puoi tornare in piedi fino a cinque volte.",
+    "Dannato primordiale": "Il male divora ogni difesa: in sfida e in assalto tutta la DEF viene convertita in ATK.",
+    "Macellatore": "Una schivata non basta a scappare: in sfida puoi riacciuffare chi evita il colpo e punirlo al doppio.",
+    "Mente centrale": "Sei non ironicamente diventato la mente centrale di una razza aliena: durante gli assalti gli alieni possono colpire ogni struttura attraversata.",
+    "Amletico": "Potere o sopravvivenza? In sfida e in assalto puoi sacrificare metà della vita per trasformarla in attacco. Hai inoltre 50 HP extra.",
+    "Accumulatore di meraviglie": "Una valigia infinita risolve qualsiasi problema, dal vaso alla Luna: ogni turno può comparire qualcosa che altera il colpo.",
+    "Anima della festa": "La festa cresce turno dopo turno: recuperi seguaci che aumentano tutte le statistiche e in assalto sfrutti meglio chi ti ha preceduto.",
+    "Zanno": "Zanne. Tante zanne. Soprattutto +300 ATK.",
+    "Uditore del profondo": "A un solo punto vita qualcosa dal profondo risponde. E risponde con un miliardo di danni.",
+    "Monarca della tempesta di fuoco": "In sfida combatti come se avessi sempre Iridescente, Minimista, Primo impatto e Icore.",
+    "Evocatore delle maree": "Ogni assalto richiama Onde dell'abisso; se cadi, il tuo impatto genera uno tsunami contro tutte le strutture.",
+    "Mecha sciamano": "In sfida il mecha consuma 10 HP a turno e forza nuovamente il tuo approccio, esasperandone le statistiche.",
+})
+
+def set_per_oggetto(nome_oggetto):
+    """Restituisce tutti i set che richiedono l'oggetto, ignorando l'eventuale livello LV."""
+    base = str(nome_oggetto).split(" LV")[0]
+    trovati = []
+    for nome_set, componenti in classi.items():
+        if not nome_set or not componenti:
+            continue
+        if base in componenti:
+            trovati.append(nome_set)
+    return sorted(trovati, key=str.lower)
