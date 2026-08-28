@@ -520,7 +520,8 @@ libri = {'Libro del bene e del male': {'ef': 'Icore', 'descrizione': 'Riduci la 
            "Yoga estremo per persone comuni ma non troppo": {"ef": "Armadillibilità", "descrizione": "Combattere è un arte tanto quanto morire con stile."},
            "Il re in giallo": {"ef": "Giallo", "descrizione": "Essere gialli è un arte, tanto quanto avere altri 9 amici gialli."},
            "Cerficato della nuova ombra": {"ef": "Dominio semplice", "descrizione": "Nuova ombra acquisita, per poca forza vitale blocca tecniche strane nemiche"},
-           "Manuale di meccanica pt 3": {"ef": "Caricato", "descrizione": "Prepara il colpo e assicurati di finire il lavoro"}
+           "Manuale di meccanica pt 3": {"ef": "Caricato", "descrizione": "Prepara il colpo e assicurati di finire il lavoro"},
+           "Fumetto hot degli anni 70": {"ef": "Unione dello spirito", "descrizione": "Unisci il tuo spirito a quello dei compagni e diventa più forte insieme a loro."}
 }
 
 # Mantiene automaticamente completi i pool arena che già distribuiscono libri.

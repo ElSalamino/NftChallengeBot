@@ -2076,6 +2076,24 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                     f"{_numero_placeholder_tecnico(bonus_poly['agi'])} agilità!\n"
                 )
 
+            if (
+                "Unione dello spirito" in player.get("incantamenti", [])
+                and pl != nome
+                and "Unione dello spirito" in get_ench(playerg[pl])
+            ):
+                cfg_unione = incantesimo_cfg("Unione dello spirito", "assalto", "unione")
+                bonus_unione = {}
+                for stat_unione in cfg_unione["stats"]:
+                    valore_unione = scheda_membro.get(stat_unione, 0) * cfg_unione["percento_stat"] / 100
+                    player[stat_unione] += valore_unione
+                    bonus_unione[stat_unione] = valore_unione
+                text += (
+                    f"L'unione dello spirito di {pl} risuona, dandoti "
+                    f"{_numero_placeholder_tecnico(bonus_unione['atk'])} atk "
+                    f"{_numero_placeholder_tecnico(bonus_unione['def'])} def e "
+                    f"{_numero_placeholder_tecnico(bonus_unione['agi'])} agilità!\n"
+                )
+
             if aniel in PROC_ANELLI and "aura" in PROC_ANELLI[aniel].get("assalto", {}):
                 cfg_anello = anello_cfg(aniel, "assalto", "aura")
                 stat_anello = cfg_anello["stat"]

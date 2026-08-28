@@ -30,5 +30,6 @@ FRASI_INCANTESIMI_TECNICHE = {
     "Giallo": "All'inizio del tuo assalto hai il {assalto.aiutanti.proc:pct} di chiamare {assalto.aiutanti.aiutanti_extra} giallini. Ognuno viene registrato tra gli assaltatori recenti del clan con l'ora dell'attivazione: per 301 secondi conta come un compagno in tutti gli assalti del clan. Ogni nuova attivazione aggiunge un altro gruppo e gli stack scadono indipendentemente.",
     "Dominio semplice": "A ogni turno hai il {turno.attacco.proc:pct} quando attacchi e il {turno.difesa.proc:pct} quando difendi di spendere {turno.attacco.costo_hp} HP e rendere vuoto il set avversario per quel turno. Se entrambi lo attivano, entrambi pagano il costo e vengono bloccati entrambi i set.",
     "Caricato": "A ogni attacco hai il {turno.attacco.proc:pct} di ottenere {turno.attacco.cariche_per_proc} carica. Se dopo il controllo hai meno di {turno.attacco.hp_sotto} HP e almeno una carica, le scarichi tutte infliggendo {turno.attacco.danno_per_carica} danni diretti per carica, poi il contatore torna a {turno.attacco.reset_cariche}.",
+    "Unione dello spirito": "ASSALTO — se possiedi Unione dello spirito, ogni altro membro del clan che possiede lo stesso incantesimo ti trasferisce il {assalto.unione.percento_stat:pct} del proprio ATK, DEF e AGI all'inizio dell'assalto. I contributi di più compagni si sommano.",
 
 }

@@ -885,6 +885,15 @@ INCANTESIMI_CONFIG = {
             }
         },
     },
+    "Unione dello spirito": {
+        "assalto": {
+            "unione": {
+                "proc": 100,
+                "percento_stat": 20,
+                "stats": ["atk", "def", "agi"],
+            }
+        },
+    },
 
 }
 
