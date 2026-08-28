@@ -3996,6 +3996,19 @@ def turno(main, oppo,cond=None):
     anello = main["anello"]
     anellon = oppo["anello"]
 
+    # Leggiadra neutralizza i gadget di entrambi per il solo turno corrente.
+    # Non modifica l'equipaggiamento salvato nelle schede.
+    leggiadra_presente = (
+        "Leggiadra" in main.get("incantamenti", [])
+        or "Leggiadra" in oppo.get("incantamenti", [])
+    )
+    if leggiadra_presente and incantesimo_ok(random.random(), "Leggiadra", "turno", "neutralizza_gadget"):
+        if incantesimo_val("Leggiadra", "turno", "neutralizza_gadget", "blocca_anello_attaccante", True):
+            anello = None
+        if incantesimo_val("Leggiadra", "turno", "neutralizza_gadget", "blocca_anello_difensore", True):
+            anellon = None
+        text += "🎈 **Leggiadra neutralizza i gadget di entrambi!**\n"
+
     dps = main["atk"]
     difesan = oppo["def"]
 
@@ -5166,7 +5179,7 @@ def turno(main, oppo,cond=None):
     
     if oppo["incantamenti"] != []:
         if "Iridescente" in oppo["incantamenti"] and incantesimo_ok(num, "Iridescente", "turno", "cura"):
-            text += f"☀️ {nome2} prende forza dalla luce\n"
+            text += f"✨ {nome2} recupera energia iridescente!\n"
             oppo["hp"] += incantesimo_val("Iridescente", "turno", "cura", "cura")
         
         if "Speranza" in oppo["incantamenti"] and oppo["hp"] <= incantesimo_val("Speranza", "turno", "salvezza", "hp_max") and oppo["hp"] >= incantesimo_val("Speranza", "turno", "salvezza", "hp_min"):
@@ -5191,11 +5204,6 @@ def turno(main, oppo,cond=None):
                     text += f"L'arma fantasma di {nome1} colpisce lo stesso, infliggendo {danni} danni!"
         
         
-        if "Leggiadra" in main["incantamenti"] and incantesimo_ok(num, "Leggiadra", "turno", "annulla_colpo_proprio"):
-                if "schiva il colpo" not in text:
-                    danno = 0
-                    mod = 0
-                    text += "🎈"
                
     if "veleno" in oppo:
         oppo["hp"] -= oppo["veleno"] * incantesimo_val("Velenoso", "turno", "veleno", "danno_per_stack")

@@ -502,7 +502,7 @@ libri = {'Libro del bene e del male': {'ef': 'Icore', 'descrizione': 'Riduci la 
      "Mantra dell'aria": {'ef': 'Leggiadra', 'descrizione': "Difenditi dai gadget avversari nullificando il tuo danno, sii solo sicuro di non doverne lucrare tu"},
       'Libro della fede': {'ef': 'Speranza', 'descrizione': "Dato che la speranza è l'ultima a morire preparati a sopravvivere se resti in un certo range di hp"},
        'Guida a piante e veleni': {'ef': 'Velenoso', 'descrizione': 'Aggiunta di colpi velenosi, che non stancano mai!'}, 
-       'Scritto sulle luci': {'ef': 'Iridescente', 'descrizione': "Col potere dell'iridescenza sarai sicuro di recuperare hp col sole"},
+       'Scritto sulle luci': {'ef': 'Iridescente', 'descrizione': "L'iridescenza può restituirti energia quando vieni colpito."},
         'Tavole della legge': {'ef': 'Minimista', 'descrizione': 'Grazie al potere della legge alcuni 0 nelle sfide possono salire, non farà miracoli, ma aiuta!'},
          'Raccolta del deserto': {'ef': 'Mimico', 'descrizione': 'Copia gli incantesi avversari, perchè il migliore a sceglierli è sempre il tuo avversario'},
           'Stampa guerrigliera': {'ef': 'Affilatezza', 'descrizione': 'Da minecraft con furore, Affilatezza V!'},

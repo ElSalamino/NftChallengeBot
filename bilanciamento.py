@@ -754,7 +754,13 @@ INCANTESIMI_CONFIG = {
         },
     },
     "Leggiadra": {
-        "turno": {"annulla_colpo_proprio": {"proc": 10}},
+        "turno": {
+            "neutralizza_gadget": {
+                "proc": 90,
+                "blocca_anello_attaccante": True,
+                "blocca_anello_difensore": True,
+            }
+        },
     },
     "Speranza": {
         "turno": {"salvezza": {"hp_min": 1, "hp_max": 60, "hp_porta_a": 100}},
