@@ -7291,14 +7291,12 @@ async def assalto(client, message):
                                         nemico = clan[user["team"]]["nemico"]
                                         ordine = clan[user["team"]]["orderN"]
                                         giocatore = copy.deepcopy(player[username]["scheda"])
+                                        giocatore["incantamenti"] = nft.get_ench(player[username])
                                         if "pet" in player[username]:
                                             giocatore["animale"] = player[username]["pet"]
-                                        matx = 0
-                                        for pl in clan[user["team"]]["last"]:
-                                            elapsed = time.time() - clan[user["team"]]["last"][pl]
-                                            if elapsed < 301 and username != pl:
-                                                matx += 1
-                                                
+                                        matx, omini_reali, giallini_attivi, messaggio_giallo = nft.calcola_omini_assalto(
+                                            giocatore, username, clan[user["team"]]["last"]
+                                        )
                                         serv = matx
                                         if matx < nft.proc_val("Eroe caduto", "assalto", "supporto_clan", "compagni_soglia") and giocatore["set"] == 'Eroe caduto':
                                             serv += nft.proc_val("Eroe caduto", "assalto", "supporto_clan", "serv_bonus_bot")
@@ -7325,7 +7323,7 @@ async def assalto(client, message):
         
                                         nft.classe(giocatore,giocatore["set"], liste.bonus)
                                         
-                                        output = nft.assedio(player,
+                                        output = messaggio_giallo + nft.assedio(player,
                                             giocatore,
                                             nemico,
                                             target[0],
@@ -7336,7 +7334,9 @@ async def assalto(client, message):
                                             clan[clan[user["team"]]["inguerra"]]["setting"]
                                             
                                         )
-                                        output += f"\n{matx} persone assaltano con te!"
+                                        output += f"\n{omini_reali} persone assaltano con te!"
+                                        if giallini_attivi:
+                                            output += f" (+{giallini_attivi} giallini attivi)"
                                         player[username]["aigettoni"]["assalti"] += 1
                                         if player[username]["aigettoni"]["assalti"] >= 80:
                                             try:

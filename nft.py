@@ -86,6 +86,48 @@ def set_cangiante_disponibili():
     ]
 
 
+def calcola_omini_assalto(giocatore, username, last_clan):
+    """Conta gli assaltatori recenti e applica gli stack condivisi di Giallo.
+
+    Ogni proc di Giallo crea entry fittizie distinte dentro lo stesso `last`
+    usato dagli assaltatori reali. In questo modo gli stack sono condivisi
+    dal clan e scadono con la normale finestra di 301 secondi.
+    """
+    ora_omini = time.time()
+    prefisso_giallo = "__giallo__"
+
+    # Rimuove solo i giallini scaduti; le entry dei giocatori reali restano
+    # gestite esattamente come nello storico.
+    for pl, timestamp in list(last_clan.items()):
+        if str(pl).startswith(prefisso_giallo) and (ora_omini - timestamp) >= 301:
+            last_clan.pop(pl, None)
+
+    messaggio_giallo = ""
+    if "Giallo" in giocatore.get("incantamenti", []) and incantesimo_ok(
+        random.random(), "Giallo", "assalto", "aiutanti"
+    ):
+        quanti_giallini = incantesimo_val("Giallo", "assalto", "aiutanti", "aiutanti_extra")
+        token_giallo = time.time_ns()
+        for indice_giallo in range(quanti_giallini):
+            chiave_giallo = f"{prefisso_giallo}{username}__{token_giallo}__{indice_giallo}"
+            last_clan[chiave_giallo] = ora_omini
+        messaggio_giallo = "Venite a me ~~Minions~~ giallini, è ora di distruggere questo posto!\n"
+
+    matx = 0
+    omini_reali = 0
+    giallini_attivi = 0
+    for pl, timestamp in last_clan.items():
+        elapsed = ora_omini - timestamp
+        if elapsed < 301 and username != pl:
+            matx += 1
+            if str(pl).startswith(prefisso_giallo):
+                giallini_attivi += 1
+            else:
+                omini_reali += 1
+
+    return matx, omini_reali, giallini_attivi, messaggio_giallo
+
+
 def effetto_cfg(effetto, contesto, nome):
     """Restituisce la configurazione di un effetto temporaneo."""
     return EFFETTI_CONFIG.get(effetto, {}).get(contesto, {}).get(nome, {})
@@ -997,39 +1039,9 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                     giocatore["incantamenti"] = get_ench(player[username])
                                     if "pet" in player[username]:
                                         giocatore["animale"] = player[username]["pet"]
-                                    # Gli "omini" del clan sono le entry recenti di last.
-                                    # Giallo inserisce vere entry fittizie nello stesso dizionario:
-                                    # ogni proc crea 10 chiavi nuove, quindi gli stack sono naturali.
-                                    last_clan = clan[user["team"]]["last"]
-                                    ora_omini = time.time()
-                                    prefisso_giallo = "__giallo__"
-
-                                    # Le entry finte scadute non servono più: puliamo solo quelle,
-                                    # senza cambiare il comportamento storico delle entry reali.
-                                    for pl, timestamp in list(last_clan.items()):
-                                        if str(pl).startswith(prefisso_giallo) and (ora_omini - timestamp) >= 301:
-                                            last_clan.pop(pl, None)
-
-                                    messaggio_giallo = ""
-                                    if "Giallo" in giocatore.get("incantamenti", []) and incantesimo_ok(random.random(), "Giallo", "assalto", "aiutanti"):
-                                        quanti_giallini = incantesimo_val("Giallo", "assalto", "aiutanti", "aiutanti_extra")
-                                        token_giallo = time.time_ns()
-                                        for indice_giallo in range(quanti_giallini):
-                                            chiave_giallo = f"{prefisso_giallo}{username}__{token_giallo}__{indice_giallo}"
-                                            last_clan[chiave_giallo] = ora_omini
-                                        messaggio_giallo = "Venite a me ~~Minions~~ giallini, è ora di distruggere questo posto!\n"
-
-                                    matx = 0
-                                    omini_reali = 0
-                                    giallini_attivi = 0
-                                    for pl, timestamp in last_clan.items():
-                                        elapsed = ora_omini - timestamp
-                                        if elapsed < 301 and username != pl:
-                                            matx += 1
-                                            if str(pl).startswith(prefisso_giallo):
-                                                giallini_attivi += 1
-                                            else:
-                                                omini_reali += 1
+                                    matx, omini_reali, giallini_attivi, messaggio_giallo = calcola_omini_assalto(
+                                        giocatore, username, clan[user["team"]]["last"]
+                                    )
 
                                     serv = matx
                                     if matx < proc_val("Eroe caduto", "assalto", "supporto_clan", "compagni_soglia") and giocatore["set"] == 'Eroe caduto':
