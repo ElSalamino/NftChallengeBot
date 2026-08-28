@@ -1,0 +1,62 @@
+name: Giallo last stack
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - '.github/workflows/giallo-last-stack.yml'
+      - '.github/scripts/giallo_last_stack.py'
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Applica Giallo condiviso
+        run: python .github/scripts/giallo_last_stack.py
+
+      - name: Verifica sintassi
+        run: python -m py_compile nft.py bilanciamento.py frasi_incantesimi.py liste.py
+
+      - name: Verifica Giallo e usi last
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import bilanciamento
+          import frasi_incantesimi
+
+          nft = Path('nft.py').read_text(encoding='utf-8')
+          cfg = bilanciamento.INCANTESIMI_CONFIG['Giallo']['assalto']['aiutanti']
+          assert cfg['proc'] == 50
+          assert cfg['aiutanti_extra'] == 10
+          assert 'prefisso_giallo = "__giallo__"' in nft
+          assert 'last_clan[chiave_giallo] = ora_omini' in nft
+          assert 'for indice_giallo in range(quanti_giallini)' in nft
+          assert 'matx_effettivo' not in nft
+          assert '301 secondi' in frasi_incantesimi.FRASI_INCANTESIMI_TECNICHE['Giallo']
+
+          print('--- OCCORRENZE DI clan[...] last / last_clan NEI PY ---')
+          for path in Path('.').glob('*.py'):
+              for n, line in enumerate(path.read_text(encoding='utf-8', errors='ignore').splitlines(), 1):
+                  if ('["last"]' in line or "['last']" in line or 'last_clan' in line) and ('clan' in line or 'last_clan' in line):
+                      print(f'{path}:{n}: {line.strip()}')
+          print('OK Giallo stack condiviso')
+          PY
+
+      - name: Commit finale
+        run: |
+          git restore __pycache__ 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nft.py frasi_incantesimi.py
+          git rm -f .github/workflows/giallo-last-stack.yml .github/scripts/giallo_last_stack.py
+          git commit -m "feat: rendi Giallo uno stack condiviso di clan"
+          git push origin refactor/bilanciamento-config
