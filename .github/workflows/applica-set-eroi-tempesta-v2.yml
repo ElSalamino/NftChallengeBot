@@ -1,0 +1,75 @@
+name: Applica set Eroi della tempesta v2
+
+on:
+  push:
+    branches:
+      - feature/set-eroi-tempesta
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/set-eroi-tempesta
+          fetch-depth: 0
+
+      - name: Recupera e correggi patcher
+        shell: bash
+        run: |
+          git show 8912069aee560f54462d5e000aac9f36fe69aaab:.github/workflows/applica-set-eroi-tempesta.yml > /tmp/old.yml
+          awk '/cat > \/tmp\/applica.py <<.PY./{take=1; next} /^          PY$/{take=0} take{sub(/^          /, ""); print}' /tmp/old.yml > /tmp/applica.py
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('/tmp/applica.py')
+          s = p.read_text(encoding='utf-8')
+
+          # Il blocco oggetto viene trovato con marker semplici, non con whitespace fragile.
+          a = s.index('# ---------------- __init__.py: etichetta set sotto gli oggetti ----------------')
+          b = s.index('# Controlli statici mirati.', a)
+          nuovo = '''# ---------------- __init__.py: etichetta set sotto gli oggetti ----------------\np = "__init__.py"\ntext = read(p)\ntext = text.replace("Nucleo della tempesta", "Origine della tempesta")\nif "🧩 **Set:**" not in text:\n    marker = '                if risultati[0] in liste.eventi:\\n'\n    start = text.find(marker)\n    if start < 0:\n        raise RuntimeError("Blocco eventi oggetto non trovato")\n    end_marker = '            except:\\n                pass\\n'\n    end = text.find(end_marker, start)\n    if end < 0:\n        raise RuntimeError("Fine blocco eventi oggetto non trovata")\n    end += len(end_marker)\n    insertion = '\\n            try:\\n                set_oggetto = liste.set_per_oggetto(risultati[0])\\n                if set_oggetto:\\n                    t += "\\\\n🧩 **Set:** " + ", ".join(set_oggetto)\\n            except:\\n                pass\\n'\n    text = text[:end] + insertion + text[end:]\nwrite(p, text)\n\n'''
+          s = s[:a] + nuovo + s[b:]
+
+          # Primo impatto del Monarca deve essere innato una volta per sfida, non riaggiunto ogni turno.
+          s = s.replace(
+              '    if nome_set == "Monarca della tempesta di fuoco":\n',
+              '    if nome_set == "Monarca della tempesta di fuoco" and not personaggio.get("_monarca_inizializzato"):\n',
+              1,
+          )
+          s = s.replace(
+              '                incantamenti.append(incantesimo)\n\n    return text\n',
+              '                incantamenti.append(incantesimo)\n        personaggio["_monarca_inizializzato"] = True\n\n    return text\n',
+              1,
+          )
+
+          # Mai classificare come PvP un NPC noto, anche se un caller passa un cond.
+          vecchio = '''    if cond is not None:\n        return True\n    pve = _nomi_pve_conosciuti()\n    return main.get("Nome") not in pve and oppo.get("Nome") not in pve\n'''
+          nuovo_pvp = '''    pve = _nomi_pve_conosciuti()\n    if main.get("Nome") in pve or oppo.get("Nome") in pve:\n        return False\n    return True\n'''
+          if vecchio not in s:
+              raise RuntimeError('Blocco PvP non trovato nel patcher')
+          s = s.replace(vecchio, nuovo_pvp, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Applica e valida
+        shell: bash
+        run: |
+          python /tmp/applica.py
+          python -m py_compile liste.py bilanciamento.py frasi_set.py nft.py
+          grep -q 'Guerriero Temporale' liste.py
+          grep -q 'Uditore del profondo' nft.py
+          grep -q '🧩 **Set:**' __init__.py
+          ! grep -q 'Nucleo della tempesta' liste.py
+
+      - name: Commit finale
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/applica-set-eroi-tempesta-v2.yml
+          git add liste.py bilanciamento.py frasi_set.py nft.py __init__.py
+          git commit -m "Aggiungi set Eroi della tempesta"
+          git push origin HEAD:feature/set-eroi-tempesta
