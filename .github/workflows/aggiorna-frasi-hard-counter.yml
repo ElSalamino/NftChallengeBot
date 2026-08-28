@@ -1,0 +1,65 @@
+name: Aggiorna frasi hard counter
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - '.github/workflows/aggiorna-frasi-hard-counter.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  aggiorna:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Aggiorna frasi
+        run: python tools/aggiorna_frasi_hard_counter.py
+
+      - name: Valida
+        run: |
+          python -m py_compile frasi_set.py bilanciamento.py
+          python - <<'PY'
+          import string
+          from bilanciamento import PROC_CLASSI
+          from frasi_set import FRASI_SET_TECNICHE
+
+          nomi = [
+              'Cercatore di reliquie','Ghoul','Contrabbandiere','IppoFan','Campione del sole',
+              'Anima oscura','Drago','PiroIncantatore','Guerriero 3D','Cercatore','Juggernaut',
+              'Scudiero del boschetto','Regina golgari','Ombra silenziosa','Assassino delle ombre',
+              'Cavaliere delle spine','Crociato','Cacciatore','Spacca Mostri','Primo alla bandiera',
+              'Ice and fire','Serial killer','Vigilante'
+          ]
+          for nome in nomi:
+              frase = FRASI_SET_TECNICHE[nome]
+              assert 'ASSALTO' in frase, nome
+              for _, campo, formato, conversione in string.Formatter().parse(frase):
+                  if campo is None or campo.startswith('bonus.'):
+                      continue
+                  valore = PROC_CLASSI[nome]
+                  for parte in campo.split('.'):
+                      assert isinstance(valore, dict) and parte in valore, (nome, campo)
+                      valore = valore[parte]
+          assert 'HARD COUNTER del Cannoncino' in FRASI_SET_TECNICHE['Cercatore di reliquie']
+          assert '{assalto.cannoncino.def:signed}' in FRASI_SET_TECNICHE['Cercatore di reliquie']
+          assert '{assalto.terrore_clone.atk_clone:abs}' in FRASI_SET_TECNICHE['Ghoul']
+          assert '{assalto.centrale.atk:signed}' in FRASI_SET_TECNICHE['Ombra silenziosa']
+          assert '{assalto.clone.dps:signed}' in FRASI_SET_TECNICHE['Spacca Mostri']
+          print('Frasi hard counter validate:', len(nomi))
+          PY
+
+      - name: Commit e pulizia
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f .github/workflows/aggiorna-frasi-hard-counter.yml tools/aggiorna_frasi_hard_counter.py
+          git add frasi_set.py
+          git commit -m "docs: chiarisci hard counter in assalto"
+          git push origin refactor/bilanciamento-config
