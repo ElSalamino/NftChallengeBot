@@ -1953,9 +1953,24 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                     break
         
         elif set == 'Lanciatore olimpico' and proc_ok(num, set, "assalto", "tridente"):
-            if nemico[target]["hp"] > proc_val(set, "assalto", "tridente", "hp_min"):
-                nemico[target]["hp"] -= proc_val(set, "assalto", "tridente", "danno")
-                text += f"{nome} lancia il tridente fortissimo e colpisce {target}!\n"
+            cfg_tridente = proc_cfg(set, "assalto", "tridente")
+            danno_tridente = cfg_tridente["danno"]
+            if target in nemico and nemico[target]["hp"] > cfg_tridente["hp_min"]:
+                try:
+                    indice_target = order.index(target)
+                except ValueError:
+                    indice_target = -1
+
+                bersagli_tridente = order[indice_target:] if indice_target >= 0 else [target]
+                for struttura_tridente in bersagli_tridente:
+                    if danno_tridente <= 0:
+                        break
+                    if struttura_tridente not in nemico or struttura_tridente == "inguerra":
+                        continue
+                    nemico[struttura_tridente]["hp"] -= danno_tridente
+                    player["fatto"] += danno_tridente
+                    text += f"{nome} lancia il tridente fortissimo e colpisce {struttura_tridente} per {danno_tridente} danni!\n"
+                    danno_tridente -= cfg_tridente["decremento"]
         elif (set == "Cercatore di reliquie" and proc_ok(num, set, "assalto", "cannoncino") and target == "Cannoncino"):
             text += "__Oddio una reliquia GIGANTE!__\n"
             player["def"] += proc_val(set, "assalto", "cannoncino", "def")
@@ -2000,7 +2015,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
         player["atk"] = player["atk"] * 10
         player["def"] = player["def"] * 10000
     
-    if anello != None:
+    if clan[team].get("membri"):
         for pl in clan[team]['membri']:
             aniel = playerg[pl]["scheda"]["anello"]
             if aniel in PROC_ANELLI and "aura" in PROC_ANELLI[aniel].get("assalto", {}):
