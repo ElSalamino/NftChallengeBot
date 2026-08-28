@@ -1,0 +1,58 @@
+name: Pompa hard counter assalto
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - '.github/workflows/pompa-hard-counter-assalto.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Applica hard counter
+        run: python tools/pompa_hard_counter_assalto.py
+
+      - name: Valida
+        run: |
+          python - <<'PY'
+          from bilanciamento import PROC_CLASSI
+
+          assert PROC_CLASSI['Cercatore di reliquie']['assalto']['cannoncino']['def'] == 7000
+          assert PROC_CLASSI['Ghoul']['assalto']['terrore_clone']['atk_clone'] == -3000
+          assert PROC_CLASSI['Ghoul']['assalto']['terrore_clone']['def_clone'] == -5000
+          assert PROC_CLASSI['Campione del sole']['assalto']['fabbro']['atk'] == 3000
+          assert PROC_CLASSI['Campione del sole']['assalto']['fabbro']['def'] == 2000
+          assert PROC_CLASSI['Drago']['assalto']['cucciolo']['atk'] == 5000
+          assert PROC_CLASSI['PiroIncantatore']['assalto']['cucciolo_drago']['atk'] == 3300
+          assert PROC_CLASSI['Cercatore']['assalto']['accampamento']['atk'] == 2000
+          assert PROC_CLASSI['Scudiero del boschetto']['assalto']['spaventapasseri'] == {'atk': 3000, 'def': 2000}
+          assert PROC_CLASSI['Ombra silenziosa']['assalto']['centrale']['atk'] == 15000
+          assert PROC_CLASSI['Cavaliere delle spine']['assalto']['spuntone_schivato']['atk'] == 2200
+          assert PROC_CLASSI['Cavaliere delle spine']['assalto']['spuntone_schivato']['def'] == 2200
+          assert PROC_CLASSI['Cavaliere delle spine']['assalto']['spuntone_colpito']['def'] == 3300
+          assert PROC_CLASSI['Cacciatore']['assalto']['draghetto']['dps'] == 10000
+          assert PROC_CLASSI['Spacca Mostri']['assalto']['clone']['dps'] == 10000
+          assert PROC_CLASSI['Primo alla bandiera']['assalto']['cannoncino']['dps'] == 14000
+          assert PROC_CLASSI['Ice and fire']['assalto']['drago_scaccia_drago']['dps'] == 7000
+          print('Hard counter OK')
+          PY
+          python -m py_compile nft.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
+
+      - name: Commit e pulizia
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f .github/workflows/pompa-hard-counter-assalto.yml tools/pompa_hard_counter_assalto.py
+          git add bilanciamento.py
+          git commit -m "balance: trasforma i counter assalto in hard counter"
+          git push origin refactor/bilanciamento-config
