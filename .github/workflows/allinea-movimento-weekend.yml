@@ -1,0 +1,50 @@
+name: Allinea movimento weekend
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - tools/allinea_movimento_weekend.py
+      - .github/workflows/allinea-movimento-weekend.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Applica e valida
+        run: |
+          python tools/allinea_movimento_weekend.py
+          python -m py_compile nft.py bilanciamento.py liste.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
+          python - <<'PY'
+          from pathlib import Path
+          nft = Path('nft.py').read_text(encoding='utf-8')
+          init = Path('__init__.py').read_text(encoding='utf-8')
+          assert 'def tempo_movimento_corrente(' in nft
+          assert 'ccc = tempo_movimento_corrente(player, username, trader)' in nft
+          assert 'nft.tempo_movimento_corrente(player, message.from_user.username, trader)' in init
+          print('OK')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nft.py __init__.py
+          if ! git diff --cached --quiet; then
+            git commit -m "fix: allinea indicatore movimento al weekend"
+          fi
+      - name: Cleanup
+        run: |
+          git rm -f tools/allinea_movimento_weekend.py .github/workflows/allinea-movimento-weekend.yml
+          git commit -m "chore: rimuovi patcher movimento temporaneo"
+          git push origin refactor/bilanciamento-config
