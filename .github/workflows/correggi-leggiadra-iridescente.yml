@@ -1,0 +1,152 @@
+name: Correggi Leggiadra e Iridescente
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - .github/workflows/correggi-leggiadra-iridescente.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Applica modifiche
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text, old, new, label):
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: atteso 1, trovato {count}")
+              return text.replace(old, new, 1)
+
+          # --- bilanciamento.py ---
+          p = Path('bilanciamento.py')
+          s = p.read_text(encoding='utf-8')
+          s = replace_once(
+              s,
+              '    "Leggiadra": {\n        "turno": {"annulla_colpo_proprio": {"proc": 10}},\n    },',
+              '    "Leggiadra": {\n        "turno": {\n            "neutralizza_gadget": {\n                "proc": 90,\n                "blocca_anello_attaccante": True,\n                "blocca_anello_difensore": True,\n            }\n        },\n    },',
+              'config Leggiadra',
+          )
+          p.write_text(s, encoding='utf-8')
+
+          # --- frasi_incantesimi.py ---
+          p = Path('frasi_incantesimi.py')
+          s = p.read_text(encoding='utf-8')
+          s = replace_once(
+              s,
+              '    "Leggiadra": "Quando un tuo colpo stava per andare a segno, hai il {turno.annulla_colpo_proprio.proc:pct} di azzerare volontariamente danno e modificatore di quel colpo; se il nemico aveva già schivato non cambia nulla.",',
+              '    "Leggiadra": "Se almeno uno dei due combattenti possiede Leggiadra, a ogni turno c’è il {turno.neutralizza_gadget.proc:pct} di neutralizzare contemporaneamente il gadget dell’attaccante e quello del difensore per quel turno. Gli anelli restano equipaggiati: vengono solo ignorati durante quel calcolo.",',
+              'frase Leggiadra',
+          )
+          s = replace_once(
+              s,
+              '    "Iridescente": "Non serve che ci sia il sole: quando vieni attaccato hai il {turno.cura.proc:pct} di recuperare {turno.cura.cura} HP.",',
+              '    "Iridescente": "Quando vieni attaccato hai il {turno.cura.proc:pct} di recuperare {turno.cura.cura} HP.",',
+              'frase Iridescente',
+          )
+          p.write_text(s, encoding='utf-8')
+
+          # --- liste.py: rimuovi il riferimento al sole dalla descrizione base ---
+          p = Path('liste.py')
+          s = p.read_text(encoding='utf-8')
+          old_desc = "Col potere dell'iridescenza sarai sicuro di recuperare hp col sole."
+          new_desc = "L'iridescenza può restituirti energia quando vieni colpito."
+          if old_desc not in s:
+              # tollera l'eventuale assenza del punto finale, ma non modificare alla cieca
+              old_desc = "Col potere dell'iridescenza sarai sicuro di recuperare hp col sole"
+          s = replace_once(s, old_desc, new_desc, 'descrizione base Iridescente')
+          p.write_text(s, encoding='utf-8')
+
+          # --- nft.py ---
+          p = Path('nft.py')
+          s = p.read_text(encoding='utf-8')
+
+          # Leggiadra deve agire prima di QUALSIASI logica di anello/gadget.
+          marker = '''    anello = main["anello"]\n    anellon = oppo["anello"]\n\n    dps = main["atk"]'''
+          replacement = '''    anello = main["anello"]\n    anellon = oppo["anello"]\n\n    # Leggiadra neutralizza i gadget di entrambi per il solo turno corrente.\n    # Non modifica l'equipaggiamento salvato nelle schede.\n    leggiadra_presente = (\n        "Leggiadra" in main.get("incantamenti", [])\n        or "Leggiadra" in oppo.get("incantamenti", [])\n    )\n    if leggiadra_presente and incantesimo_ok(random.random(), "Leggiadra", "turno", "neutralizza_gadget"):\n        if incantesimo_val("Leggiadra", "turno", "neutralizza_gadget", "blocca_anello_attaccante", True):\n            anello = None\n        if incantesimo_val("Leggiadra", "turno", "neutralizza_gadget", "blocca_anello_difensore", True):\n            anellon = None\n        text += "🎈 **Leggiadra neutralizza i gadget di entrambi!**\\n"\n\n    dps = main["atk"]'''
+          s = replace_once(s, marker, replacement, 'attivazione Leggiadra a inizio turno')
+
+          old_leggiadra = '''        if "Leggiadra" in main["incantamenti"] and incantesimo_ok(num, "Leggiadra", "turno", "annulla_colpo_proprio"):\n                if "schiva il colpo" not in text:\n                    danno = 0\n                    mod = 0\n                    text += "🎈"\n'''
+          s = replace_once(s, old_leggiadra, '', 'rimozione vecchia Leggiadra')
+
+          s = replace_once(
+              s,
+              '            text += f"☀️ {nome2} prende forza dalla luce\\n"',
+              '            text += f"✨ {nome2} recupera energia iridescente!\\n"',
+              'testo combattimento Iridescente',
+          )
+
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Verifica sintassi e comportamento statico
+        shell: bash
+        run: |
+          python -m py_compile nft.py bilanciamento.py frasi_incantesimi.py liste.py
+          python - <<'PY'
+          import string
+          from pathlib import Path
+          from bilanciamento import INCANTESIMI_CONFIG
+          from frasi_incantesimi import FRASI_INCANTESIMI_TECNICHE
+
+          leg = INCANTESIMI_CONFIG['Leggiadra']['turno']['neutralizza_gadget']
+          assert leg['proc'] == 90
+          assert leg['blocca_anello_attaccante'] is True
+          assert leg['blocca_anello_difensore'] is True
+
+          nft = Path('nft.py').read_text(encoding='utf-8')
+          assert 'annulla_colpo_proprio' not in nft
+          assert 'leggiadra_presente' in nft
+          assert 'anello = None' in nft
+          assert 'anellon = None' in nft
+          assert 'Leggiadra neutralizza i gadget di entrambi' in nft
+          assert '☀️' not in nft[nft.index('if "Iridescente" in oppo["incantamenti"]'):nft.index('if "Speranza" in oppo["incantamenti"]')]
+          assert 'recupera energia iridescente' in nft
+
+          liste = Path('liste.py').read_text(encoding='utf-8')
+          assert "recuperare hp col sole" not in liste
+          assert "L'iridescenza può restituirti energia quando vieni colpito." in liste
+
+          assert 'sole' not in FRASI_INCANTESIMI_TECNICHE['Iridescente'].lower()
+          assert '{turno.cura.proc:pct}' in FRASI_INCANTESIMI_TECNICHE['Iridescente']
+          assert '{turno.cura.cura}' in FRASI_INCANTESIMI_TECNICHE['Iridescente']
+          assert '{turno.neutralizza_gadget.proc:pct}' in FRASI_INCANTESIMI_TECNICHE['Leggiadra']
+
+          # Tutti i placeholder delle frasi devono continuare a risolversi.
+          allowed = {'', 'pct', 'x', 'signed', 'abs', 'bool', 'rid_pct', 'pct_mul'}
+          for nome, template in FRASI_INCANTESIMI_TECNICHE.items():
+              for _, campo, formato, conversione in string.Formatter().parse(template):
+                  if campo is None:
+                      continue
+                  assert conversione is None
+                  assert formato in allowed
+                  valore = INCANTESIMI_CONFIG[nome]
+                  for parte in campo.split('.'):
+                      assert isinstance(valore, dict) and parte in valore, (nome, campo, parte)
+                      valore = valore[parte]
+
+          print('OK: Leggiadra 90% blocco gadget bilaterale; Iridescente senza sole')
+          PY
+
+      - name: Commit finale
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nft.py bilanciamento.py frasi_incantesimi.py liste.py
+          git rm .github/workflows/correggi-leggiadra-iridescente.yml
+          git commit -m "fix: correggi Leggiadra e Iridescente"
+          git push origin refactor/bilanciamento-config
