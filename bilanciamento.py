@@ -476,6 +476,30 @@ PROC_ANELLI = {
     "Carica mobile": {
         "assalto": {"esplosione": {"proc": 50, "danno_min": 20, "danno_max": 150}},
     },
+    "Polimerizzazione": {
+        "assalto": {"polimerizzazione": {"proc": 100, "percento_stat": 20, "stats": ["atk", "def", "agi"]}},
+    },
+    "Valvola da 4\"": {
+        "sfida": {"inizio": {"proc": 100, "atk": 100, "def": 100, "agi": 1}},
+    },
+    "Roulette russa": {
+        "turno": {"roulette": {"proc": 16.6666666667, "lati": 6, "danno": 100}},
+    },
+    "Roulette tibetana": {
+        "turno": {"roulette": {"proc": 16.6666666667, "lati": 6, "cura": 100}},
+    },
+    "Sasso rotolante": {
+        "turno": {"valanga": {"proc": 10, "carica_per_turno": 1, "danno_per_carica": 2, "reset_dopo_proc": True}},
+    },
+    "WuWuWuuurm": {
+        "turno": {"presa_schivata": {"proc": 30, "atk_base": 144, "danno_min": 20, "aggiungi_int": True}},
+    },
+    "Dance Dance Revolution": {
+        "turno": {"combo": {"proc": 100, "incremento": 1, "bonus_danno_per_combo_pct": 10, "reset_su_mancata_schivata": True}},
+    },
+    "GDR semplificato": {
+        "turno": {"formula": {"proc": 100, "attivo_per_entrambi": True, "danno_min": 0}},
+    },
 }
 
 

@@ -830,6 +830,14 @@ anellic = [
     "Aureola",
     "Ali di luminite",
     "Proteina brullicanti",
+    'Polimerizzazione',
+    'Valvola da 4"',
+    'Roulette russa',
+    'Roulette tibetana',
+    'Sasso rotolante',
+    'WuWuWuuurm',
+    'Dance Dance Revolution',
+    'GDR semplificato',
 ]
 
 Approccini = {"Esperto di animali":["OrsoDruido","Dragone delle stelle","Ratto delle tombe","Silvantropo","Balena territoriale","Fantamsa del ritorno"],
@@ -1495,6 +1503,14 @@ anelli = {"Anello perfezionista":"Imposta il seed delle sfide ed assalti, creand
     "Aureola": "La luce salverà qualche tuo danno!",
     "Ali di luminite": "Ambisci al volo, alza drasticamente la tua agilità!",
     "Proteina brullicanti": "Un colpo secco senza confronti, raddoppia il tuo attacco!",
+    'Polimerizzazione': 'Unisciti ai tuoi compagni ed assicurati di vincere.',
+    'Valvola da 4"': 'Concettualmente un blocco di ottone.',
+    'Roulette russa': '1/6 di spararti o 1/6 di sparare',
+    'Roulette tibetana': '1/6 di curarti o 1/6 di curare',
+    'Sasso rotolante': 'Crea lentamente una valanga ogni turno, quando il sasso arriva arriva!',
+    'WuWuWuuurm': 'Un piccolo wurm che ti aiuta a prendere gli avversari al volo!',
+    'Dance Dance Revolution': 'CCCompo di schivate!',
+    'GDR semplificato': 'Trasforma le sfide in matematica, ora il danno è attacco - difesa!',
 }
 
 usabili = {

@@ -51,6 +51,54 @@ def anello_val(anello, contesto, nome, chiave, default=None):
 
 
 
+def _applica_valvola_inizio_sfida(personaggio):
+    """Applica una sola volta il bonus iniziale della Valvola da 4\" alla copia dello scontro."""
+    nome_anello = 'Valvola da 4"'
+    marker = "_valvola4_applicata"
+    if personaggio.get("anello") != nome_anello or personaggio.get(marker):
+        return ""
+    if not anello_ok(random.random(), nome_anello, "sfida", "inizio"):
+        return ""
+    cfg = anello_cfg(nome_anello, "sfida", "inizio")
+    personaggio["atk"] += cfg["atk"]
+    personaggio["def"] += cfg["def"]
+    personaggio["agi"] += cfg["agi"]
+    personaggio[marker] = True
+    return f"{personaggio['Nome']} si presenta alla sfida con una valvola enorme!\n"
+
+
+def _effetti_anelli_inizio_turno(main, oppo, anello, anellon):
+    """Effetti che scattano all'inizio di ogni turno usando gli anelli locali post-Leggiadra."""
+    text = ""
+
+    # Ogni copia della roulette tira indipendentemente e agisce sul combattente di turno.
+    for ring in (anello, anellon):
+        if ring == "Roulette russa" and anello_ok(random.random(), ring, "turno", "roulette"):
+            danno = anello_val(ring, "turno", "roulette", "danno")
+            main["hp"] -= danno
+            text += f"{main['Nome']} ha perso la roulette russa, {danno} danni!\n"
+        elif ring == "Roulette tibetana" and anello_ok(random.random(), ring, "turno", "roulette"):
+            cura = anello_val(ring, "turno", "roulette", "cura")
+            main["hp"] += cura
+            text += f"{main['Nome']} ha vinto la roulette tibetana, {cura} cure!\n"
+
+    # Ogni Sasso carica a ogni turno, anche quando il proprietario sta difendendo.
+    for proprietario, bersaglio, ring in ((main, oppo, anello), (oppo, main, anellon)):
+        if ring != "Sasso rotolante":
+            continue
+        cfg = anello_cfg(ring, "turno", "valanga")
+        proprietario["_sasso_cariche"] = proprietario.get("_sasso_cariche", 0) + cfg["carica_per_turno"]
+        cariche = proprietario["_sasso_cariche"]
+        if anello_ok(random.random(), ring, "turno", "valanga"):
+            danni = cariche * cfg["danno_per_carica"]
+            bersaglio["hp"] -= danni
+            proprietario["_sasso_cariche"] = 0
+            text += f"Un sasso becca {bersaglio['Nome']} per {danni} danni!\n"
+        else:
+            text += f"Senti un sasso in lontananza... ({cariche} Cariche)\n"
+    return text
+
+
 def incantesimo_cfg(incantesimo, contesto, nome):
     """Restituisce la configurazione di un effetto di incantesimo."""
     return INCANTESIMI_CONFIG.get(incantesimo, {}).get(contesto, {}).get(nome, {})
@@ -2013,6 +2061,21 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
         for pl in clan[team]['membri']:
             scheda_membro = playerg[pl]["scheda"]
             aniel = scheda_membro["anello"]
+
+            if anello == "Polimerizzazione" and pl != nome and aniel == "Polimerizzazione":
+                cfg_poly = anello_cfg("Polimerizzazione", "assalto", "polimerizzazione")
+                bonus_poly = {}
+                for stat_poly in cfg_poly["stats"]:
+                    valore_poly = scheda_membro.get(stat_poly, 0) * cfg_poly["percento_stat"] / 100
+                    player[stat_poly] += valore_poly
+                    bonus_poly[stat_poly] = valore_poly
+                text += (
+                    f"La polimerizzazione di {pl} eccheggia, dandoti "
+                    f"{_numero_placeholder_tecnico(bonus_poly['atk'])} atk "
+                    f"{_numero_placeholder_tecnico(bonus_poly['def'])} def e "
+                    f"{_numero_placeholder_tecnico(bonus_poly['agi'])} agilità!\n"
+                )
+
             if aniel in PROC_ANELLI and "aura" in PROC_ANELLI[aniel].get("assalto", {}):
                 cfg_anello = anello_cfg(aniel, "assalto", "aura")
                 stat_anello = cfg_anello["stat"]
@@ -4115,6 +4178,9 @@ def turno(main, oppo,cond=None):
     nome1 = main["Nome"]
     nome2 = oppo["Nome"]
 
+    text += _applica_valvola_inizio_sfida(main)
+    text += _applica_valvola_inizio_sfida(oppo)
+
     anello = main["anello"]
     anellon = oppo["anello"]
 
@@ -4130,6 +4196,10 @@ def turno(main, oppo,cond=None):
         if incantesimo_val("Leggiadra", "turno", "neutralizza_gadget", "blocca_anello_difensore", True):
             anellon = None
         text += "🎈 **Leggiadra neutralizza i gadget di entrambi!**\n"
+
+    text += _effetti_anelli_inizio_turno(main, oppo, anello, anellon)
+    if main["hp"] <= 0 or oppo["hp"] <= 0:
+        return text
 
     dps = main["atk"]
     difesan = oppo["def"]
@@ -4646,6 +4716,21 @@ def turno(main, oppo,cond=None):
     if possibile > random.randint(0, 100):
         text += f"{nome2} schiva il colpo di {nome1}\n"
         oppo["schivato"] = True
+        if anellon == "Dance Dance Revolution":
+            incremento_combo = anello_val(anellon, "turno", "combo", "incremento")
+            oppo["_ddr_combo"] = oppo.get("_ddr_combo", 0) + incremento_combo
+            text += f"CCCompo a {oppo['_ddr_combo']}!\n"
+        if anello == "WuWuWuuurm" and anello_ok(random.random(), anello, "turno", "presa_schivata"):
+            cfg_wurm = anello_cfg(anello, "turno", "presa_schivata")
+            atk_wurm = cfg_wurm["atk_base"] + (main.get("int", 0) if cfg_wurm.get("aggiungi_int", True) else 0)
+            def_wurm = max(0, difesan)
+            danni_wurm = random.uniform(
+                atk_wurm * (100 / ((100 + def_wurm * 1.5) + 1)),
+                atk_wurm * (100 / ((100 + def_wurm) + 1)),
+            )
+            danni_wurm = round(max(cfg_wurm["danno_min"], danni_wurm))
+            oppo["hp"] -= danni_wurm
+            text += f"Il wurm prende al volo {nome2}, mordendolo per {danni_wurm} danni!\n"
         if anello == "Coda demoniaca":
             oppo["lastD"] = anello_val(anello, "turno", "schivata", "lastD_reset")
         mod = 0
@@ -4653,6 +4738,9 @@ def turno(main, oppo,cond=None):
     
     else:
         oppo["schivato"] = False
+        if anellon == "Dance Dance Revolution" and oppo.get("_ddr_combo", 0) > 0:
+            oppo["_ddr_combo"] = 0
+            text += "CCCompo persa!\n"
         num = random.random()
         mod = random.uniform(0.8, 1.2)
         if main["schivato"] == True:
@@ -4747,12 +4835,23 @@ def turno(main, oppo,cond=None):
     if difesan < 0:
         dps -= difesan
         difesan = 0
-    danno = random.uniform(
-                dps * (100 / ((100 + difesan * 1.5)+1)), dps * (100 / ((100 + difesan)+1))
-            )
+    formula_gdr = anello == "GDR semplificato" or anellon == "GDR semplificato"
+    if formula_gdr:
+        danno = max(anello_val("GDR semplificato", "turno", "formula", "danno_min", 0), dps - difesan)
+        if mod > 0:
+            mod = 1
+    else:
+        danno = random.uniform(
+                    dps * (100 / ((100 + difesan * 1.5)+1)), dps * (100 / ((100 + difesan)+1))
+                )
+        if danno <= 20:
+            danno = 20
 
-    if danno <= 20:
-        danno = 20
+    if anello == "Dance Dance Revolution" and mod > 0:
+        combo_ddr = main.get("_ddr_combo", 0)
+        if combo_ddr > 0:
+            bonus_combo = anello_val(anello, "turno", "combo", "bonus_danno_per_combo_pct")
+            danno *= 1 + ((combo_ddr * bonus_combo) / 100)
     
     if main["incantamenti"] != []:
         if 'Primo impatto' in main["incantamenti"]:
@@ -4855,6 +4954,7 @@ def turno(main, oppo,cond=None):
             text += "+"
     
     
+    formula_tag = "F" if formula_gdr else ""
     dannov = round(danno * mod)
     main["fatto"] += dannov
     if setN == 'Spadaccino Musashi':
@@ -4889,14 +4989,14 @@ def turno(main, oppo,cond=None):
 
                     oppo["Scudo"] -= round(float(danno) * (mod + proc_val(setN, "turno", "scudo", "mod_bonus")))
                     vita = oppo["Scudo"]
-                    text += f"{nome1} infligge {dannov} danno allo scudo di {nome2} ({vita} scudo)!\n"
+                    text += f"{nome1} infligge {dannov}{formula_tag} danno allo scudo di {nome2} ({vita} scudo)!\n"
                     if oppo["Scudo"] <= 0:
                         text += "**Lo scudo si è rotto!**\n"
             else:
                     oppo["hp"] -= round(float(danno) * mod)
                     vita = oppo["hp"]
                     dannov = round(danno * mod)
-                    text += f"{nome1} infligge {dannov} danni a {nome2} ({vita})!\n"
+                    text += f"{nome1} infligge {dannov}{formula_tag} danni a {nome2} ({vita})!\n"
 
             if set == "Shogun moderno":
 
@@ -4906,7 +5006,7 @@ def turno(main, oppo,cond=None):
 
                             oppo["Scudo"] -= round(float(danno) * random.uniform(proc_val(set, "turno", "doppio_colpo", "moltiplicatore_min"), proc_val(set, "turno", "doppio_colpo", "moltiplicatore_max")))
                             vita = oppo["Scudo"]
-                            text += f"{nome1} infligge {dannov} danno allo scudo di {nome2} ({vita} scudo)!\n"
+                            text += f"{nome1} infligge {dannov}{formula_tag} danno allo scudo di {nome2} ({vita} scudo)!\n"
                             if oppo["Scudo"] <= 0:
                                 text += "**Lo scudo si è rotto!**\n"
                         else:
@@ -4914,7 +5014,7 @@ def turno(main, oppo,cond=None):
                             oppo["hp"] -= round(float(danno) * new_m)
                             vita = oppo["hp"]
                             dannov = round(danno * new_m)
-                            text += f"{nome1} infligge {dannov} danni a {nome2} ({vita})!\n"
+                            text += f"{nome1} infligge {dannov}{formula_tag} danni a {nome2} ({vita})!\n"
 
             if set == "Manipolatore di morte" and proc_ok(num, set, "turno", "scheletri"):
                     text += f"\n**{nome1} evoca una marea di scheletri ad attaccare!**\n"
@@ -4928,7 +5028,7 @@ def turno(main, oppo,cond=None):
                             oppo["Scudo"] -= round(float(danno) * new_m)
 
                             vita = oppo["Scudo"]
-                            text += f"Uno scheletrino infligge {dannov} danno allo scudo di {nome2} ({vita} scudo)!\n"
+                            text += f"Uno scheletrino infligge {dannov}{formula_tag} danno allo scudo di {nome2} ({vita} scudo)!\n"
                             if oppo["Scudo"] <= 0:
                                 text += "**Lo scudo si è rotto!**\n"
                             danno += proc_val(set, "turno", "scheletri", "crescita_danno_scudo")
@@ -4938,7 +5038,7 @@ def turno(main, oppo,cond=None):
 
                             vita = oppo["hp"]
                             dannov = round(danno * new_m)
-                            text += f"Uno scheletrino infligge {dannov} danni a {nome2} ({vita})!\n"
+                            text += f"Uno scheletrino infligge {dannov}{formula_tag} danni a {nome2} ({vita})!\n"
                             danno += proc_val(set, "turno", "scheletri", "crescita_danno_hp")
 
                     danno = round(float(danno) * new_m)
