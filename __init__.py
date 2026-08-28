@@ -839,7 +839,7 @@ async def tastiera(clinet,message):
     if message.from_user.username in inabilitati:
         text += "⚰️ Al momento sei memento morto...\n"
     
-    if ora - player[message.from_user.username]["last"] >= 3600:
+    if ora - player[message.from_user.username]["last"] >= nft.tempo_movimento_corrente(player, message.from_user.username, trader):
         text += "🚩 Ci si può spostare\n"
     
     mete = trader["meteo"][player[message.from_user.username]["location"]]
@@ -910,7 +910,7 @@ async def tastiera(clinet,message):
     if message.from_user.username in inabilitati:
         text += "⚰️ Al momento sei memento morto...\n"
     
-    if ora - player[message.from_user.username]["last"] >= 3600:
+    if ora - player[message.from_user.username]["last"] >= nft.tempo_movimento_corrente(player, message.from_user.username, trader):
         text += "🚩 Ci si può spostare\n"
     
     mete = trader["meteo"][player[message.from_user.username]["location"]]

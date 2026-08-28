@@ -73,6 +73,20 @@ def set_weekend_mod(mod):
     _WEEKEND_MOD_ATTIVO = mod
 
 
+def tempo_movimento_corrente(player, username, trader):
+    """Cooldown reale per il movimento, condiviso tra UI e callback."""
+    ccc = 3600
+    if _WEEKEND_MOD_ATTIVO == "senza_frontiere":
+        return weekend_mod_val(_WEEKEND_MOD_ATTIVO, "tempo_movimento", 5)
+    if player[username]["setta"]["benedizione"] == "Verme delle sabbie":
+        a = round(
+            trader["sette"][player[username]["setta"]["loc"]]["power"]
+            * (trader["sette"][player[username]["setta"]["loc"]]["%"] / 100)
+        )
+        ccc *= 1 - (a / 100)
+    return ccc
+
+
 def _snapshot_premi_dungeon(giocatore):
     exp = giocatore.get("exp", {}).get("expattuale", 0)
     return {
@@ -1334,12 +1348,7 @@ async def muoveeere(scelta,location,player,message,app, username,trader):
         now = time.time()
 
         elapsed = now - other_time
-        ccc = 3600
-        if _WEEKEND_MOD_ATTIVO == "senza_frontiere":
-            ccc = weekend_mod_val(_WEEKEND_MOD_ATTIVO, "tempo_movimento", 5)
-        elif player[username]["setta"]["benedizione"] == "Verme delle sabbie":
-            a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
-            ccc *= 1 - (a/100)
+        ccc = tempo_movimento_corrente(player, username, trader)
         
         if elapsed > ccc:
             if scelta in move[player[username]["location"]] or player[username]["location"] == "Hub":
