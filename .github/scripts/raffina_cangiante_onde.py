@@ -23,11 +23,17 @@ replace_once(
     '''def incantesimo_val(incantesimo, contesto, nome, chiave, default=None):\n    """Legge un valore di tuning di un incantesimo."""\n    return incantesimo_cfg(incantesimo, contesto, nome).get(chiave, default)\n\n\ndef set_cangiante_disponibili():\n    """Set copiabili da Cangiante: esclude quelli che forniscono solo bonus base alle statistiche."""\n    escludi_solo_bonus = incantesimo_val(\n        "Cangiante", "generale", "selezione_set", "escludi_solo_bonus_base", True\n    )\n    return [\n        nome_set\n        for nome_set in classi\n        if not (\n            escludi_solo_bonus\n            and proc_val(nome_set, "generale", "set_base", "solo_bonus_base", False)\n        )\n    ]\n''',
 )
 
-text = Path("nft.py").read_text(encoding="utf-8")
-old = 'random.choice(list(classi))'
-if text.count(old) != 2:
-    raise SystemExit(f"Attese 2 estrazioni Cangiante da classi, trovate {text.count(old)}")
-Path("nft.py").write_text(text.replace(old, 'random.choice(set_cangiante_disponibili())'), encoding="utf-8")
+replace_once(
+    "nft.py",
+    '''        set = random.choice(list(classi))\n        main["set"] = set''',
+    '''        set = random.choice(set_cangiante_disponibili())\n        main["set"] = set''',
+)
+
+replace_once(
+    "nft.py",
+    '''        setN = random.choice(list(classi))\n        oppo["set"] = setN''',
+    '''        setN = random.choice(set_cangiante_disponibili())\n        oppo["set"] = setN''',
+)
 
 replace_once(
     "frasi_incantesimi.py",
