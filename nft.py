@@ -4,7 +4,7 @@ from pyrogram import Client, ContinuePropagation, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import date
 from liste import *
-from bilanciamento import PROC_CLASSI, PROC_ANELLI, NUCLEI_CONFIG, DUNGEON_CONFIG, INCANTESIMI_CONFIG, EFFETTI_CONFIG
+from bilanciamento import PROC_CLASSI, PROC_ANELLI, NUCLEI_CONFIG, DUNGEON_CONFIG, INCANTESIMI_CONFIG, EFFETTI_CONFIG, WEEKEND_MOD_CONFIG, WEEKEND_MOD_POOL
 from frasi_set import FRASI_SET_TECNICHE
 from frasi_anelli import FRASI_ANELLI_TECNICHE
 from frasi_incantesimi import FRASI_INCANTESIMI_TECNICHE
@@ -48,6 +48,78 @@ def anello_ok(numero_casuale, anello, contesto, nome, default=0):
 def anello_val(anello, contesto, nome, chiave, default=None):
     """Legge un valore di tuning dell'anello."""
     return anello_cfg(anello, contesto, nome).get(chiave, default)
+
+
+_WEEKEND_MOD_ATTIVO = None
+
+
+def weekend_mod_cfg(mod):
+    return WEEKEND_MOD_CONFIG.get(mod, {})
+
+
+def weekend_mod_val(mod, chiave, default=None):
+    return weekend_mod_cfg(mod).get(chiave, default)
+
+
+def weekend_mod_descrizione(mod):
+    cfg = weekend_mod_cfg(mod)
+    if not cfg:
+        return "Nessun modificatore."
+    return f"{cfg.get('nome', mod)} — {cfg.get('descrizione', '')}".strip()
+
+
+def set_weekend_mod(mod):
+    global _WEEKEND_MOD_ATTIVO
+    _WEEKEND_MOD_ATTIVO = mod
+
+
+def _snapshot_premi_dungeon(giocatore):
+    exp = giocatore.get("exp", {}).get("expattuale", 0)
+    return {
+        "zaino": copy.deepcopy(giocatore.get("zaino", {})),
+        "gloria": giocatore.get("gloria", 0),
+        "grado": giocatore.get("grado", 0),
+        "exp": exp,
+    }
+
+
+def _duplica_premi_dungeon_da_snapshot(giocatore, prima, evento):
+    """Duplica solo i delta positivi prodotti dal dungeon; costi/perdite restano invariati."""
+    mod = evento.get("mod") if isinstance(evento, dict) else None
+    moltiplicatore = weekend_mod_val(mod, "moltiplicatore_premi_dungeon", 1)
+    if not prima or moltiplicatore <= 1:
+        return
+    extra = moltiplicatore - 1
+
+    zaino = giocatore.setdefault("zaino", {})
+    prima_zaino = prima.get("zaino", {})
+    for oggetto, quantita in list(zaino.items()):
+        try:
+            delta = quantita - prima_zaino.get(oggetto, 0)
+        except TypeError:
+            continue
+        if delta > 0:
+            zaino[oggetto] += delta * extra
+
+    for chiave in ("gloria", "grado"):
+        adesso = giocatore.get(chiave, 0)
+        delta = adesso - prima.get(chiave, 0)
+        if delta > 0:
+            giocatore[chiave] = adesso + delta * extra
+
+    exp_now = giocatore.get("exp", {}).get("expattuale", 0)
+    delta_exp = exp_now - prima.get("exp", 0)
+    if delta_exp > 0:
+        giocatore["exp"]["expattuale"] = exp_now + delta_exp * extra
+
+
+def _applica_stat_dungeon_evento(personaggio, evento):
+    mod = evento.get("mod") if isinstance(evento, dict) else None
+    moltiplicatore = weekend_mod_val(mod, "moltiplicatore_stat_dungeon", 1)
+    if moltiplicatore == 1:
+        return
+    for stat in ("hp", "def", "atk", "agi"):
+        personaggio[stat] = round(personaggio.get(stat, 0) * moltiplicatore)
 
 
 
@@ -1263,7 +1335,9 @@ async def muoveeere(scelta,location,player,message,app, username,trader):
 
         elapsed = now - other_time
         ccc = 3600
-        if player[username]["setta"]["benedizione"] == "Verme delle sabbie":
+        if _WEEKEND_MOD_ATTIVO == "senza_frontiere":
+            ccc = weekend_mod_val(_WEEKEND_MOD_ATTIVO, "tempo_movimento", 5)
+        elif player[username]["setta"]["benedizione"] == "Verme delle sabbie":
             a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
             ccc *= 1 - (a/100)
         
@@ -1290,7 +1364,7 @@ async def muoveeere(scelta,location,player,message,app, username,trader):
             await app.edit_message_text(
                             chat_id=message.message.chat.id,
                             message_id=message.message.message_id,
-                            text=f"Devi aspettare un'ora per muoverti, diciamo che circa ti manca {tempo} ore!",
+                            text=f"Devi aspettare ancora {tempo} per muoverti!",
                     ) 
 
 async def commerciante_inline(scelta,player,username,app,message):
@@ -2866,14 +2940,19 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
               
 
 async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dungeon,inabilitati,tuttov):
+    _snapshot_premi_weekend = _snapshot_premi_dungeon(player[username])
+    _supporter_nome_weekend = None
+    _snapshot_supporter_weekend = None
+    try:
+        _supporter_nome_weekend = player[username].get("supporto", {}).get("Nome")
+        if _supporter_nome_weekend and _supporter_nome_weekend != username and _supporter_nome_weekend in player:
+            _snapshot_supporter_weekend = _snapshot_premi_dungeon(player[_supporter_nome_weekend])
+    except Exception:
+        pass
     if ("Affronta" in scelta and "Boss" in player[username]["dungeon"]["mostri"]):
         other_time = last_dungeon.get(username,0)
         now = time.time() 
-        modificatore = 0
-        if evento["mod"] == "stop_dg":
-            modificatore -= 5               
-        if evento["mod"] == "più_dg":
-            modificatore += 5
+        modificatore = weekend_mod_val(evento.get("mod"), "mod_dungeon", 0)
         if username in nop:
             modificatore -= 60
         
@@ -2938,6 +3017,8 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
             * (player[username]["dungeon"]["piano"] / 10)
                     )
                 )
+
+            _applica_stat_dungeon_evento(user2, evento)
 
             if "supporto" in player[username]:
                 player[username].pop("supporto")
@@ -3148,15 +3229,16 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
 
 
 
+    _duplica_premi_dungeon_da_snapshot(player[username], _snapshot_premi_weekend, evento)
+    if _snapshot_supporter_weekend is not None and _supporter_nome_weekend in player:
+        _duplica_premi_dungeon_da_snapshot(player[_supporter_nome_weekend], _snapshot_supporter_weekend, evento)
+
 async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dungeon,nemici,inabilitati,trader):
+    _snapshot_premi_weekend = _snapshot_premi_dungeon(player[username])
     if scelta in nemici:
         other_time = last_dungeon.get(username,0)
         now = time.time() 
-        modificatore = 0
-        if evento["mod"] == "stop_dg":
-            modificatore -= 5                
-        if evento["mod"] == "più_dg":
-            modificatore += 5
+        modificatore = weekend_mod_val(evento.get("mod"), "mod_dungeon", 0)
         if username in nop:
             modificatore -= 60
         if player[username]["setta"]["benedizione"] == "Giaguaro":
@@ -3202,6 +3284,7 @@ async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dun
             * (player[username]["dungeon"]["piano"] / 8)
                     )
                 )
+            _applica_stat_dungeon_evento(user2, evento)
             user1["incantamenti"] = get_ench(player[username])
             user2["incantamenti"] = []
             text = f"{nome1} incontri {nome2} nel dungeon!\n\n"
@@ -3294,6 +3377,8 @@ async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dun
             await message.answer(f"Mancano {manca} secondi!")
 
 
+
+    _duplica_premi_dungeon_da_snapshot(player[username], _snapshot_premi_weekend, evento)
 
 async def arena(client, app, message, player, scelta, armi, protezioni, armieprot, Approcci, classi, trader, username):
     arenaitem = arenamod[trader["stagione"].lower()]
@@ -5540,14 +5625,11 @@ def turno(main, oppo,cond=None):
 
 
 async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dungeon,globali,inabilitati,scelte,tutto,tuttov,megaman,zombie,gungeon,magic,protezioni,armi,trader):
+    _snapshot_premi_weekend = _snapshot_premi_dungeon(player[username])
     if scelta not in nemici:
         other_time = last_dungeon.get(username,0)
         now = time.time() 
-        modificatore = 0
-        if evento["mod"] == "stop_dg":
-            modificatore += dungeon_global("generale", "mod_stop_dg", -5)
-        if evento["mod"] == "più_dg":
-            modificatore += dungeon_global("generale", "mod_piu_dg", 5)
+        modificatore = weekend_mod_val(evento.get("mod"), "mod_dungeon", 0)
         if username in nop:
             modificatore += dungeon_global("generale", "mod_nop", -60)
         if player[username]["setta"]["benedizione"] == "Avventuriero":
@@ -6801,4 +6883,4 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
 
         else:
             await message.answer(f"Mancano {manca} secondi!")
-
+    _duplica_premi_dungeon_da_snapshot(player[username], _snapshot_premi_weekend, evento)

@@ -63,6 +63,11 @@ if 1 == 1:
         with open("./backup/evento.json") as json_file:
         evento = json.load(json_file)
     except: pass
+try:
+    nft.set_weekend_mod(evento.get("mod"))
+except Exception:
+    nft.set_weekend_mod(None)
+
 strader = {"sfide":{}}
 sched = BackgroundScheduler({'apscheduler.job_defaults.max_instances': 12})
 
@@ -245,7 +250,7 @@ async def auto_check(username):
         else:
             minimo = 900
             if evento["mod"] == "flexville":
-                minimo - 450
+                minimo = nft.weekend_mod_val("flexville", "recupero_secondi", 450)
             if player[username]["team"] != "nessuno":
                 if "Chiesa" in clan[player[username]["team"]]["villaggio"]:
                     minimo -= 5 * int(clan[player[username]["team"]]["villaggio"]["Chiesa"]["lv"])
@@ -270,6 +275,7 @@ nop = []
 def premio_exp(a, b, text):
     possibilia = 0.2
     possibilib = 0.1
+    quantita_drop = int(nft.weekend_mod_val(_mod_weekend_corrente(), "quantita_drop_pvp", 1))
     #
     
     if "set" in a["scheda"]:
@@ -327,9 +333,9 @@ def premio_exp(a, b, text):
         ):
             contentino = "Un oggetto incartato"
         try:
-            a["zaino"][contentino] += 1
+            a["zaino"][contentino] += quantita_drop
         except:
-            a["zaino"][contentino] = 1
+            a["zaino"][contentino] = quantita_drop
         
         if a["notifiche"]["oggetti"] == "no":
             pass
@@ -337,7 +343,7 @@ def premio_exp(a, b, text):
             try:
                 app.send_message(
                     a["scheda"]["Nome"],
-                    f"Hai vinto {contentino} grazie alla tua bravura in questa sfida!",
+                    f"Hai vinto {quantita_drop}x {contentino} grazie alla tua bravura in questa sfida!",
                 )
             except:
                 pass
@@ -419,16 +425,16 @@ def premio_exp(a, b, text):
             b["l-streak"] = 0
 
         try:
-            b["zaino"][contentino] += 1
+            b["zaino"][contentino] += quantita_drop
         except:
-            b["zaino"][contentino] = 1
+            b["zaino"][contentino] = quantita_drop
         if b["notifiche"]["oggetti"] == "no":
             pass
         else:
 
             try:
                 app.send_message(
-                    b["scheda"]["Nome"], f"Di consolazione ottieni {contentino}!"
+                    b["scheda"]["Nome"], f"Di consolazione ottieni {quantita_drop}x {contentino}!"
                 )
             except:
                 pass
@@ -1215,6 +1221,56 @@ def reset(client, message):
 
 
 
+def _mod_weekend_corrente():
+    if isinstance(evento, dict):
+        return evento.get("mod")
+    return None
+
+
+def _tempo_sfida_weekend():
+    return int(nft.weekend_mod_val(_mod_weekend_corrente(), "tempo_sfida", 35))
+
+
+def _regala_pioggia_incantesimi():
+    quantita = int(nft.weekend_mod_val("piovono_incantesimi", "quantita_libri", 3))
+    for nome_giocatore in list(player):
+        libro = random.choice(list(liste.libri))
+        nft.gestione_zaino(player[nome_giocatore]["zaino"], "add", libro, quantita)
+        try:
+            app.send_message(
+                nome_giocatore,
+                f"🌧️ **Piovono incantesimi!**\nDal cielo ti cadono {quantita} copie di **{libro}**!",
+            )
+        except Exception:
+            pass
+
+
+def _regala_grazie_partecipato():
+    quantita = int(nft.weekend_mod_val("grazie_partecipato", "quantita_usabili", 20))
+    for nome_giocatore in list(player):
+        ricevuti = {}
+        for _ in range(quantita):
+            usabile = random.choice(liste.usabilitutti)
+            nft.gestione_zaino(player[nome_giocatore]["zaino"], "add", usabile, 1)
+            ricevuti[usabile] = ricevuti.get(usabile, 0) + 1
+        riepilogo = ", ".join(f"{q}x {oggetto}" for oggetto, q in ricevuti.items())
+        try:
+            app.send_message(
+                nome_giocatore,
+                f"🎁 **Grazie di aver partecipato!**\nRicevi {quantita} usabili comuni casuali:\n{riepilogo}",
+            )
+        except Exception:
+            pass
+
+
+def _attiva_mod_weekend(mod):
+    nft.set_weekend_mod(mod)
+    if mod == "piovono_incantesimi":
+        _regala_pioggia_incantesimi()
+    elif mod == "grazie_partecipato":
+        _regala_grazie_partecipato()
+
+
 @app.on_message(filters.command("iniziaevento") & filters.private & filters.user(autorizzati)
 )
 def reset(client, message):
@@ -1224,9 +1280,10 @@ def reset(client, message):
     else:
         scelto = trader["vorrei"][0]
         trader["vorrei"] = list()
-    mod = random.choice(["punti_extra", "calma", "sfide assurde", "stop_dg","più_dg","flexville",None,None,None])
+    mod = random.choice(nft.WEEKEND_MOD_POOL)
     evento["mod"] = mod
     evento["evento"] = scelto
+    _attiva_mod_weekend(mod)
 
     with open("./backup/evento.json", "w") as outfile:
         json.dump(evento, outfile)
@@ -1253,6 +1310,8 @@ def reset(client, message):
             testo+= " Corri corri che il dungeon non aspetta nessuno, preparati ad una corsa assurda!"
         if mod == "flexville":
             testo+= " Tempi morti dimezzati, muori meno per vivere meglio!"
+        if mod in ("ricchezze_sparse", "senza_frontiere", "dungeon_brutti_sporti_cattivi", "piovono_incantesimi", "grazie_partecipato"):
+            testo += " " + nft.weekend_mod_descrizione(mod)
     
     try:
         app.send_message(-1001549963117, testo)
@@ -1281,9 +1340,10 @@ def inizio_weew():
     else:
         scelto = trader["vorrei"][0]
         trader["vorrei"] = list()
-    mod = random.choice(["punti_extra", "calma", "sfide assurde", "stop_dg","più_dg","flexville",None,None,None])
+    mod = random.choice(nft.WEEKEND_MOD_POOL)
     evento["mod"] = mod
     evento["evento"] = scelto
+    _attiva_mod_weekend(mod)
 
     with open("./backup/evento.json", "w") as outfile:
         json.dump(evento, outfile)
@@ -1310,6 +1370,8 @@ def inizio_weew():
             testo+= " Corri corri che il dungeon non aspetta nessuno, preparati ad una corsa assurda!"
         if mod == "flexville":
             testo+= " Tempi morti dimezzati, muori meno per vivere meglio!"
+        if mod in ("ricchezze_sparse", "senza_frontiere", "dungeon_brutti_sporti_cattivi", "piovono_incantesimi", "grazie_partecipato"):
+            testo += " " + nft.weekend_mod_descrizione(mod)
         
     try:
         app.send_message(-1001549963117, testo)
@@ -1322,6 +1384,7 @@ def fine_weew():
     
     evento["evento"] = None
     evento["mod"] = None
+    nft.set_weekend_mod(None)
     with open("./backup/evento.json", "w") as outfile:
         json.dump(evento, outfile)
     for a in player:
@@ -2226,6 +2289,8 @@ def auto_backup():
 
 @sched.scheduled_job("cron", hour=00)
 def mezzanotte():
+    if _mod_weekend_corrente() == "piovono_incantesimi":
+        _regala_pioggia_incantesimi()
     
     trader["primo"] = None
     trader["bossoggi"] = nft.take_boss(liste.Boss, 3)
@@ -3880,7 +3945,7 @@ async def me(client, message):
                 else:
                     minimo = 900
                     if evento["mod"] == "flexville":
-                        minimo - 450
+                        minimo = nft.weekend_mod_val("flexville", "recupero_secondi", 450)
                     if player[username]["team"] != "nessuno":
                         if "Chiesa" in clan[player[username]["team"]]["villaggio"]:
                             minimo -= 5 * int(clan[player[username]["team"]]["villaggio"]["Chiesa"]["lv"])
@@ -4187,7 +4252,7 @@ async def me(client, message):
                 else:
                     minimo = 900
                     if evento["mod"] == "flexville":
-                        minimo - 450
+                        minimo = nft.weekend_mod_val("flexville", "recupero_secondi", 450)
                     if player[username]["team"] != "nessuno":
                         if "Chiesa" in clan[player[username]["team"]]["villaggio"]:
                             minimo -= 5 * int(clan[player[username]["team"]]["villaggio"]["Chiesa"]["lv"])
@@ -4589,7 +4654,7 @@ def sfide_brain():
                             
                             punti = furto
                             if evento["mod"] == "punti_extra":
-                                furto += 5
+                                punti += nft.weekend_mod_val("punti_extra", "punti_extra", 5)
                             
                             if "set" in a["scheda"]:
                                 if a["scheda"]["anello"] == "Anello d'oro fortissimo":
@@ -6418,7 +6483,7 @@ async def amichevole(client, message):
                     elif username != sfidante or sfidante not in list(inabilitati):
                         player[username]["preso"] = True
 
-                        tempo = 35
+                        tempo = _tempo_sfida_weekend()
                         nome1 = username
                         nome2 = sfidante
                         txt = f"Stai sfidando {sfidante}!\nHai {tempo} secondi per scegliere l'approccio!"
@@ -6650,7 +6715,7 @@ async def amichevole(client, message):
                     elif username != sfidante or sfidante not in list(inabilitati):
                         player[username]["preso"] = True
 
-                        tempo = 35
+                        tempo = _tempo_sfida_weekend()
                         nome1 = username
                         nome2 = sfidante
                         txt = f"Stai sfidando {sfidante}!\nHai {tempo} secondi per scegliere l'approccio!"
@@ -6940,11 +7005,7 @@ async def sfida(client, message):
                         await app.send_message(message.chat.id,
                             f"Complimenti, sei a {sfide} giorni di sfide!\nIn regalo {contentino}!"
                         )
-                tempo = 35
-                if evento["mod"] ==  "calma":
-                        tempo += 20
-                if evento["mod"] ==  "sfide assurde":
-                        tempo -= 7
+                tempo = _tempo_sfida_weekend()
                 nome1 = username
                 nome2 = sfidante
                 if nome1 == nome2:

@@ -520,6 +520,87 @@ NUCLEI_CONFIG = {
 
 
 # ============================================================
+# MODIFICATORI WEEKEND
+# ============================================================
+# Chiavi macchina stabili; nome/descrizione sono ciò che vede il giocatore.
+# Il pool mantiene circa un terzo di weekend senza modificatore.
+WEEKEND_MOD_CONFIG = {
+    "punti_extra": {
+        "nome": "Punti extra",
+        "descrizione": "Le sfide PvP assegnano 5 punti extra al vincitore.",
+        "punti_extra": 5,
+    },
+    "calma": {
+        "nome": "Calma",
+        "descrizione": "Hai 55 secondi per rispondere a una sfida invece di 35.",
+        "tempo_sfida": 55,
+    },
+    "sfide assurde": {
+        "nome": "Sfide assurde",
+        "descrizione": "Hai 28 secondi per rispondere a una sfida invece di 35.",
+        "tempo_sfida": 28,
+    },
+    "stop_dg": {
+        "nome": "Dungeon scialli",
+        "descrizione": "Le azioni del dungeon richiedono 5 secondi in più.",
+        "mod_dungeon": -5,
+    },
+    "più_dg": {
+        "nome": "Più dungeon",
+        "descrizione": "Le azioni del dungeon richiedono 5 secondi in meno.",
+        "mod_dungeon": 5,
+    },
+    "flexville": {
+        "nome": "Flexville",
+        "descrizione": "Il tempo base per riprendersi dalla morte passa da 900 a 450 secondi.",
+        "recupero_secondi": 450,
+    },
+    "ricchezze_sparse": {
+        "nome": "Ricchezze sparse",
+        "descrizione": "Quando una sfida PvP droppa un oggetto, ne ricevi 2 copie.",
+        "quantita_drop_pvp": 2,
+    },
+    "senza_frontiere": {
+        "nome": "Senza frontiere",
+        "descrizione": "Spostarsi tra le zone richiede soltanto 5 secondi.",
+        "tempo_movimento": 5,
+    },
+    "dungeon_brutti_sporti_cattivi": {
+        "nome": "Dungeon brutti, sporti e cattivi",
+        "descrizione": "I premi positivi del dungeon sono x2, ma le statistiche dei nemici e dei boss del dungeon sono x3.",
+        "moltiplicatore_premi_dungeon": 2,
+        "moltiplicatore_stat_dungeon": 3,
+    },
+    "piovono_incantesimi": {
+        "nome": "Piovono incantesimi",
+        "descrizione": "Ogni giocatore riceve 3 copie di un libro casuale all'inizio dell'evento e di nuovo a mezzanotte.",
+        "quantita_libri": 3,
+        "ripeti_mezzanotte": True,
+    },
+    "grazie_partecipato": {
+        "nome": "Grazie di aver partecipato",
+        "descrizione": "Ogni giocatore riceve 20 usabili comuni casuali.",
+        "quantita_usabili": 20,
+    },
+}
+
+WEEKEND_MOD_POOL = [
+    "punti_extra",
+    "calma",
+    "sfide assurde",
+    "stop_dg",
+    "più_dg",
+    "flexville",
+    "ricchezze_sparse",
+    "senza_frontiere",
+    "dungeon_brutti_sporti_cattivi",
+    "piovono_incantesimi",
+    "grazie_partecipato",
+    None, None, None, None, None, None,
+]
+
+
+# ============================================================
 # DATABASE HARDCODATO DUNGEON
 # ============================================================
 # Tutto il tuning del dungeon vive qui, soprattutto quello delle stanze.
