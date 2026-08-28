@@ -1,0 +1,51 @@
+name: Finalizza set Eroi della tempesta
+
+on:
+  push:
+    branches:
+      - feature/set-eroi-tempesta
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/set-eroi-tempesta
+          fetch-depth: 0
+
+      - name: Ricostruisci patch validato
+        shell: bash
+        run: |
+          git show 6dd2eca97474d518566246abe1a7250e948b19ba:.github/workflows/applica-set-eroi-tempesta-v2.yml > /tmp/v2.yml
+          awk '
+            /- name: Recupera e correggi patcher/{step=1; next}
+            step && /run: \|/{run=1; next}
+            run && /^      - name:/{exit}
+            run {sub(/^          /, ""); print}
+          ' /tmp/v2.yml > /tmp/prepara.sh
+          bash /tmp/prepara.sh
+
+      - name: Applica e valida
+        shell: bash
+        run: |
+          python /tmp/applica.py
+          python -m py_compile liste.py bilanciamento.py frasi_set.py nft.py
+          grep -Fq 'Guerriero Temporale' liste.py
+          grep -Fq 'Uditore del profondo' nft.py
+          grep -Fq '🧩 **Set:**' __init__.py
+          if grep -Fq 'Nucleo della tempesta' liste.py; then exit 1; fi
+          if grep -Fq 'Nucleo della tempesta' __init__.py; then exit 1; fi
+
+      - name: Commit finale
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/applica-set-eroi-tempesta-v3.yml
+          git add liste.py bilanciamento.py frasi_set.py nft.py __init__.py
+          git commit -m "Aggiungi set Eroi della tempesta"
+          git push origin HEAD:feature/set-eroi-tempesta
