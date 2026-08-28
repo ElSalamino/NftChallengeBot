@@ -1,0 +1,107 @@
+name: Aggiungi nuovi anelli
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - '.github/workflows/aggiungi-anelli-nuovi.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  applica:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Applica patch
+        run: python tools/aggiungi_anelli_nuovi.py
+
+      - name: Valida
+        run: |
+          python -m py_compile nft.py bilanciamento.py frasi_anelli.py liste.py
+          python - <<'PY'
+          import string
+          import bilanciamento
+          import frasi_anelli
+          import liste
+
+          nuovi = [
+              'Polimerizzazione', 'Valvola da 4"', 'Roulette russa', 'Roulette tibetana',
+              'Sasso rotolante', 'WuWuWuuurm', 'Dance Dance Revolution', 'GDR semplificato'
+          ]
+          for nome in nuovi:
+              assert nome in bilanciamento.PROC_ANELLI, nome
+              assert nome in frasi_anelli.FRASI_ANELLI_TECNICHE, nome
+              assert nome in liste.anellic, nome
+
+              frase = frasi_anelli.FRASI_ANELLI_TECNICHE[nome]
+              for _, campo, formato, conversione in string.Formatter().parse(frase):
+                  if campo is None:
+                      continue
+                  valore = bilanciamento.PROC_ANELLI[nome]
+                  for parte in campo.split('.'):
+                      assert isinstance(valore, dict) and parte in valore, (nome, campo)
+                      valore = valore[parte]
+
+          p = bilanciamento.PROC_ANELLI
+          assert p['Polimerizzazione']['assalto']['polimerizzazione']['percento_stat'] == 20
+          assert p['Valvola da 4"']['sfida']['inizio'] == {'proc': 100, 'atk': 100, 'def': 100, 'agi': 1}
+          assert abs(p['Roulette russa']['turno']['roulette']['proc'] - (100/6)) < 1e-6
+          assert p['Roulette russa']['turno']['roulette']['danno'] == 100
+          assert p['Roulette tibetana']['turno']['roulette']['cura'] == 100
+          assert p['Sasso rotolante']['turno']['valanga']['proc'] == 10
+          assert p['Sasso rotolante']['turno']['valanga']['danno_per_carica'] == 2
+          assert p['WuWuWuuurm']['turno']['presa_schivata']['proc'] == 30
+          assert p['WuWuWuuurm']['turno']['presa_schivata']['atk_base'] == 144
+          assert p['Dance Dance Revolution']['turno']['combo']['bonus_danno_per_combo_pct'] == 10
+          assert p['GDR semplificato']['turno']['formula']['attivo_per_entrambi'] is True
+
+          src = open('nft.py', encoding='utf-8').read()
+          controlli = [
+              '_applica_valvola_inizio_sfida',
+              '_effetti_anelli_inizio_turno',
+              'La polimerizzazione di {pl} eccheggia',
+              'CCCompo a',
+              'CCCompo persa',
+              'Il wurm prende al volo',
+              'formula_gdr = anello == "GDR semplificato" or anellon == "GDR semplificato"',
+              'formula_tag = "F" if formula_gdr else ""',
+          ]
+          for c in controlli:
+              assert c in src, c
+
+          # Le descrizioni lore devono essere presenti in qualche dizionario di liste.py.
+          lore = {
+              'Polimerizzazione': 'Unisciti ai tuoi compagni ed assicurati di vincere.',
+              'Valvola da 4"': 'Concettualmente un blocco di ottone.',
+              'Roulette russa': '1/6 di spararti o 1/6 di sparare',
+              'Roulette tibetana': '1/6 di curarti o 1/6 di curare',
+              'Sasso rotolante': 'Crea lentamente una valanga ogni turno, quando il sasso arriva arriva!',
+              'WuWuWuuurm': 'Un piccolo wurm che ti aiuta a prendere gli avversari al volo!',
+              'Dance Dance Revolution': 'CCCompo di schivate!',
+              'GDR semplificato': 'Trasforma le sfide in matematica, ora il danno è attacco - difesa!',
+          }
+          trovati = {}
+          for valore in vars(liste).values():
+              if isinstance(valore, dict):
+                  for k, v in lore.items():
+                      if valore.get(k) == v:
+                          trovati[k] = True
+          assert set(trovati) == set(lore), set(lore) - set(trovati)
+          print('Nuovi anelli validati:', len(nuovi))
+          PY
+
+      - name: Commit e pulizia
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f .github/workflows/aggiungi-anelli-nuovi.yml tools/aggiungi_anelli_nuovi.py
+          git add nft.py bilanciamento.py frasi_anelli.py liste.py
+          git commit -m "feat: aggiungi nuovi anelli e meccaniche"
+          git push origin refactor/bilanciamento-config
