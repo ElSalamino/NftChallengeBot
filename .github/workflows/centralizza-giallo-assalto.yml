@@ -1,0 +1,52 @@
+name: Centralizza Giallo assalto
+
+on:
+  push:
+    branches:
+      - refactor/bilanciamento-config
+    paths:
+      - '.github/workflows/centralizza-giallo-assalto.yml'
+      - '.github/scripts/centralizza_giallo_assalto.py'
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/bilanciamento-config
+          fetch-depth: 0
+
+      - name: Centralizza Giallo
+        run: python .github/scripts/centralizza_giallo_assalto.py
+
+      - name: Verifica moduli validi
+        run: python -m py_compile nft.py bilanciamento.py frasi_incantesimi.py liste.py
+
+      - name: Verifica entrambi i percorsi assalto
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          nft = Path('nft.py').read_text(encoding='utf-8')
+          init = Path('__init__.py').read_text(encoding='utf-8')
+          assert 'def calcola_omini_assalto(' in nft
+          assert 'calcola_omini_assalto(\n                                        giocatore, username, clan[user["team"]]["last"]' in nft
+          assert 'giocatore["incantamenti"] = nft.get_ench(player[username])' in init
+          assert 'nft.calcola_omini_assalto(' in init
+          assert 'output = messaggio_giallo + nft.assedio(' in init
+          assert '__giallo__' in nft
+          print('OK: Giallo condiviso su entrambi i percorsi assalto')
+          PY
+
+      - name: Commit finale
+        run: |
+          git restore __pycache__ 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nft.py __init__.py
+          git rm -f .github/workflows/centralizza-giallo-assalto.yml .github/scripts/centralizza_giallo_assalto.py
+          git commit -m "fix: applica Giallo a tutti i percorsi assalto"
+          git push origin refactor/bilanciamento-config
