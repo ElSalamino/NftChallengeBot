@@ -801,6 +801,48 @@ INCANTESIMI_CONFIG = {
     "Evocabilità": {
         "dungeon": {"supporto": {"atk": 40, "def": 40, "agi": 10}},
     },
+    "Cangiante": {
+        "turno": {
+            "attacco": {"proc": 99},
+            "difesa": {"proc": 99},
+        },
+    },
+    "Inevitabile": {
+        "turno": {"difesa": {"proc": 100, "danno_attaccante": 5, "danno_difensore": 5}},
+    },
+    "Spumeggiante": {
+        "turno": {
+            "attacco": {"proc": 8},
+            "difesa": {"proc": 8},
+        },
+    },
+    "Onde dell'abisso": {
+        "assalto": {"onda": {"proc": 100, "atk_pct_min": 30, "atk_pct_max": 70}},
+    },
+    "Armadillibilità": {
+        "assalto": {"morte": {"proc": 100, "def_pct": 100}},
+    },
+    "Giallo": {
+        "assalto": {"aiutanti": {"proc": 50, "aiutanti_extra": 10}},
+    },
+    "Dominio semplice": {
+        "turno": {
+            "attacco": {"proc": 50, "costo_hp": 3},
+            "difesa": {"proc": 50, "costo_hp": 3},
+        },
+    },
+    "Caricato": {
+        "turno": {
+            "attacco": {
+                "proc": 10,
+                "cariche_per_proc": 1,
+                "hp_sotto": 100,
+                "danno_per_carica": 5,
+                "reset_cariche": 0,
+            }
+        },
+    },
+
 }
 
 
