@@ -997,32 +997,53 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                     giocatore["incantamenti"] = get_ench(player[username])
                                     if "pet" in player[username]:
                                         giocatore["animale"] = player[username]["pet"]
-                                    matx = 0
-                                    for pl in clan[user["team"]]["last"]:
-                                        elapsed = time.time() - clan[user["team"]]["last"][pl]
-                                        if elapsed < 301 and username != pl:
-                                            matx += 1
-                                            
-                                    matx_effettivo = matx
+                                    # Gli "omini" del clan sono le entry recenti di last.
+                                    # Giallo inserisce vere entry fittizie nello stesso dizionario:
+                                    # ogni proc crea 10 chiavi nuove, quindi gli stack sono naturali.
+                                    last_clan = clan[user["team"]]["last"]
+                                    ora_omini = time.time()
+                                    prefisso_giallo = "__giallo__"
+
+                                    # Le entry finte scadute non servono più: puliamo solo quelle,
+                                    # senza cambiare il comportamento storico delle entry reali.
+                                    for pl, timestamp in list(last_clan.items()):
+                                        if str(pl).startswith(prefisso_giallo) and (ora_omini - timestamp) >= 301:
+                                            last_clan.pop(pl, None)
+
                                     messaggio_giallo = ""
                                     if "Giallo" in giocatore.get("incantamenti", []) and incantesimo_ok(random.random(), "Giallo", "assalto", "aiutanti"):
-                                        matx_effettivo += incantesimo_val("Giallo", "assalto", "aiutanti", "aiutanti_extra")
+                                        quanti_giallini = incantesimo_val("Giallo", "assalto", "aiutanti", "aiutanti_extra")
+                                        token_giallo = time.time_ns()
+                                        for indice_giallo in range(quanti_giallini):
+                                            chiave_giallo = f"{prefisso_giallo}{username}__{token_giallo}__{indice_giallo}"
+                                            last_clan[chiave_giallo] = ora_omini
                                         messaggio_giallo = "Venite a me ~~Minions~~ giallini, è ora di distruggere questo posto!\n"
 
-                                    serv = matx_effettivo
-                                    if matx_effettivo < proc_val("Eroe caduto", "assalto", "supporto_clan", "compagni_soglia") and giocatore["set"] == 'Eroe caduto':
+                                    matx = 0
+                                    omini_reali = 0
+                                    giallini_attivi = 0
+                                    for pl, timestamp in last_clan.items():
+                                        elapsed = ora_omini - timestamp
+                                        if elapsed < 301 and username != pl:
+                                            matx += 1
+                                            if str(pl).startswith(prefisso_giallo):
+                                                giallini_attivi += 1
+                                            else:
+                                                omini_reali += 1
+
+                                    serv = matx
+                                    if matx < proc_val("Eroe caduto", "assalto", "supporto_clan", "compagni_soglia") and giocatore["set"] == 'Eroe caduto':
                                         serv += proc_val("Eroe caduto", "assalto", "supporto_clan", "serv_bonus_nft")
                                         
                                     if giocatore["set"] == 'Eroe della rivolta':
                                         serv = serv * proc_val("Eroe della rivolta", "assalto", "supporto_clan", "serv_mul")
-                                    if player[username]["setta"]["benedizione"] == 'Orso polare' and matx_effettivo > 2:
+                                    if player[username]["setta"]["benedizione"] == 'Orso polare' and matx > 2:
                                         
-                                        a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
+                                        a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"] /100))
                                         serv += (a/4)
-                                    if player[username]["setta"]["benedizione"] == 'Kaimano' and matx_effettivo <= 2:
-                                        a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
+                                    if player[username]["setta"]["benedizione"] == 'Kaimano' and matx <= 2:
+                                        a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"] /100))
                                         serv += (a/4)
-                                    
                                     bostabile = ["def", "atk", "agi"]
                                     for stat in bostabile:
     
@@ -1041,9 +1062,9 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                         clan[clan[user["team"]]["inguerra"]]["setting"]
                                         
                                     )
-                                    output += f"\n{matx} persone assaltano con te!"
-                                    if matx_effettivo != matx:
-                                        output += f" ({matx_effettivo} considerate nei calcoli grazie a Giallo)"
+                                    output += f"\n{omini_reali} persone assaltano con te!"
+                                    if giallini_attivi:
+                                        output += f" (+{giallini_attivi} giallini attivi)"
                                     player[username]["aigettoni"]["assalti"] += 1
                                     if player[username]["aigettoni"]["assalti"] >= 70:
                                         try:
