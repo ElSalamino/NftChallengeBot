@@ -60,10 +60,11 @@ old_ui = '''    if ora - player[message.from_user.username]["last"] >= 3600:
 new_ui = '''    if ora - player[message.from_user.username]["last"] >= nft.tempo_movimento_corrente(player, message.from_user.username, trader):
         text += "🚩 Ci si può spostare\\n"
 '''
-if old_ui in ini:
-    ini = ini.replace(old_ui, new_ui, 1)
+numero_ui = ini.count(old_ui)
+if numero_ui:
+    ini = ini.replace(old_ui, new_ui)
 elif new_ui not in ini:
-    raise RuntimeError("Indicatore movimento menu non trovato")
+    raise RuntimeError("Indicatori movimento menu non trovati")
 
 nft_path.write_text(nft, encoding="utf-8")
 init_path.write_text(ini, encoding="utf-8")
@@ -71,6 +72,6 @@ init_path.write_text(ini, encoding="utf-8")
 ast.parse(nft, filename="nft.py")
 assert "def tempo_movimento_corrente(" in nft
 assert "ccc = tempo_movimento_corrente(player, username, trader)" in nft
-assert '>= nft.tempo_movimento_corrente(player, message.from_user.username, trader)' in ini
-assert '>= 3600:\n        text += "🚩 Ci si può spostare' not in ini
-print("Movimento weekend allineato")
+assert ini.count('nft.tempo_movimento_corrente(player, message.from_user.username, trader)') >= 2
+assert old_ui not in ini
+print(f"Movimento weekend allineato; indicatori aggiornati: {numero_ui or 'gia presenti'}")
