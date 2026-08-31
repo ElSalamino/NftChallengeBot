@@ -1,0 +1,95 @@
+name: Recover arena matchmaking update
+
+on:
+  push:
+    branches:
+      - feature/set-eroi-tempesta
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/set-eroi-tempesta
+          fetch-depth: 0
+
+      - name: Apply corrected arena patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          source = Path('.github/workflows/arena-matchmaking.yml').read_text(encoding='utf-8')
+          start_marker = "          python - <<'PY'\n"
+          end_marker = "\n          PY\n\n          python -m py_compile nft.py"
+
+          start = source.index(start_marker) + len(start_marker)
+          end = source.index(end_marker, start)
+          script = source[start:end]
+
+          # Nel primo tentativo new_queue_tail non era raw: il \\n della stringa
+          # generata diventava un newline reale dentro la f-string di nft.py.
+          old = "new_queue_tail = '''"
+          if old not in script:
+              raise SystemExit('new_queue_tail marker not found')
+          script = script.replace(old, "new_queue_tail = r'''", 1)
+
+          exec(compile(script, '<arena-matchmaking-patch>', 'exec'), {})
+          PY
+
+          python -m py_compile nft.py
+          git diff --check
+
+      - name: Verify arena matchmaking rules
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          text = Path('nft.py').read_text(encoding='utf-8')
+          required = {
+              'timeout': 'ARENA_MATCH_TIMEOUT = 600',
+              'bot': 'ARENA_BOT_NAME = "Ermenegildo"',
+              'queue': 'trader["arena_matchmaking"]',
+              'same_round': 'chiave = str(_arena_round(scheda))',
+              'games': 'return int(scheda.get("W", 0)) + int(scheda.get("L", 0))',
+              'base_picks': 'pick_umani_teorici = 4 + partite',
+              'bonus_20': '((pick_umani_teorici * 120) + 99) // 100',
+              'random_pick': 'scelta = random.choice(_arena_opzioni_pick_bot(arenaitem, trader))',
+              'expired': 'if attesa >= ARENA_MATCH_TIMEOUT:',
+              'bot_fight': 'await _arena_scontro_bot(',
+          }
+          for name, token in required.items():
+              if token not in text:
+                  raise SystemExit(f'missing {name}: {token}')
+
+          forbidden = [
+              'if trader["arena"] != None and trader["arena"] != username:',
+              'trader["arena"] = username',
+          ]
+          for token in forbidden:
+              if token in text:
+                  raise SystemExit(f'legacy arena queue still present: {token}')
+
+          # Formula attesa: 4 pick iniziali, +1 per partita, poi +20% arrotondato in alto.
+          expected = {0: 5, 1: 6, 2: 8, 3: 9, 6: 12, 11: 18}
+          for games, wanted in expected.items():
+              human = 4 + games
+              got = ((human * 120) + 99) // 100
+              if got != wanted:
+                  raise SystemExit(f'pick formula mismatch at {games} games: {got} != {wanted}')
+          PY
+
+      - name: Commit arena update and clean temporary workflows
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/arena-matchmaking.yml .github/workflows/arena-matchmaking-recover.yml
+          git add nft.py .github/workflows/arena-matchmaking.yml .github/workflows/arena-matchmaking-recover.yml
+          git commit -m "Aggiorna matchmaking arena con Ermenegildo"
+          git push origin feature/set-eroi-tempesta
