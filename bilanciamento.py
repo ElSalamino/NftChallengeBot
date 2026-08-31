@@ -1049,3 +1049,15 @@ PROC_CLASSI.update({
         "sfida": {"riuso_approccio": {"danno_hp": 10}},
     },
 })
+
+
+# --- SECONDA ONDATA SET: BILANCIAMENTO ---
+PROC_CLASSI.update({
+    "Anima persa": {"sfida": {"schivata_negata": {"hp": 200}}},
+    "Disabilitatore provetto": {"assalto": {"muraglione": {"atk_mul": 4}}},
+    "Controllore del cielo": {"sfida": {"cura_in_potere": {"atk_divisore": 2, "def_divisore": 2}}},
+    "Eterna sventura": {"sfida": {"sventura": {"proc": 20, "atk_target": -10, "def_target": -10, "agi_target": -10}}},
+    "Pescatore alternativo": {"sfida": {"azzardo": {"proc": 50, "atk_mul": 2, "def_mul": 0.5}}},
+    "Esca vivente": {"sfida": {"esca": {"def": 0}}, "assalto": {"esca": {"def": 0}}},
+    "Giustiziere a V": {"sfida": {"giudizio": {"turno_min": 4, "agi_mul": 2}}, "assalto": {"accampamento": {"atk_mul": 6}}},
+})

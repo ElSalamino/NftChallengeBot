@@ -146,3 +146,15 @@ FRASI_SET_TECNICHE.update({
     "Evocatore delle maree": "Assalto: attiva sempre Onde dell'abisso; alla morte infligge a tutte le strutture il {assalto.tsunami.percento_atk:pct} del proprio ATK. Sfida: nessun effetto.",
     "Mecha sciamano": "Sfida: perde {sfida.riuso_approccio.danno_hp} HP a ogni proprio turno e riapplica il moltiplicatore dell'approccio. Assalto: nessun effetto.",
 })
+
+
+# --- SECONDA ONDATA SET: FRASI TECNICHE ---
+FRASI_SET_TECNICHE.update({
+    "Anima persa": "Sfida: non può schivare. Ogni tiro che sarebbe stato una schivata concede {sfida.schivata_negata.hp} HP e il colpo prosegue normalmente.",
+    "Disabilitatore provetto": "ASSALTO — HARD COUNTER del Muraglione extra: se lo scegli come bersaglio, il tuo ATK viene moltiplicato per {assalto.muraglione.atk_mul:x} per quell'assalto.",
+    "Controllore del cielo": "Sfida: a fine di ogni turno, se hai guadagnato HP durante quel turno, guadagni ATK pari agli HP recuperati/{sfida.cura_in_potere.atk_divisore} e DEF pari agli HP recuperati/{sfida.cura_in_potere.def_divisore}.",
+    "Eterna sventura": "Sfida: quando un tuo colpo va a segno hai il {sfida.sventura.proc:pct} di togliere {sfida.sventura.atk_target:abs} ATK, {sfida.sventura.def_target:abs} DEF e {sfida.sventura.agi_target:abs} AGI all'avversario.",
+    "Pescatore alternativo": "Sfida: a ogni tuo turno hai il {sfida.azzardo.proc:pct} di moltiplicare permanentemente per {sfida.azzardo.atk_mul:x} l'ATK e per {sfida.azzardo.def_mul:x} la DEF. I proc successivi si accumulano fino a fine sfida.",
+    "Esca vivente": "Sfida: all'inizio la DEF viene impostata a {sfida.esca.def}. Assalto: anche la DEF dell'assaltatore viene impostata a {assalto.esca.def}.",
+    "Giustiziere a V": "Sfida: dal proprio turno {sfida.giudizio.turno_min} in poi l'AGI è moltiplicata una volta per {sfida.giudizio.agi_mul:x} e resta così fino a fine sfida. ASSALTO — HARD COUNTER dell'Accampamento: se lo bersagli, ATK ×{assalto.accampamento.atk_mul}.",
+})

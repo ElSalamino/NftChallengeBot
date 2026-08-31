@@ -2229,3 +2229,37 @@ def set_per_oggetto(nome_oggetto):
         if base in componenti:
             trovati.append(nome_set)
     return sorted(trovati, key=str.lower)
+
+
+# --- SECONDA ONDATA SET: CATALOGO ---
+classi.update({
+    "Anima persa": ["Bastone del folle", "Anima dispersa"],
+    "Disabilitatore provetto": ["Cacciavite multiuso", "Delle squame viscide"],
+    "Controllore del cielo": ["Artiglio di Drago", "Ali piumate"],
+    "Eterna sventura": ["Guanti di cormorant", "Corona maledetta"],
+    "Pescatore alternativo": ["Ascia bipenne", "Cappellino da pescatore"],
+    "Esca vivente": ["Canna blu", "Armatura di carne"],
+    "Giustiziere a V": ["Frusta telaia", "Armatura del folle"],
+})
+Approccini.update({
+    "Anima persa": ["Conservativo", "Difensivo", "Impavido"],
+    "Disabilitatore provetto": ["Aggressivo", "Spinto", "Autorevole"],
+    "Controllore del cielo": ["Agile", "Schivo", "Conservativo"],
+    "Eterna sventura": ["Malevolo", "Aggressivo", "Vendicativo"],
+    "Pescatore alternativo": ["Rischioso", "Aggressivo", "Spavaldo"],
+    "Esca vivente": ["Rischioso", "Impavido", "Conservativo"],
+    "Giustiziere a V": ["Agile", "Vendicativo", "Spinto"],
+})
+bonus.update({nome: {"hp": 0, "def": 0, "atk": 0, "agi": 0} for nome in [
+    "Anima persa", "Disabilitatore provetto", "Controllore del cielo", "Eterna sventura",
+    "Pescatore alternativo", "Esca vivente", "Giustiziere a V"
+]})
+frasi_set.update({
+    "Anima persa": "Non puoi più scappare dal colpo: quando il corpo proverebbe a schivare, l'anima resta e ti regala vita per continuare a combattere.",
+    "Disabilitatore provetto": "Viti, cavi e un pessimo rapporto con i muri: in assalto sai esattamente cosa smontare per farli crollare.",
+    "Controllore del cielo": "Ogni cura ti porta più in alto: recuperare vita alimenta anche attacco e difesa fino a renderti padrone del cielo.",
+    "Eterna sventura": "Ogni colpo può lasciare qualcosa di peggio di una ferita: l'avversario perde lentamente la capacità di reagire.",
+    "Pescatore alternativo": "La pesca è secondaria: ogni turno puoi buttare via prudenza e difesa per trasformarti in una macchina d'attacco.",
+    "Esca vivente": "La difesa non serve se sei tu l'esca: entri in sfida e in assalto completamente scoperto.",
+    "Giustiziere a V": "Il giudizio arriva dopo qualche turno: diventi molto più agile e contro gli accampamenti non conosci mezze misure.",
+})

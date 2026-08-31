@@ -5139,7 +5139,7 @@ def turno(main, oppo,cond=None):
     possibile += dogebonus
 
 
-    if possibile > random.randint(0, 100):
+    if _tiro_schivata_seconda_ondata(possibile, oppo):
         text += f"{nome2} schiva il colpo di {nome1}\n"
         oppo["schivato"] = True
         if anellon == "Dance Dance Revolution":
@@ -7441,3 +7441,74 @@ def assedio(playerg, player, nemico, target, team, order, clan, meteo=None, sett
             testo += f"🌊 Cadendo, {player['Nome']} genera uno tsunami: {danno} danni a ciascuna delle {colpite} strutture rimaste!\\n"
 
     return prefisso + testo
+
+
+# --- SECONDA ONDATA SET: RUNTIME ---
+_turno_seconda_ondata_base = turno
+_assedio_seconda_ondata_base = assedio
+
+def _tiro_schivata_seconda_ondata(possibile, difensore):
+    successo = possibile > random.randint(0, 100)
+    if successo and difensore.get("set") == "Anima persa":
+        hp = proc_val("Anima persa", "sfida", "schivata_negata", "hp")
+        difensore["hp"] += hp
+        difensore["_anima_persa_hp"] = difensore.get("_anima_persa_hp", 0) + hp
+        return False
+    return successo
+
+def _inizializza_seconda_ondata_sfida(p):
+    if p.get("set") == "Esca vivente" and not p.get("_esca_vivente_inizializzata"):
+        p["def"] = proc_val("Esca vivente", "sfida", "esca", "def")
+        p["_esca_vivente_inizializzata"] = True
+        return f"🪱 {p['Nome']} si offre come esca e rinuncia completamente alla difesa!\n"
+    return ""
+
+def turno(main, oppo, cond=None):
+    if not _e_sfida_pvp(main, oppo, cond):
+        return _turno_seconda_ondata_base(main, oppo, cond)
+    prefisso = _inizializza_seconda_ondata_sfida(main) + _inizializza_seconda_ondata_sfida(oppo)
+    if main.get("set") == "Giustiziere a V":
+        main["_giustiziere_turni"] = main.get("_giustiziere_turni", 0) + 1
+        if main["_giustiziere_turni"] >= proc_val("Giustiziere a V", "sfida", "giudizio", "turno_min") and not main.get("_giustiziere_agilita_attiva"):
+            main["agi"] *= proc_val("Giustiziere a V", "sfida", "giudizio", "agi_mul")
+            main["_giustiziere_agilita_attiva"] = True
+            prefisso += f"⚖️ {main['Nome']} entra nella fase del giudizio: agilità raddoppiata!\n"
+    if main.get("set") == "Pescatore alternativo" and proc_ok(random.random(), "Pescatore alternativo", "sfida", "azzardo"):
+        main["atk"] *= proc_val("Pescatore alternativo", "sfida", "azzardo", "atk_mul")
+        main["def"] *= proc_val("Pescatore alternativo", "sfida", "azzardo", "def_mul")
+        prefisso += f"🎣 {main['Nome']} rischia tutto: attacco raddoppiato e difesa dimezzata!\n"
+    hp_prima = {id(main): main.get("hp", 0), id(oppo): oppo.get("hp", 0)}
+    fatto_prima = main.get("fatto", 0)
+    anima_prima = oppo.get("_anima_persa_hp", 0)
+    testo = _turno_seconda_ondata_base(main, oppo, cond)
+    anima_dopo = oppo.get("_anima_persa_hp", 0)
+    if anima_dopo > anima_prima:
+        testo += f"👻 {oppo['Nome']} avrebbe schivato, ma l'Anima persa gli concede {anima_dopo-anima_prima} HP e il colpo continua!\n"
+    for combattente in (main, oppo):
+        if combattente.get("set") == "Controllore del cielo":
+            guadagno = combattente.get("hp", 0) - hp_prima[id(combattente)]
+            if guadagno > 0:
+                atk_gain = guadagno / proc_val("Controllore del cielo", "sfida", "cura_in_potere", "atk_divisore")
+                def_gain = guadagno / proc_val("Controllore del cielo", "sfida", "cura_in_potere", "def_divisore")
+                combattente["atk"] += atk_gain
+                combattente["def"] += def_gain
+                testo += f"🪽 {combattente['Nome']} converte {guadagno:g} HP in +{atk_gain:g} ATK e +{def_gain:g} DEF!\n"
+    if main.get("set") == "Eterna sventura" and main.get("fatto", 0) > fatto_prima and not oppo.get("schivato", False) and proc_ok(random.random(), "Eterna sventura", "sfida", "sventura"):
+        for stat, key in (("atk", "atk_target"), ("def", "def_target"), ("agi", "agi_target")):
+            oppo[stat] += proc_val("Eterna sventura", "sfida", "sventura", key)
+        testo += f"☠️ La sventura di {main['Nome']} corrode {oppo['Nome']}: -10 ATK, -10 DEF e -10 AGI!\n"
+    return prefisso + testo
+
+def assedio(playerg, player, nemico, target, team, order, clan, meteo=None, setting=dict()):
+    prefisso = ""
+    nome_set = player.get("set")
+    if nome_set == "Esca vivente":
+        player["def"] = proc_val("Esca vivente", "assalto", "esca", "def")
+        prefisso += "🪱 Ti presenti come esca vivente: difesa azzerata!\n"
+    if nome_set == "Disabilitatore provetto" and target == "Muraglione extra":
+        player["atk"] *= proc_val("Disabilitatore provetto", "assalto", "muraglione", "atk_mul")
+        prefisso += "🔧 Smonti il Muraglione extra pezzo per pezzo: attacco ×4!\n"
+    if nome_set == "Giustiziere a V" and target == "Accampamento":
+        player["atk"] *= proc_val("Giustiziere a V", "assalto", "accampamento", "atk_mul")
+        prefisso += "⚖️ L'Accampamento è sotto giudizio: attacco ×6!\n"
+    return prefisso + _assedio_seconda_ondata_base(playerg, player, nemico, target, team, order, clan, meteo, setting)
