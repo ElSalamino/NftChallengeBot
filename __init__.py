@@ -2556,14 +2556,16 @@ async def arenaff(client, message):
                     reply_to_message_id=player[username]["arena"]["pin"]
                 )
             except Exception as h:
-                player[username].pop("arena")
-                try:
-                    await client.delete_messages(
-                    chat_id=message.chat.id,
-                    message_ids=player[username]["arena"]["pin"]
-                )
-                except:
-                    pass
+                arena_pin = player[username].get("arena", {}).get("pin")
+                player[username].pop("arena", None)
+                if arena_pin is not None:
+                    try:
+                        await client.delete_messages(
+                            chat_id=message.chat.id,
+                            message_ids=arena_pin
+                        )
+                    except Exception:
+                        pass
                 await message.reply(f"L'arena è stata chiusa per attività sospette\n{h}")
         else:
             bottoni = list()
