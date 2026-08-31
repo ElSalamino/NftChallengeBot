@@ -111,7 +111,7 @@ for armature in liste.armi:
 
     
 
-tempesta = ["Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0","Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0"]
+tempesta = ["Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0","Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0","Assetto mecha LV0","Lama temporale LV0","Una valigia senza fine LV0","Un libro su tutte le creature LV0"]
 zombie = ["Un armatura in filo spinato LV0","Un pompa del nonno LV0","Due gemelle luccicanti LV0","Una katana ben affilata LV0","Un fucile a pallettoni LV0","Una bandana da tipo tosto LV0","Delle placche metalliche LV0","Un visore laser LV0","Un manganello LV0",]
 megaman = ["Neo blaster LV0","Spada a protoni LV0","Z-Saber LV0","Chip terra LV0","Chip fuoco LV0","Chip elettro LV0","Chip lunare LV0",]
 megaset = ['Neo blaster', 'Spada a protoni', 'Z-Saber', 'Chip terra', 'Chip fuoco', 'Chip elettro', 'Chip lunare']
@@ -121,7 +121,7 @@ premi_pescatore = ["Canna rossa LV0","Canna blu LV0","Canna magenta LV0","Cappel
 item_pescatore = ["Canna rossa","Canna blu","Canna magenta","Cappellino da pescatore","Armatura di esche","Secchiello di vermi","Giubbina con lenze"]
 
 
-emojiz = {"Velo di catena": "💫","Spada del dio della fucina": "💫","Fuoco purificatore": "💫","Bussola taumaturgica": "💫","Lama Mentale": "💫","Un armatura in filo spinato": "🧟","Un pompa del nonno": "🧟","Due gemelle luccicanti": "🧟","Una katana ben affilata": "🧟","Un fucile a pallettoni": "🧟","Una bandana da tipo tosto": "🧟","Delle placche metalliche": "🧟","Un visore laser": "🧟","Un manganello": "🧟","Mantello rosso": "🔫","Tasto X": "🔫","Tasto B": "🔫","Blasfemia": "🔫","Armatura di cormorant": "🔫","Guanti di cormorant": "🔫","Pistola del west": "🔫","Blaster a turbina": "🔫","Cacciavite multiuso": "🔫","Junior secondo": "🔫","Neo blaster": "🤖","Spada a protoni": "🤖","Z-Saber": "🤖","Chip terra": "🤖","Chip fuoco": "🤖","Chip elettro": "🤖","Chip lunare": "🤖","Assetto mecha":"⛈","Centro temporale":"⛈","Benda maledetta":"⛈","Armatura di carne":"⛈","Anima dispersa":"⛈","Origine della tempesta":"⛈","Corona maledetta":"⛈","Il ciondolo della creazione":"⛈","Zanna del aliena":"⛈"}
+emojiz = {"Velo di catena": "💫","Spada del dio della fucina": "💫","Fuoco purificatore": "💫","Bussola taumaturgica": "💫","Lama Mentale": "💫","Un armatura in filo spinato": "🧟","Un pompa del nonno": "🧟","Due gemelle luccicanti": "🧟","Una katana ben affilata": "🧟","Un fucile a pallettoni": "🧟","Una bandana da tipo tosto": "🧟","Delle placche metalliche": "🧟","Un visore laser": "🧟","Un manganello": "🧟","Mantello rosso": "🔫","Tasto X": "🔫","Tasto B": "🔫","Blasfemia": "🔫","Armatura di cormorant": "🔫","Guanti di cormorant": "🔫","Pistola del west": "🔫","Blaster a turbina": "🔫","Cacciavite multiuso": "🔫","Junior secondo": "🔫","Neo blaster": "🤖","Spada a protoni": "🤖","Z-Saber": "🤖","Chip terra": "🤖","Chip fuoco": "🤖","Chip elettro": "🤖","Chip lunare": "🤖","Assetto mecha":"⛈","Centro temporale":"⛈","Benda maledetta":"⛈","Armatura di carne":"⛈","Anima dispersa":"⛈","Origine della tempesta":"⛈","Corona maledetta":"⛈","Il ciondolo della creazione":"⛈","Zanna del aliena":"⛈","Lama temporale":"⛈","Una valigia senza fine":"⛈","Un libro su tutte le creature":"⛈"}
 
 item_boss = ['Ricordo straziante',"Un terzo occhio","Pessime idee","Marchio del dannato","Aura pessima", 'Una falce spaventosa', 'Un mantello nero cenere', 'Una bibbia inversa', 'Un piccolo uccellino scheletrico', 'Amuleto del protettore', 'Guanto titanico', 'Cinta del comandante', 'Un frammento del potere', 'Un generatore incartato', 'Una tempesta in barattolo', 'Catenaccio demoniaco', 'Dente infernale', "Chiavi dell'aldilà", 'Tentacolo viscido', 'Coda-mazza', 'Cuore delle sabbie', 'Spada di sangue di demone', 'Un copricapo rossastro', 'Coda demoniaca', 'Fiamma bluastra', 'Forcone fiammeggiante', 'Una spilla rossa', 'Vanga da cimitero', 'Sacco da cadaveri', "Anello dell'occulto", 'Corvo amichevole', 'Ali piumate', 'Artiglio del mostro', 'Unto e lercio', 'Fanghiglia della palude', 'Laniccio del pantano', 'Ninfea stagnia', 'Un teschio antico', 'Uncino rituale', 'Copricapo maori', 'Effige della tribe', 'Totem spirituale', 'Stecca tori']
 
@@ -326,6 +326,8 @@ def premio_exp(a, b, text):
             vertutto = item_trovabili + gungeon 
         if evento["evento"] == "magic":
             vertutto = item_trovabili + magic 
+        if evento["evento"] == "tempesta":
+            vertutto = item_trovabili + tempesta
 
         contentino = random.choice(vertutto)
         if (
@@ -414,6 +416,8 @@ def premio_exp(a, b, text):
             vertutto = item_trovabili + gungeon + gungeon
         if evento["evento"] == "magic":
             vertutto = item_trovabili + magic + magic + magic
+        if evento["evento"] == "tempesta":
+            vertutto = item_trovabili + tempesta + tempesta + tempesta
 
         contentino = random.choice(vertutto)
         if (
@@ -1113,6 +1117,8 @@ async def fine(client, message):
                                         vertutto = tuttov + gungeon + gungeon
             if evento["evento"] == "magic":
                                         vertutto = tuttov + magic + magic + magic
+            if evento["evento"] == "tempesta":
+                                        vertutto = tuttov + tempesta + tempesta + tempesta
             for gwefqw in range(win):
                 vinto = random.choice(vertutto)
                 try:
@@ -1294,12 +1300,14 @@ def _attiva_mod_weekend(mod):
 def reset(client, message):
     
     if len(trader["vorrei"]) == 0:
-        scelto = random.choice(["gungeon", "zombie", "mega", "magic"])
+        scelto = random.choice(["gungeon", "zombie", "mega", "magic", "tempesta"])
     else:
         scelto = trader["vorrei"][0]
         trader["vorrei"] = list()
     mod = random.choice(nft.WEEKEND_MOD_POOL)
     evento["mod"] = mod
+    if scelto == "tempesta":
+        testo = "Gli Eroi della Tempesta ⛈ irrompono nel mondo!\nNuovi equip e set Tempesta sono disponibili nelle ricompense!"
     evento["evento"] = scelto
     _attiva_mod_weekend(mod)
 
@@ -1354,12 +1362,14 @@ def reset(client, message):
 def inizio_weew():
     
     if len(trader["vorrei"]) == 0:
-        scelto = random.choice(["gungeon", "zombie", "mega", "magic"])
+        scelto = random.choice(["gungeon", "zombie", "mega", "magic", "tempesta"])
     else:
         scelto = trader["vorrei"][0]
         trader["vorrei"] = list()
     mod = random.choice(nft.WEEKEND_MOD_POOL)
     evento["mod"] = mod
+    if scelto == "tempesta":
+        testo = "Gli Eroi della Tempesta ⛈ irrompono nel mondo!\nNuovi equip e set Tempesta sono disponibili nelle ricompense!"
     evento["evento"] = scelto
     _attiva_mod_weekend(mod)
 
@@ -1459,6 +1469,8 @@ def auto_incarico():
                                             vertutto = tuttov + gungeon + gungeon
                 if evento["evento"] == "magic":
                                             vertutto = tuttov + magic + magic + magic
+                if evento["evento"] == "tempesta":
+                                            vertutto = tuttov + tempesta + tempesta + tempesta
                 for gwefqw in range(win):
                     vinto = random.choice(vertutto)
                     try:
@@ -4632,6 +4644,8 @@ def _daniele_premio_sfida(username, vittoria):
             vertutto = vertutto + gungeon + (gungeon if not vittoria else [])
         elif evento.get("evento") == "magic":
             vertutto = vertutto + magic + magic + (magic if not vittoria else [])
+        elif evento.get("evento") == "tempesta":
+            vertutto = vertutto + tempesta + tempesta + (tempesta if not vittoria else [])
 
         contentino = random.choice(vertutto)
         if scheda.get("anello") == "Un generatore incartato" and random.random() < 0.06:
@@ -5916,6 +5930,8 @@ async def usa(client, message):
                                         vertutto = tuttov + gungeon + gungeon
                                     if evento["evento"] == "magic":
                                         vertutto = tuttov + magic + magic + magic
+                                    if evento["evento"] == "tempesta":
+                                        vertutto = tuttov + tempesta + tempesta + tempesta
 
                                     
                                     if rep == 1:

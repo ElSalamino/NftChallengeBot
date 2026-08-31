@@ -998,7 +998,7 @@ casa_nemici = {'Dune di rione': ['Pollosauro', 'Pistolero', 'Automa massivo', 'E
 
 
 classi = {"Esperto di animali":["Una valigia senza fine","Un libro su tutte le creature"]
-    ,"Pescatore":[],"Re del raaave":["Staffa da rave","Corona del rave"],"Piccolo kraken":["Un dente di kraken","Delle squame viscide"],
+    ,"Pescatore":["Canna blu","Cappellino da pescatore"],"Re del raaave":["Staffa da rave","Corona del rave"],"Piccolo kraken":["Un dente di kraken","Delle squame viscide"],
           "Pescatore di balene":["Uncino enorme","Chela animata"],
     "Campione del sole": ["Spada del dio della fucina", "Corazza a piastre"],
     "Cercatore di reliquie": ["Artiglio del mostro", "Bussola taumaturgica"],
@@ -1619,7 +1619,10 @@ eventi = {
     "Origine della tempesta":"Eroi della tempesta ⛈",
     "Corona maledetta":"Eroi della tempesta ⛈",
     "Il ciondolo della creazione":"Eroi della tempesta ⛈",
-    "Zanna del aliena":"Eroi della tempesta ⛈"
+    "Zanna del aliena":"Eroi della tempesta ⛈",
+    "Lama temporale":"Eroi della tempesta ⛈",
+    "Una valigia senza fine":"Eroi della tempesta ⛈",
+    "Un libro su tutte le creature":"Eroi della tempesta ⛈"
 }
 
 nemici ={'Orconte': {'Nome': 'Orconte', 'hp': 899, 'def': 471, 'atk': 92, 'agi': 8, 'Ap': 'Base', 'schivato': False, 'anello': None, 'boost': {'sfida': {}}, 'set': 'Cultista pazzo'},
@@ -2157,17 +2160,17 @@ protezioniextra = {
 
 # --- SET EROI DELLA TEMPESTA: CATALOGO ---
 classi.update({
-    "Guerriero Temporale": ["Centro temporale", "Assetto mecha"],
-    "Dannato primordiale": ["Benda maledetta", "Il ciondolo della creazione"],
-    "Macellatore": ["Armatura di carne", "Anima dispersa"],
+    "Guerriero Temporale": ["Lama temporale", "Centro temporale"],
+    "Dannato primordiale": ["Una bibbia inversa", "Benda maledetta"],
+    "Macellatore": ["Mannaia pazza", "Anima dispersa"],
     "Mente centrale": ["Zanna del aliena", "Benda maledetta"],
-    "Amletico": ["Origine della tempesta", "Corona maledetta"],
+    "Amletico": ["Lama Mentale", "Corona maledetta"],
     "Accumulatore di meraviglie": ["Una valigia senza fine", "Il ciondolo della creazione"],
     "Anima della festa": ["Staffa da rave", "Centro temporale"],
-    "Zanno": ["Zanna maledetta", "Zanna del aliena"],
+    "Zanno": ["Zanna del aliena", "Dente infernale"],
     "Uditore del profondo": ["Tentacolo viscido", "Armatura di carne"],
-    "Monarca della tempesta di fuoco": ["Un copricapo rossastro", "Anima dispersa"],
-    "Evocatore delle maree": ["Il ciondolo della creazione", "Chela animata"],
+    "Monarca della tempesta di fuoco": ["Fiamma bluastra", "Un copricapo rossastro"],
+    "Evocatore delle maree": ["Tentacolo viscido", "Il ciondolo della creazione"],
     "Mecha sciamano": ["Stecca tori", "Assetto mecha"],
 })
 
