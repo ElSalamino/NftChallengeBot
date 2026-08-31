@@ -22,6 +22,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import textwrap
 
           source = Path('.github/workflows/arena-matchmaking.yml').read_text(encoding='utf-8')
           start_marker = "          python - <<'PY'\n"
@@ -29,10 +30,9 @@ jobs:
 
           start = source.index(start_marker) + len(start_marker)
           end = source.index(end_marker, start)
-          script = source[start:end]
+          script = textwrap.dedent(source[start:end])
 
-          # Nel primo tentativo new_queue_tail non era raw: il \\n della stringa
-          # generata diventava un newline reale dentro la f-string di nft.py.
+          # Mantiene letterale il \n che deve finire nella f-string generata.
           old = "new_queue_tail = '''"
           if old not in script:
               raise SystemExit('new_queue_tail marker not found')
@@ -75,7 +75,7 @@ jobs:
               if token in text:
                   raise SystemExit(f'legacy arena queue still present: {token}')
 
-          # Formula attesa: 4 pick iniziali, +1 per partita, poi +20% arrotondato in alto.
+          # 4 pick iniziali, +1 per partita, +20% arrotondato in alto.
           expected = {0: 5, 1: 6, 2: 8, 3: 9, 6: 12, 11: 18}
           for games, wanted in expected.items():
               human = 4 + games
