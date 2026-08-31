@@ -37,6 +37,22 @@ jobs:
               raise SystemExit('helper validation marker not found')
           script = script.replace(old_check, new_check, 1)
           exec(compile(script, '<apply-daniele-patch>', 'exec'), {})
+
+          # Il vecchio script sostituiva il primo guard globale trovato. Correggiamo
+          # esplicitamente quello dentro /sfida, senza toccare altre sezioni.
+          path = Path('__init__.py')
+          text = path.read_text(encoding='utf-8')
+          sfida_start = text.index('async def sfida(client, message):', text.index('filters.regex(r"^Sfida ⚔️")'))
+          sfida_end = text.index('@app.on_message(filters.regex(r"^Pesca 🎣")', sfida_start)
+          sfida_block = text[sfida_start:sfida_end]
+          old_guard = '        if sfidante in list(inabilitati):\n'
+          new_guard = '        if not sfidante_bot and sfidante in list(inabilitati):\n'
+          if new_guard not in sfida_block:
+              if old_guard not in sfida_block:
+                  raise SystemExit('sfida availability guard not found')
+              sfida_block = sfida_block.replace(old_guard, new_guard, 1)
+              text = text[:sfida_start] + sfida_block + text[sfida_end:]
+              path.write_text(text, encoding='utf-8')
           PY
 
           git diff --check
