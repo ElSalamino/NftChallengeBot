@@ -1,6 +1,7 @@
 # coding=utf-8
 import copy,html,json,random,sys,time,asyncio,gc, importlib
 from io import BytesIO, StringIO
+from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from pyrogram import Client, ContinuePropagation, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -1191,18 +1192,35 @@ def reset(client, message):
 @app.on_message(filters.command("ban") & filters.user(autorizzati)
 )
 def reset(client, message):
+    if not message.reply_to_message:
+        app.send_message(message.chat.id, "Usa /ban in risposta alla persona da bannare!")
+        return
     if len(message.command) == 1:
-        app.kick_chat_member(message.chat.id,message.reply_to_message.from_user.id)
-        app.send_message(message.chat.id,f"{message.reply_to_message.from_user.username} bannato per seeeempre!")
+        app.ban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+        app.send_message(message.chat.id, f"{message.reply_to_message.from_user.username} bannato per seeeempre!")
     else:
-        app.kick_chat_member(message.chat.id,message.reply_to_message.from_user.id, int(time.time() + int(message.command[1])))
-        app.send_message(message.chat.id,f"{message.reply_to_message.from_user.username} bannato per un pochino di secondi, tipo {message.command[1]}!")
+        try:
+            secondi = max(30, int(message.command[1]))
+        except (TypeError, ValueError):
+            app.send_message(message.chat.id, "Durata non valida. Usa /ban secondi rispondendo alla persona.")
+            return
+        app.ban_chat_member(
+            message.chat.id,
+            message.reply_to_message.from_user.id,
+            datetime.now() + timedelta(seconds=secondi),
+        )
+        app.send_message(message.chat.id, f"{message.reply_to_message.from_user.username} bannato per {secondi} secondi!")
 
 @app.on_message(filters.command("kick") & filters.user(autorizzati)
 )
 def reset(client, message):
-    app.kick_chat_member(message.chat.id,message.reply_to_message.from_user.id, int(time.time() + 30))
-    app.send_message(message.chat.id,f"{message.reply_to_message.from_user.username} cacciato via dal gruppo!")
+    if not message.reply_to_message:
+        app.send_message(message.chat.id, "Usa /kick in risposta alla persona da cacciare!")
+        return
+    user_id = message.reply_to_message.from_user.id
+    app.ban_chat_member(message.chat.id, user_id)
+    app.unban_chat_member(message.chat.id, user_id)
+    app.send_message(message.chat.id, f"{message.reply_to_message.from_user.username} cacciato via dal gruppo!")
 
 @app.on_message(filters.command("sban") & filters.user(autorizzati)
 )
@@ -1212,7 +1230,7 @@ def reset(client, message):
         app.send_message(message.chat.id,f"No ecco, devi fare /sban in risposta alla persona!")
     else:
         try:
-            app.unban_chat_member(message.chat.id, message.reply_to_message.from_user.username)
+            app.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
         
             app.send_message(message.chat.id,f"{message.reply_to_message.from_user.username} sbannato!")
         except:
@@ -2540,9 +2558,9 @@ async def arenaff(client, message):
             except Exception as h:
                 player[username].pop("arena")
                 try:
-                    await client.delete(
+                    await client.delete_messages(
                     chat_id=message.chat.id,
-                    reply_to_message_id=player[username]["arena"]["pin"]
+                    message_ids=player[username]["arena"]["pin"]
                 )
                 except:
                     pass
@@ -2943,8 +2961,7 @@ async def notifiches(client, message):
     await app.send_message(message.chat.id,text=testo, reply_markup=reply_markup)
 
 
-@app.on_message(filters.regex(r"^Invita 📮")|filters.command(["invita", "invita@NFTchallengebot"]) & ~filters.user(bannati)
-)
+@app.on_message((filters.regex(r"^Invita 📮") | filters.command(["invita", "invita@NFTchallengebot"])) & ~filters.user(bannati))
 async def invita(client, message):
     username = message.from_user.username
 
@@ -3545,8 +3562,7 @@ def gentop(d, v, tipo):
         x += 1
     return v
 
-@app.on_message(filters.regex(r"^Top 🔝")|filters.command(["top", "top@NFTchallengebot"]) & ~filters.user(bannati) & ~filters.chat(non_qui)
-)
+@app.on_message((filters.regex(r"^Top 🔝") | filters.command(["top", "top@NFTchallengebot"])) & ~filters.user(bannati) & ~filters.chat(non_qui))
 async def top(client, message):
     try:
         if len(message.command) == 1:
@@ -3860,6 +3876,9 @@ from pykeyboard import InlineKeyboard
 
 @app.on_message( ~filters.user(bannati) & filters.command(["duello"]))
 async def duello(client, message):
+    if message.reply_to_message is None and len(message.command) < 2:
+        await message.reply("Usa /duello @utente oppure rispondi a un messaggio.")
+        return
     if message.reply_to_message == None:
                     to = message.command[1].replace("@", "")
                     for x in list(player):
@@ -3899,7 +3918,7 @@ async def duello(client, message):
         await message.reply("Lo sfidato è in un duello!")
     
     
-@app.on_message( ~filters.user(bannati) & filters.regex(r"^Me 👤")| filters.command(["me", "me@NFTchallengebot"]))
+@app.on_message(~filters.user(bannati) & (filters.regex(r"^Me 👤") | filters.command(["me", "me@NFTchallengebot"])))
 async def me(client, message):
     try:
         if len(message.command) == 1 and message.reply_to_message == None:
@@ -6037,7 +6056,7 @@ async def negozio(client, message):
         await app.send_message(message.chat.id,txt, reply_markup=reply_markup)
 
 
-@app.on_message( ~filters.user(bannati) & filters.regex(r"^Info 🗞")|filters.command(["info"]))
+@app.on_message(~filters.user(bannati) & (filters.regex(r"^Info 🗞") | filters.command(["info"])))
 async def eenfo(client, message):
     iscritti = len(player)
     trovabili = len(tuttov)
@@ -7794,7 +7813,7 @@ async def rissona(clinet,message):
     scelta = message.data.split("_")[1]
     await nft.incarico(scelta,player,message.from_user.username,clan,message,app)
 
-@app.on_callback_query(~filters.user(bannati) & filters.regex("suggerisci*"))
+@app.on_callback_query(~filters.user(bannati) & filters.regex(r"^suggerisci\*"))
 async def rissona(clinet,message):
     scelta = message.data.split("*")[1]
     await nft.suggerimenti_inline(scelta,message.from_user.username,message,trader,app)
@@ -7848,13 +7867,13 @@ async def rissona(clinet,message):
     await nft.cambio_not(scelta,player,message.from_user.username,app,message)
 
 
-@app.on_callback_query(~filters.user(bannati) & filters.regex("approzzi*"))
+@app.on_callback_query(~filters.user(bannati) & filters.regex(r"^approzzi\*"))
 async def rissona(clinet,message):
     scelta = message.data.split("*")[1]
     await nft.cambio_approccio(scelta,player,message.from_user.username,app,message)
     
     
-@app.on_callback_query(~filters.user(bannati) & filters.regex("nomina?"))
+@app.on_callback_query(~filters.user(bannati) & filters.regex(r"^nomina\?"))
 async def rissona(clinet,message):
     scelta = message.data.split("?")
     
@@ -8321,6 +8340,14 @@ async def villaggio(clinet,message):
     else:
         await message.message.edit("Non hai un clan")
 
+
+
+@app.on_callback_query(group=999)
+async def _ack_callback_query(client, query):
+    try:
+        await query.answer()
+    except Exception:
+        pass
 
 
 gc.collect()
