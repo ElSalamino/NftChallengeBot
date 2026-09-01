@@ -2347,3 +2347,59 @@ frasi_set.update({
     "Arcidemone": "La cura degli altri è un insulto personale: ogni volta che il nemico recupera vita, la tua rabbia diventa potenza.",
     "Big Game Hunter": "Prima di cacciare una bestia bisogna muoversi come lei: all'inizio dello scontro ne copi immediatamente l'agilità.",
 })
+
+
+# --- QUINTA ONDATA SET: TREDICI SET ---
+classi.update({
+    "Nucleo dell'uragano": ["Uncino rituale", "Origine della tempesta"],
+    "Tormento di fuoco": ["Spada del dio della fucina", "Origine della tempesta"],
+    "Girarrosto": ["Frusta di salsiccia", "Bastone sferico"],
+    "Venere di ferro": ["Spina insanguinata", "Scaglioni pesanti"],
+    "Rosso D'ossidina": ["Canna rossa", "Scudo d'ossidiana"],
+    "Oltraggioso": ["Blasfemia", "Armatura pesantissima"],
+    "Festante oscuro": ["Palla Ombra", "Corona del rave"],
+    "Legionaro di Evelin": ["Corvo amichevole", "Scudo del comandante"],
+    "Neo Genesi": ["Spada a protoni", "Piuma celeste"],
+    "Intermezzo": ["Lancia celeste", "Palla chiodata"],
+    "Obscurio": ["Palla Ombra", "Velo di catena"],
+    "Primo al comando": ["Martello del folle", "Scudo del comandante"],
+    "Luce persa": ["Spada del crociato", "Anima dispersa"],
+})
+
+Approccini.update({
+    "Nucleo dell'uragano": ["Agile", "Spinto", "Impavido"],
+    "Tormento di fuoco": ["Aggressivo", "Malevolo", "Spinto"],
+    "Girarrosto": ["Conservativo", "Impavido", "Spavaldo"],
+    "Venere di ferro": ["Difensivo", "Conservativo", "Impavido"],
+    "Rosso D'ossidina": ["Aggressivo", "Spavaldo", "Agile"],
+    "Oltraggioso": ["Malevolo", "Spavaldo", "Impavido"],
+    "Festante oscuro": ["Conservativo", "Ingannevole", "Agile"],
+    "Legionaro di Evelin": ["Autorevole", "Aggressivo", "Spinto"],
+    "Neo Genesi": ["Agile", "Spinto", "Autorevole"],
+    "Intermezzo": ["Agile", "Conservativo", "Difensivo"],
+    "Obscurio": ["Ingannevole", "Malevolo", "Conservativo"],
+    "Primo al comando": ["Autorevole", "Spinto", "Impavido"],
+    "Luce persa": ["Aggressivo", "Impavido", "Spinto"],
+})
+
+bonus.update({nome: {"hp": 0, "def": 0, "atk": 0, "agi": 0} for nome in [
+    "Nucleo dell'uragano", "Tormento di fuoco", "Girarrosto", "Venere di ferro",
+    "Rosso D'ossidina", "Oltraggioso", "Festante oscuro", "Legionaro di Evelin",
+    "Neo Genesi", "Intermezzo", "Obscurio", "Primo al comando", "Luce persa"
+]})
+
+frasi_set.update({
+    "Nucleo dell'uragano": "Il vento aspetta che il nemico si affidi al proprio anello: appena il potere si manifesta, l'uragano gli si rivolta contro.",
+    "Tormento di fuoco": "Ogni scintilla di potere avversaria alimenta un tormento che brucia usando la forza stessa di chi lo ha evocato.",
+    "Girarrosto": "Puoi cuocere lentamente quanto vuoi: la prima volta che sembri davvero cotto, torni improvvisamente in perfetta forma.",
+    "Venere di ferro": "Ogni colpo affonda meno del previsto: spine e ferro assorbono una parte costante della violenza in arrivo.",
+    "Rosso D'ossidina": "Ogni colpo riuscito ti convince ancora di più della tua strategia: diventi sempre più simile al tuo stesso approccio.",
+    "Oltraggioso": "Oltraggi perfino il concetto di danno: nessun singolo colpo riesce a superare il limite che imponi allo scontro.",
+    "Festante oscuro": "Dentro di te festeggiano ombre senza fine: prendono i colpi al tuo posto, ma a ogni turno una parte del loro dolore torna a reclamarti.",
+    "Legionaro di Evelin": "Evelin detta il ritmo: nei turni dispari il colpo trova sempre un rinforzo, mentre gli accampamenti preferiscono non discutere.",
+    "Neo Genesi": "La nuova genesi procede a impulsi regolari: nei turni pari libera una scarica pulita che accompagna il colpo.",
+    "Intermezzo": "Ogni schivata è una nota accumulata. A tre, cinque e otto cariche il crescendo diventa sempre più difficile da fermare.",
+    "Obscurio": "La luce della guarigione non trova strada nell'oscurità: davanti a te recuperare vita diventa semplicemente impossibile.",
+    "Primo al comando": "Ogni anello che osa attivarsi diventa un segnale per il comandante: il caos degli altri si trasforma immediatamente in nuova vita.",
+    "Luce persa": "Abbandoni ogni agilità e la trasformi in potere puro: niente più evasione, soltanto attacco e difesa alimentati dalla luce perduta.",
+})

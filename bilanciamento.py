@@ -1125,3 +1125,60 @@ PROC_CLASSI.update({
         "combattimento": {"copia_agilita": {"attivo": True}},
     },
 })
+
+
+# --- QUINTA ONDATA SET: TREDICI SET ---
+PROC_CLASSI.update({
+    "Nucleo dell'uragano": {
+        "combattimento": {"proc_anello_avversario": {"percento_atk_proprio": 10}},
+        "assalto": {"immunita": {"struttura": "Spuntone malefico", "messaggio": "🌪 Il vento spazza via la trappola dello Spuntone malefico!"}},
+    },
+    "Tormento di fuoco": {
+        "combattimento": {"proc_anello_avversario": {"percento_atk_avversario": 10}},
+        "assalto": {"immunita": {"struttura": "Fabbro incantaspade", "messaggio": "🔥 Il Fabbro incantaspade non riesce a scalfirti: il tormento di fuoco lo sovrasta!"}},
+    },
+    "Girarrosto": {
+        "combattimento": {"salvezza": {"hp_soglia_percento": 50, "hp_ripristino_percento": 100, "usi": 1}},
+        "assalto": {"salvezza": {"hp_soglia_percento": 50, "hp_ripristino_percento": 100, "usi": 1}},
+    },
+    "Venere di ferro": {
+        "combattimento": {"riduzione_danno": {"percento": 20}},
+        "assalto": {"riduzione_danno": {"percento": 30}},
+    },
+    "Rosso D'ossidina": {
+        "combattimento": {"riuso_approccio": {"attivo": True}},
+        "assalto": {"immunita": {"struttura": "Sedimento del cucciolo", "messaggio": "🔴 Il drago è troppo arrabbiato per riuscire a farti del male!"}},
+    },
+    "Oltraggioso": {
+        "combattimento": {"cap_danno": {"massimo": 50}},
+        "assalto": {"immunita": {"struttura": "Chiesa", "messaggio": "⛪ L'oltraggio è tale che perfino la Chiesa rinuncia a danneggiarti!"}},
+    },
+    "Festante oscuro": {
+        "combattimento": {"fantasmi": {"percento_ritorno": 50}},
+        "assalto": {"immunita": {"struttura": "Cane da guardia", "messaggio": "👻 Il Cane da guardia si perde tra le ombre e non riesce a colpirti!"}},
+    },
+    "Legionaro di Evelin": {
+        "combattimento": {"danno_turno": {"parita": "dispari", "danno": 50}},
+        "assalto": {"immunita": {"struttura": "Accampamento", "messaggio": "🦅 Nessuno nell'Accampamento vuole mettersi contro Evelin!"}},
+    },
+    "Neo Genesi": {
+        "combattimento": {"danno_turno": {"parita": "pari", "danno": 50}},
+        "assalto": {"immunita": {"struttura": "Spaventapasseri ornamentale", "messaggio": "✨ Lo Spaventapasseri ornamentale non osa muoversi davanti a cotanta potenza!"}},
+    },
+    "Intermezzo": {
+        "combattimento": {"cariche_schivata": {"soglia_1": 3, "bonus_1": 5, "soglia_2": 5, "bonus_2": 15, "soglia_3": 8, "moltiplicatore": 2}},
+        "assalto": {"immunita": {"struttura": "Muraglione extra", "messaggio": "🪽 Fluttui oltre il Muraglione extra in completa tranquillità!"}},
+    },
+    "Obscurio": {
+        "combattimento": {"anti_cura": {"attivo": True}},
+        "assalto": {"immunita": {"struttura": "Stazione laser di sicurezza", "messaggio": "🌑 La luce compressa della Stazione laser non riesce a illuminarti!"}},
+    },
+    "Primo al comando": {
+        "combattimento": {"proc_anello": {"cura": 30}},
+        "assalto": {"immunita": {"struttura": "Clone", "messaggio": "🫡 Il Clone riconosce il Primo al comando e non riesce a danneggiarlo!"}},
+    },
+    "Luce persa": {
+        "combattimento": {"conversione": {"agi_mul": 4, "quota_atk": 0.5, "quota_def": 0.5}},
+        "assalto": {"conversione": {"agi_mul": 4, "quota_atk": 0.5, "quota_def": 0.5}},
+    },
+})

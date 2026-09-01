@@ -183,3 +183,21 @@ FRASI_SET_TECNICHE.update({
     "Arcidemone": "COMBATTIMENTO (vale anche in dungeon e boss): quando l'avversario recupera HP durante un turno, guadagni {combattimento.cura_nemica.atk:signed} ATK per il resto dello scontro.",
     "Big Game Hunter": "COMBATTIMENTO (vale anche in dungeon e boss): all'inizio dello scontro imposti la tua AGI uguale all'AGI corrente dell'avversario.",
 })
+
+
+# --- QUINTA ONDATA SET: TREDICI SET ---
+FRASI_SET_TECNICHE.update({
+    "Nucleo dell'uragano": "COMBATTIMENTO (anche dungeon/boss): ogni volta che un anello avversario procca, il vento infligge al proprietario dell'anello danni puliti pari al {combattimento.proc_anello_avversario.percento_atk_proprio:pct} del tuo ATK. ASSALTO: non subisci danni dallo {assalto.immunita.struttura}.",
+    "Tormento di fuoco": "COMBATTIMENTO (anche dungeon/boss): ogni volta che un anello avversario procca, il proprietario dell'anello subisce danni puliti pari al {combattimento.proc_anello_avversario.percento_atk_avversario:pct} del proprio ATK. ASSALTO: non subisci danni dal {assalto.immunita.struttura}.",
+    "Girarrosto": "COMBATTIMENTO (anche dungeon/boss): la prima volta che scendi sotto il {combattimento.salvezza.hp_soglia_percento:pct} degli HP iniziali torni al {combattimento.salvezza.hp_ripristino_percento:pct}. ASSALTO: stessa salvezza, una volta per assalto.",
+    "Venere di ferro": "COMBATTIMENTO (anche dungeon/boss): ogni perdita di HP viene ridotta del {combattimento.riduzione_danno.percento:pct}. ASSALTO: la riduzione sale al {assalto.riduzione_danno.percento:pct}.",
+    "Rosso D'ossidina": "COMBATTIMENTO (anche dungeon/boss): dopo ogni colpo riuscito riapplichi il tuo approccio e il log mostra in cosa stai diventando più estremo. ASSALTO: non subisci danni dal {assalto.immunita.struttura}.",
+    "Oltraggioso": "COMBATTIMENTO (anche dungeon/boss): finché partecipi allo scontro, ogni singola perdita di HP o Scudo di entrambi i combattenti è limitata a un massimo di {combattimento.cap_danno.massimo} danni. ASSALTO: non subisci danni dalla {assalto.immunita.struttura}.",
+    "Festante oscuro": "COMBATTIMENTO (anche dungeon/boss): i fantasmi assorbono al posto tuo ogni perdita di HP; all'inizio di ogni tuo turno subisci il {combattimento.fantasmi.percento_ritorno:pct} del danno ancora accumulato nei fantasmi e quel valore viene rimosso dal loro accumulo. ASSALTO: non subisci danni dal {assalto.immunita.struttura}.",
+    "Legionaro di Evelin": "COMBATTIMENTO (anche dungeon/boss): nei tuoi turni {combattimento.danno_turno.parita}, se il colpo non viene schivato e va a segno, infliggi altri {combattimento.danno_turno.danno} danni puliti. ASSALTO: non subisci danni dall'{assalto.immunita.struttura}.",
+    "Neo Genesi": "COMBATTIMENTO (anche dungeon/boss): nei tuoi turni {combattimento.danno_turno.parita}, se il colpo non viene schivato e va a segno, infliggi altri {combattimento.danno_turno.danno} danni puliti. ASSALTO: non subisci danni dallo {assalto.immunita.struttura}.",
+    "Intermezzo": "COMBATTIMENTO (anche dungeon/boss): ogni schivata concede una carica. Da {combattimento.cariche_schivata.soglia_1} cariche aggiungi {combattimento.cariche_schivata.bonus_1} danni; da {combattimento.cariche_schivata.soglia_2} aggiungi anche altri {combattimento.cariche_schivata.bonus_2}; da {combattimento.cariche_schivata.soglia_3} il danno risultante viene inoltre moltiplicato ×{combattimento.cariche_schivata.moltiplicatore}. ASSALTO: non subisci danni dal {assalto.immunita.struttura}.",
+    "Obscurio": "COMBATTIMENTO (anche dungeon/boss): l'avversario non può aumentare i propri HP tramite cure finché è vivo; le resurrezioni da 0 HP o meno restano possibili. ASSALTO: non subisci danni dalla {assalto.immunita.struttura}.",
+    "Primo al comando": "COMBATTIMENTO (anche dungeon/boss): ogni proc di qualsiasi anello nello scontro ti cura di {combattimento.proc_anello.cura} HP. ASSALTO: non subisci danni dal {assalto.immunita.struttura}.",
+    "Luce persa": "COMBATTIMENTO (anche dungeon/boss): a inizio scontro calcoli AGI ×{combattimento.conversione.agi_mul}; il {combattimento.conversione.quota_atk:pct_mul} va in ATK e il {combattimento.conversione.quota_def:pct_mul} in DEF, poi AGI diventa 0. ASSALTO: stessa conversione prima dell'assalto.",
+})
