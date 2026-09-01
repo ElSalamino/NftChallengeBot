@@ -2410,6 +2410,12 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                     defense = 0
                                 dannissimi = round(float(attaccon)* (100 / (50 + float(defense))* random.uniform(0.7, 1.5)))
                                 player["hp"] -= dannissimi
+                                if set == "Oscurato" and difesa in nemico and isinstance(nemico.get(difesa), dict):
+                                    riflesso_oscuro = round(max(0, dannissimi) * proc_val("Oscurato", "assalto", "riflesso", "percento") / 100)
+                                    if riflesso_oscuro > 0:
+                                        nemico[difesa]["hp"] -= riflesso_oscuro
+                                        player["fatto"] = player.get("fatto", 0) + riflesso_oscuro
+                                        text += f"🌑 Il dolore torna indietro: {riflesso_oscuro} danni riflessi a {difesa}!\n"
                                 nos = player["hp"]
                                 text += f"Cade così sul {x+1}° spuntone! ({nos})\n"                            
                             if set == "Cavaliere delle spine" and proc_ok(num, set, "assalto", "spuntone_schivato"):
@@ -2597,6 +2603,12 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                 text += "La chiesa pare contenere un antico male...\n"
                             
                             player["hp"] -= dannissimi
+                            if set == "Oscurato" and difesa in nemico and isinstance(nemico.get(difesa), dict):
+                                riflesso_oscuro = round(max(0, dannissimi) * proc_val("Oscurato", "assalto", "riflesso", "percento") / 100)
+                                if riflesso_oscuro > 0:
+                                    nemico[difesa]["hp"] -= riflesso_oscuro
+                                    player["fatto"] = player.get("fatto", 0) + riflesso_oscuro
+                                    text += f"🌑 Il dolore torna indietro: {riflesso_oscuro} danni riflessi a {difesa}!\n"
                             nos = player["hp"]
                         
                         else:
@@ -2628,6 +2640,12 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                     dannissimi = 5
                                 
                                 player["hp"] -= dannissimi
+                                if set == "Oscurato" and difesa in nemico and isinstance(nemico.get(difesa), dict):
+                                    riflesso_oscuro = round(max(0, dannissimi) * proc_val("Oscurato", "assalto", "riflesso", "percento") / 100)
+                                    if riflesso_oscuro > 0:
+                                        nemico[difesa]["hp"] -= riflesso_oscuro
+                                        player["fatto"] = player.get("fatto", 0) + riflesso_oscuro
+                                        text += f"🌑 Il dolore torna indietro: {riflesso_oscuro} danni riflessi a {difesa}!\n"
                                 nos = player["hp"]
 
                                 text += f"Lo spaventapasseri ti colpisce alle spalle per {dannissimi} danni!({nos})\n"
@@ -2651,12 +2669,24 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                         elif difesa == "Cane da guardia" and 0.3 > num and setting["Cane da guardia"] != "Orso":
                             text += f"{nome} non è abbastanza veloce ed il cane lo riinsegue,subendo così altri {dannissimi} danni!\n"
                             player["hp"] -= dannissimi
+                            if set == "Oscurato" and difesa in nemico and isinstance(nemico.get(difesa), dict):
+                                riflesso_oscuro = round(max(0, dannissimi) * proc_val("Oscurato", "assalto", "riflesso", "percento") / 100)
+                                if riflesso_oscuro > 0:
+                                    nemico[difesa]["hp"] -= riflesso_oscuro
+                                    player["fatto"] = player.get("fatto", 0) + riflesso_oscuro
+                                    text += f"🌑 Il dolore torna indietro: {riflesso_oscuro} danni riflessi a {difesa}!\n"
                             num = random.random()
                             dannissimi = round(dannissimi//2)
                             for g in range(4):
                                 if difesa == "Cane da guardia" and 0.5 > num and setting["Cane da guardia"] == "Cane rapido":
                                     text += f"{nome} non è ancora abbastanza veloce ed il cane lo riinsegue,subendo così altri {dannissimi} danni!\n"
                                     player["hp"] -= dannissimi
+                                    if set == "Oscurato" and difesa in nemico and isinstance(nemico.get(difesa), dict):
+                                        riflesso_oscuro = round(max(0, dannissimi) * proc_val("Oscurato", "assalto", "riflesso", "percento") / 100)
+                                        if riflesso_oscuro > 0:
+                                            nemico[difesa]["hp"] -= riflesso_oscuro
+                                            player["fatto"] = player.get("fatto", 0) + riflesso_oscuro
+                                            text += f"🌑 Il dolore torna indietro: {riflesso_oscuro} danni riflessi a {difesa}!\n"
                                 else:
                                     break
 
@@ -7512,3 +7542,193 @@ def assedio(playerg, player, nemico, target, team, order, clan, meteo=None, sett
         player["atk"] *= proc_val("Giustiziere a V", "assalto", "accampamento", "atk_mul")
         prefisso += "⚖️ L'Accampamento è sotto giudizio: attacco ×6!\n"
     return prefisso + _assedio_seconda_ondata_base(playerg, player, nemico, target, team, order, clan, meteo, setting)
+
+
+# --- TERZA ONDATA SET: NOVE SET ---
+_turno_terza_ondata_base = turno
+_assedio_terza_ondata_base = assedio
+
+def _danno_normale_terza(attaccante, difensore):
+    dps = max(0, float(attaccante.get("atk", 0)))
+    difesa = max(0, float(difensore.get("def", 0)))
+    minimo = dps * (100 / ((100 + difesa * 1.5) + 1))
+    massimo = dps * (100 / ((100 + difesa) + 1))
+    return max(20, random.uniform(minimo, massimo))
+
+
+def _mangia_vermi_terza(personaggio, contesto):
+    if personaggio.get("set") != "Duellista vermico":
+        return ""
+    marker = f"_duellista_vermico_{contesto}"
+    if personaggio.get(marker):
+        return ""
+    cfg = proc_cfg("Duellista vermico", contesto, "vermi")
+    mangiati = 1 if cfg.get("primo_garantito", True) else 0
+    while proc_ok(random.random(), "Duellista vermico", contesto, "vermi"):
+        mangiati += 1
+    if mangiati:
+        personaggio["atk"] += cfg["atk"] * mangiati
+        personaggio["def"] += cfg["def"] * mangiati
+        personaggio["hp"] += cfg["hp"] * mangiati
+    personaggio[marker] = True
+    return f"🪱 {personaggio['Nome']} mangia {mangiati} verme/i: +{cfg['atk']*mangiati} ATK, +{cfg['def']*mangiati} DEF, +{cfg['hp']*mangiati} HP!\n"
+
+
+def _inizializza_terza_combattimento(proprietario, avversario):
+    testo = ""
+    nome_set = proprietario.get("set")
+    if nome_set == "Monarca oscuro" and not proprietario.get("_monarca_oscuro_inizializzato"):
+        pct = proc_val(nome_set, "combattimento", "inizio", "hp_target_percento")
+        prima = avversario.get("hp", 0)
+        avversario["hp"] = round(prima * pct / 100)
+        proprietario["_monarca_oscuro_inizializzato"] = True
+        testo += f"🌑 {avversario['Nome']} entra nell'ombra del Monarca con solo il {pct}% degli HP!\n"
+    if nome_set == "Re dei gadget" and not proprietario.get("_re_gadget_inizializzato"):
+        bonus_int = proc_val(nome_set, "combattimento", "intelletto", "int")
+        proprietario["int"] = proprietario.get("int", 0) + bonus_int
+        proprietario["_re_gadget_inizializzato"] = True
+        testo += f"🧰 {proprietario['Nome']} apre la collezione di gadget: +{bonus_int} INT!\n"
+    if nome_set == "Il comico" and not proprietario.get("_comico_clap_combattimento"):
+        proprietario["_comico_clap_combattimento"] = True
+        testo += "👏 **CLAP!**\n"
+    testo += _mangia_vermi_terza(proprietario, "combattimento")
+    return testo
+
+
+def _proc_comico_terza(proprietario, avversario):
+    if proprietario.get("set") != "Il comico":
+        return ""
+    if not proc_ok(random.random(), "Il comico", "combattimento", "confusione"):
+        return ""
+    possibile = possibiles(avversario.get("agi", 0), avversario.get("agi", 0))
+    if possibile > random.randint(0, 100):
+        return ""
+    danno = round(_danno_normale_terza(avversario, avversario))
+    avversario["hp"] -= danno
+    proprietario["fatto"] = proprietario.get("fatto", 0) + danno
+    return f"🤡 {avversario['Nome']} è così confuso da colpirsi da solo! ({danno} danni)\n"
+
+
+def _danno_su_bersaglio_terza(hp_prima, scudo_prima, bersaglio):
+    danno_hp = max(0, hp_prima - bersaglio.get("hp", hp_prima))
+    danno_scudo = 0
+    if scudo_prima is not None:
+        danno_scudo = max(0, scudo_prima - bersaglio.get("Scudo", scudo_prima))
+    return danno_hp + danno_scudo
+
+
+def _aggiungi_extra_terza(attaccante, bersaglio, danno_base, percento, etichetta):
+    if danno_base <= 0:
+        return ""
+    extra = round(danno_base * percento / 100)
+    if extra <= 0:
+        return ""
+    if "Scudo" in bersaglio and bersaglio.get("Scudo", -1) >= 0 and bersaglio.get("hp", 0) > 0:
+        bersaglio["Scudo"] -= extra
+    else:
+        bersaglio["hp"] -= extra
+    attaccante["fatto"] = attaccante.get("fatto", 0) + extra
+    return f"{etichetta} +{extra} danni!\n"
+
+
+def turno(main, oppo, cond=None):
+    prefisso = _inizializza_terza_combattimento(main, oppo) + _inizializza_terza_combattimento(oppo, main)
+    hp_turno_main = main.get("hp", 0)
+    hp_turno_oppo = oppo.get("hp", 0)
+
+    prefisso += _proc_comico_terza(main, oppo)
+    prefisso += _proc_comico_terza(oppo, main)
+
+    hp_prima = oppo.get("hp", 0)
+    scudo_prima = oppo.get("Scudo") if "Scudo" in oppo else None
+    testo = _turno_terza_ondata_base(main, oppo, cond)
+    danno_base = _danno_su_bersaglio_terza(hp_prima, scudo_prima, oppo)
+
+    if main.get("set") == "Demone delle lame" and danno_base > 0:
+        pct = proc_val("Demone delle lame", "combattimento", "danno_extra", "percento")
+        testo += _aggiungi_extra_terza(main, oppo, danno_base, pct, "🔪 Le lame trovano un secondo varco:")
+    elif main.get("set") == "Cacciatore d'esce" and danno_base > 0 and proc_ok(random.random(), "Cacciatore d'esce", "combattimento", "secondo_colpo"):
+        pct = proc_val("Cacciatore d'esce", "combattimento", "secondo_colpo", "percento_danno")
+        testo += _aggiungi_extra_terza(main, oppo, danno_base, pct, "🎯 L'esca richiama un secondo colpo:")
+
+    danno_subito_main = max(0, hp_turno_main - main.get("hp", 0))
+    danno_subito_oppo = max(0, hp_turno_oppo - oppo.get("hp", 0))
+    if main.get("set") == "Oscurato" and danno_subito_main > 0:
+        pct = proc_val("Oscurato", "combattimento", "riflesso", "percento")
+        riflesso = round(danno_subito_main * pct / 100)
+        if riflesso > 0:
+            oppo["hp"] -= riflesso
+            main["fatto"] = main.get("fatto", 0) + riflesso
+            testo += f"🌑 {main['Nome']} riflette {riflesso} danni a {oppo['Nome']}!\n"
+    if oppo.get("set") == "Oscurato" and danno_subito_oppo > 0:
+        pct = proc_val("Oscurato", "combattimento", "riflesso", "percento")
+        riflesso = round(danno_subito_oppo * pct / 100)
+        if riflesso > 0:
+            main["hp"] -= riflesso
+            oppo["fatto"] = oppo.get("fatto", 0) + riflesso
+            testo += f"🌑 {oppo['Nome']} riflette {riflesso} danni a {main['Nome']}!\n"
+
+    return prefisso + testo
+
+
+def _last_recenti_terza(clan, team, nome, finestra):
+    ora = time.time()
+    recenti = 0
+    try:
+        last = clan[team].get("last", {})
+    except Exception:
+        return 0
+    for giocatore, timestamp in last.items():
+        try:
+            if giocatore != nome and ora - float(timestamp) < finestra:
+                recenti += 1
+        except Exception:
+            continue
+    return recenti
+
+
+def assedio(playerg, player, nemico, target, team, order, clan, meteo=None, setting=dict()):
+    prefisso = ""
+    nome_set = player.get("set")
+    prefisso += _mangia_vermi_terza(player, "assalto")
+    if nome_set == "Il comico":
+        prefisso += "👏 **CLAP!**\n"
+
+    danno_monarca = 0
+    if nome_set == "Monarca oscuro" and target in nemico and isinstance(nemico.get(target), dict):
+        cfg = proc_cfg(nome_set, "assalto", "last")
+        quanti = _last_recenti_terza(clan, team, player.get("Nome"), cfg["finestra_secondi"])
+        danno_monarca = cfg["danno_per_last"] * quanti
+        if danno_monarca > 0:
+            nemico[target]["hp"] -= danno_monarca
+            prefisso += f"🌑 Le ombre di {quanti} assaltatori recenti colpiscono {target} per {danno_monarca} danni!\n"
+
+    hp_target_prima = None
+    if target in nemico and isinstance(nemico.get(target), dict):
+        hp_target_prima = nemico[target].get("hp", 0)
+
+    testo = _assedio_terza_ondata_base(playerg, player, nemico, target, team, order, clan, meteo, setting)
+    if danno_monarca > 0:
+        player["fatto"] = player.get("fatto", 0) + danno_monarca
+
+    if hp_target_prima is not None and target in nemico and isinstance(nemico.get(target), dict):
+        danno_base = max(0, hp_target_prima - nemico[target].get("hp", hp_target_prima))
+        extra = 0
+        etichetta = ""
+        if nome_set == "Demone delle lame" and danno_base > 0:
+            pct = proc_val(nome_set, "assalto", "danno_extra", "percento")
+            extra = round(danno_base * pct / 100)
+            etichetta = "🔪 Le lame approfondiscono il colpo"
+        elif nome_set == "Cacciatore d'esce" and danno_base > 0 and proc_ok(random.random(), nome_set, "assalto", "secondo_colpo"):
+            pct = proc_val(nome_set, "assalto", "secondo_colpo", "percento_danno")
+            extra = round(danno_base * pct / 100)
+            etichetta = "🎯 L'esca richiama un secondo colpo"
+        if extra > 0:
+            nemico[target]["hp"] -= extra
+            player["fatto"] = player.get("fatto", 0) + extra
+            testo += f"{etichetta}: +{extra} danni a {target}!\n"
+            if nemico[target].get("hp", 0) <= 0:
+                nemico.pop(target, None)
+                testo += "**E' andata!!**\n"
+
+    return prefisso + testo

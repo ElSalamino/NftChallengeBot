@@ -2263,3 +2263,53 @@ frasi_set.update({
     "Esca vivente": "La difesa non serve se sei tu l'esca: entri in sfida e in assalto completamente scoperto.",
     "Giustiziere a V": "Il giudizio arriva dopo qualche turno: diventi molto più agile e contro gli accampamenti non conosci mezze misure.",
 })
+
+
+# --- TERZA ONDATA SET: NOVE SET ---
+classi.update({
+    "Monarca oscuro": ["Palla Ombra", "Scudo d'ossidiana"],
+    "Oscurato": ["NotteSferza", "Teschio d'ossidiana"],
+    "Demone delle lame": ["Coltelli da lancio", "Un machete"],
+    "Re dei gadget": ["Bomba sneaky", "Bastone sferico"],
+    "Il comico": ["Bomba sneaky", "Sgabello da bar"],
+    "Survival medievale": ["Spada della vitalità", "Un armatura in filo spinato"],
+    "Duellista vermico": ["Spada d'oro fortissima", "Secchiello di vermi"],
+    "Cacciatore d'esce": ["Coltelli da lancio", "Armatura di esche"],
+    "Duro a morire": ["Stecca di ferro", "Un tavolo speziato"],
+})
+
+Approccini.update({
+    "Monarca oscuro": ["Malevolo", "Vendicativo", "Difensivo"],
+    "Oscurato": ["Vendicativo", "Difensivo", "Conservativo"],
+    "Demone delle lame": ["Aggressivo", "Spinto", "Agile"],
+    "Re dei gadget": ["Autorevole", "Conservativo", "Agile"],
+    "Il comico": ["Spavaldo", "Rischioso", "Agile"],
+    "Survival medievale": ["Conservativo", "Impavido", "Difensivo"],
+    "Duellista vermico": ["Spavaldo", "Aggressivo", "Rischioso"],
+    "Cacciatore d'esce": ["Aggressivo", "Agile", "Spinto"],
+    "Duro a morire": ["Difensivo", "Conservativo", "Impavido"],
+})
+
+bonus.update({
+    "Monarca oscuro": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Oscurato": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Demone delle lame": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Re dei gadget": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Il comico": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Survival medievale": {"hp": 500, "def": 0, "atk": 0, "agi": 0},
+    "Duellista vermico": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Cacciatore d'esce": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Duro a morire": {"hp": 0, "def": 222, "atk": 0, "agi": 0},
+})
+
+frasi_set.update({
+    "Monarca oscuro": "La battaglia comincia già nella penombra: il nemico entra debilitato e in assalto l'ombra di chi ti ha preceduto si abbatte sul bersaglio.",
+    "Oscurato": "Il dolore non resta mai da una parte sola: una parte di ogni ferita torna sempre indietro.",
+    "Demone delle lame": "Ogni lama trova un secondo varco: i tuoi colpi mordono più a fondo in ogni combattimento.",
+    "Re dei gadget": "Non serve capire come funzioni: basta avere abbastanza gadget da sembrare improvvisamente molto più intelligente.",
+    "Il comico": "Un sonoro CLAP e la concentrazione sparisce: l'avversario può diventare il proprio peggior nemico.",
+    "Survival medievale": "Vecchia scuola, molta vita: sopravvivere è più semplice quando parti con parecchia carne in più.",
+    "Duellista vermico": "Il primo verme è inevitabile. Se il gusto prende piede, potresti non smettere più di mangiarne.",
+    "Cacciatore d'esce": "Ogni colpo può richiamarne un secondo, meno potente ma abbastanza fastidioso da fare la differenza.",
+    "Duro a morire": "Non elegante, non veloce, semplicemente molto difficile da buttare giù.",
+})

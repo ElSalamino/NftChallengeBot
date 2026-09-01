@@ -158,3 +158,17 @@ FRASI_SET_TECNICHE.update({
     "Esca vivente": "Sfida: all'inizio la DEF viene impostata a {sfida.esca.def}. Assalto: anche la DEF dell'assaltatore viene impostata a {assalto.esca.def}.",
     "Giustiziere a V": "Sfida: dal proprio turno {sfida.giudizio.turno_min} in poi l'AGI è moltiplicata una volta per {sfida.giudizio.agi_mul:x} e resta così fino a fine sfida. ASSALTO — HARD COUNTER dell'Accampamento: se lo bersagli, ATK ×{assalto.accampamento.atk_mul}.",
 })
+
+
+# --- TERZA ONDATA SET: NOVE SET ---
+FRASI_SET_TECNICHE.update({
+    "Monarca oscuro": "COMBATTIMENTO (vale anche in dungeon e boss): l'avversario inizia al {combattimento.inizio.hp_target_percento:pct} dei suoi HP. ASSALTO: all'inizio infliggi {assalto.last.danno_per_last} danni per ogni entry last attiva negli ultimi {assalto.last.finestra_secondi} secondi alla struttura scelta.",
+    "Oscurato": "COMBATTIMENTO (vale anche in dungeon e boss): ogni danno subito ne riflette il {combattimento.riflesso.percento:pct} all'avversario. ASSALTO: ogni colpo delle difese subito riflette il {assalto.riflesso.percento:pct} alla struttura che lo ha inflitto.",
+    "Demone delle lame": "COMBATTIMENTO (vale anche in dungeon e boss): ogni colpo andato a segno infligge il {combattimento.danno_extra.percento:pct} di danno extra. ASSALTO: il colpo alla struttura bersaglio infligge il {assalto.danno_extra.percento:pct} di danno extra.",
+    "Re dei gadget": "COMBATTIMENTO (vale anche in dungeon e boss): all'inizio ottieni {combattimento.intelletto.int:signed} INT fino alla fine dello scontro.",
+    "Il comico": "COMBATTIMENTO (vale anche in dungeon e boss): all'inizio compare un sonoro CLAP! A ogni turno l'avversario ha il {combattimento.confusione.proc:pct} di provare a colpirsi da solo; se non schiva, subisce il proprio colpo. ASSALTO: compare CLAP!, senza altri effetti.",
+    "Survival medievale": "Bonus base sempre attivo in qualunque modalità: {bonus.hp:signed} HP.",
+    "Duellista vermico": "COMBATTIMENTO e ASSALTO: il primo verme è garantito; poi hai il {combattimento.vermi.proc:pct} di mangiarne un altro, ripetendo finché fallisci. Ogni verme dà {combattimento.vermi.atk:signed} ATK, {combattimento.vermi.def:signed} DEF e {combattimento.vermi.hp:signed} HP.",
+    "Cacciatore d'esce": "COMBATTIMENTO (vale anche in dungeon e boss): ogni colpo andato a segno ha il {combattimento.secondo_colpo.proc:pct} di generare un secondo colpo pari al {combattimento.secondo_colpo.percento_danno:pct} del primo. ASSALTO: stessa logica con {assalto.secondo_colpo.proc:pct} di probabilità e {assalto.secondo_colpo.percento_danno:pct} della forza del primo colpo.",
+    "Duro a morire": "Bonus base sempre attivo in qualunque modalità: {bonus.def:signed} DEF.",
+})

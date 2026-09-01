@@ -1061,3 +1061,41 @@ PROC_CLASSI.update({
     "Esca vivente": {"sfida": {"esca": {"def": 0}}, "assalto": {"esca": {"def": 0}}},
     "Giustiziere a V": {"sfida": {"giudizio": {"turno_min": 4, "agi_mul": 2}}, "assalto": {"accampamento": {"atk_mul": 6}}},
 })
+
+
+# --- TERZA ONDATA SET: NOVE SET ---
+PROC_CLASSI.update({
+    "Monarca oscuro": {
+        "combattimento": {"inizio": {"hp_target_percento": 60}},
+        "assalto": {"last": {"danno_per_last": 10, "finestra_secondi": 301}},
+    },
+    "Oscurato": {
+        "combattimento": {"riflesso": {"percento": 5}},
+        "assalto": {"riflesso": {"percento": 5}},
+    },
+    "Demone delle lame": {
+        "combattimento": {"danno_extra": {"percento": 20}},
+        "assalto": {"danno_extra": {"percento": 30}},
+    },
+    "Re dei gadget": {
+        "combattimento": {"intelletto": {"int": 200}},
+    },
+    "Il comico": {
+        "combattimento": {"confusione": {"proc": 15}},
+        "assalto": {"clap": {"solo_testo": True}},
+    },
+    "Survival medievale": {
+        "generale": {"set_base": {"solo_bonus_base": True}},
+    },
+    "Duellista vermico": {
+        "combattimento": {"vermi": {"proc": 11, "primo_garantito": True, "atk": 1, "def": 1, "hp": 20}},
+        "assalto": {"vermi": {"proc": 11, "primo_garantito": True, "atk": 1, "def": 1, "hp": 20}},
+    },
+    "Cacciatore d'esce": {
+        "combattimento": {"secondo_colpo": {"proc": 40, "percento_danno": 50}},
+        "assalto": {"secondo_colpo": {"proc": 40, "percento_danno": 50}},
+    },
+    "Duro a morire": {
+        "generale": {"set_base": {"solo_bonus_base": True}},
+    },
+})
