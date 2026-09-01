@@ -7732,3 +7732,142 @@ def assedio(playerg, player, nemico, target, team, order, clan, meteo=None, sett
                 testo += "**E' andata!!**\n"
 
     return prefisso + testo
+
+
+# --- QUARTA ONDATA SET: SEI SET ---
+_turno_quarta_ondata_base = turno
+_assedio_quarta_ondata_base = assedio
+
+
+def _inizializza_pazzo_temporale_quarta(proprietario, avversario):
+    if proprietario.get("set") != "Pazzo temporale" or proprietario.get("_pazzo_temporale_init"):
+        return ""
+    proprietario["_pazzo_temporale_init"] = True
+    testo = "**Snap!**\n"
+    if proc_ok(random.random(), "Pazzo temporale", "combattimento", "seed"):
+        seed = proc_val("Pazzo temporale", "combattimento", "seed", "seed")
+        stato = random.Random(seed).getstate()
+        proprietario["_pazzo_temporale_seed_attivo"] = True
+        avversario["_pazzo_temporale_seed_attivo"] = True
+        proprietario["_pazzo_temporale_rng_state"] = stato
+        avversario["_pazzo_temporale_rng_state"] = stato
+        testo += "⏳ Il tempo si spezza: il destino dello scontro è stato fissato!\n"
+    return testo
+
+
+def _inizializza_big_game_hunter_quarta(proprietario, agilita_avversario):
+    if proprietario.get("set") != "Big Game Hunter" or proprietario.get("_big_game_hunter_init"):
+        return ""
+    proprietario["_big_game_hunter_init"] = True
+    proprietario["agi"] = agilita_avversario
+    return f"🏹 {proprietario['Nome']} studia la preda e ne copia l'agilità: {agilita_avversario} AGI!\n"
+
+
+def _inizializza_gunslingher_quarta(proprietario, avversario):
+    if proprietario.get("set") != "GunSlingher" or proprietario.get("_gunslingher_init"):
+        return ""
+    proprietario["_gunslingher_init"] = True
+    cfg = proc_cfg("GunSlingher", "combattimento", "raffica")
+    colpi = random.randint(cfg["colpi_min"], cfg["colpi_max"])
+    danno = colpi * cfg["danno_per_colpo"]
+    avversario["hp"] -= danno
+    proprietario["fatto"] = proprietario.get("fatto", 0) + danno
+    return f"🔫 {proprietario['Nome']} apre lo scontro con {colpi} colpi: {danno} danni prima di reagire!\n"
+
+
+def _canto_vero_potere_quarta(proprietario):
+    if proprietario.get("set") != "Evocatore del vero potere":
+        return ""
+    testo = "🎶 Il canto del vero potere risuona prima dell'attacco...\n"
+    if proc_ok(random.random(), "Evocatore del vero potere", "combattimento", "canto"):
+        anello = proc_val("Evocatore del vero potere", "combattimento", "canto", "anello")
+        proprietario["anello"] = anello
+        testo += f"💍 QUALCOSA HA RISPOSTO AL CANTO: {anello}!\n"
+    return testo
+
+
+def turno(main, oppo, cond=None):
+    prefisso = _inizializza_pazzo_temporale_quarta(main, oppo)
+    prefisso += _inizializza_pazzo_temporale_quarta(oppo, main)
+
+    stato_seed = main.get("_pazzo_temporale_rng_state") or oppo.get("_pazzo_temporale_rng_state")
+    stato_globale = None
+    if stato_seed is not None:
+        stato_globale = random.getstate()
+        random.setstate(stato_seed)
+
+    try:
+        agi_main_iniziale = main.get("agi", 0)
+        agi_oppo_iniziale = oppo.get("agi", 0)
+        prefisso += _inizializza_big_game_hunter_quarta(main, agi_oppo_iniziale)
+        prefisso += _inizializza_big_game_hunter_quarta(oppo, agi_main_iniziale)
+        prefisso += _inizializza_gunslingher_quarta(main, oppo)
+        prefisso += _inizializza_gunslingher_quarta(oppo, main)
+
+        if is_dead(main) or is_dead(oppo):
+            return prefisso
+
+        prefisso += _canto_vero_potere_quarta(main)
+
+        hp_main_prima = main.get("hp", 0)
+        hp_oppo_prima = oppo.get("hp", 0)
+        scudo_oppo_prima = oppo.get("Scudo") if "Scudo" in oppo else None
+
+        testo = _turno_quarta_ondata_base(main, oppo, cond)
+        danno_base = _danno_su_bersaglio_terza(hp_oppo_prima, scudo_oppo_prima, oppo)
+
+        if main.get("set") == "Primo alla torre" and not main.get("_primo_alla_torre_usato") and danno_base > 0:
+            mol = proc_val("Primo alla torre", "combattimento", "primo_colpo", "moltiplicatore_danno")
+            extra_pct = (mol - 1) * 100
+            testo += _aggiungi_extra_terza(main, oppo, danno_base, extra_pct, "🗼 Il primo colpo domina la torre:")
+            main["_primo_alla_torre_usato"] = True
+
+        hp_main_dopo = main.get("hp", 0)
+        hp_oppo_dopo = oppo.get("hp", 0)
+        bonus_atk = proc_val("Arcidemone", "combattimento", "cura_nemica", "atk")
+        if main.get("set") == "Arcidemone" and hp_oppo_dopo > hp_oppo_prima:
+            main["atk"] += bonus_atk
+            testo += f"😈 La cura del nemico alimenta l'Arcidemone: +{bonus_atk} ATK!\n"
+        if oppo.get("set") == "Arcidemone" and hp_main_dopo > hp_main_prima:
+            oppo["atk"] += bonus_atk
+            testo += f"😈 La cura di {main['Nome']} alimenta {oppo['Nome']}: +{bonus_atk} ATK!\n"
+
+        return prefisso + testo
+    finally:
+        if stato_globale is not None:
+            nuovo_stato = random.getstate()
+            main["_pazzo_temporale_rng_state"] = nuovo_stato
+            oppo["_pazzo_temporale_rng_state"] = nuovo_stato
+            random.setstate(stato_globale)
+
+
+def assedio(playerg, player, nemico, target, team, order, clan, meteo=None, setting=dict()):
+    prefisso = ""
+    stato_globale = None
+    nome_set = player.get("set")
+
+    if nome_set == "Pazzo temporale":
+        prefisso += "**Snap!**\n"
+        if proc_ok(random.random(), nome_set, "assalto", "seed"):
+            stato_globale = random.getstate()
+            random.seed(proc_val(nome_set, "assalto", "seed", "seed"))
+            prefisso += "⏳ Il seed dell'assalto è stato fissato!\n"
+
+    try:
+        if nome_set == "Primo alla torre" and target == "Clone":
+            mol = proc_val(nome_set, "assalto", "clone", "atk_mul")
+            player["atk"] *= mol
+            prefisso += f"🗼 Il Clone è il bersaglio perfetto: ATK ×{mol}!\n"
+
+        if nome_set == "GunSlingher" and "Clone" in nemico and isinstance(nemico.get("Clone"), dict):
+            cfg = proc_cfg(nome_set, "assalto", "raffica_clone")
+            colpi = random.randint(cfg["colpi_min"], cfg["colpi_max"])
+            danno = colpi * cfg["danno_per_colpo"]
+            nemico["Clone"]["hp"] -= danno
+            player["fatto"] = player.get("fatto", 0) + danno
+            prefisso += f"🔫 Raffica preventiva sul Clone: {colpi} colpi, {danno} danni!\n"
+
+        return prefisso + _assedio_quarta_ondata_base(playerg, player, nemico, target, team, order, clan, meteo, setting)
+    finally:
+        if stato_globale is not None:
+            random.setstate(stato_globale)

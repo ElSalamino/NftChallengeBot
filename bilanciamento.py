@@ -1099,3 +1099,29 @@ PROC_CLASSI.update({
         "generale": {"set_base": {"solo_bonus_base": True}},
     },
 })
+
+
+# --- QUARTA ONDATA SET: SEI SET ---
+PROC_CLASSI.update({
+    "Primo alla torre": {
+        "combattimento": {"primo_colpo": {"moltiplicatore_danno": 2}},
+        "assalto": {"clone": {"atk_mul": 4}},
+    },
+    "Pazzo temporale": {
+        "combattimento": {"seed": {"proc": 90, "seed": "Anello perfezionista"}},
+        "assalto": {"seed": {"proc": 90, "seed": "Anello perfezionista"}},
+    },
+    "Evocatore del vero potere": {
+        "combattimento": {"canto": {"proc": 1, "anello": "Anello superfortissimo ma proprio rotto sgravatissimo"}},
+    },
+    "GunSlingher": {
+        "combattimento": {"raffica": {"colpi_min": 1, "colpi_max": 6, "danno_per_colpo": 20}},
+        "assalto": {"raffica_clone": {"colpi_min": 1, "colpi_max": 6, "danno_per_colpo": 60}},
+    },
+    "Arcidemone": {
+        "combattimento": {"cura_nemica": {"atk": 4000}},
+    },
+    "Big Game Hunter": {
+        "combattimento": {"copia_agilita": {"attivo": True}},
+    },
+})

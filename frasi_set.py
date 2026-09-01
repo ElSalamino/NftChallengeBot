@@ -172,3 +172,14 @@ FRASI_SET_TECNICHE.update({
     "Cacciatore d'esce": "COMBATTIMENTO (vale anche in dungeon e boss): ogni colpo andato a segno ha il {combattimento.secondo_colpo.proc:pct} di generare un secondo colpo pari al {combattimento.secondo_colpo.percento_danno:pct} del primo. ASSALTO: stessa logica con {assalto.secondo_colpo.proc:pct} di probabilità e {assalto.secondo_colpo.percento_danno:pct} della forza del primo colpo.",
     "Duro a morire": "Bonus base sempre attivo in qualunque modalità: {bonus.def:signed} DEF.",
 })
+
+
+# --- QUARTA ONDATA SET: SEI SET ---
+FRASI_SET_TECNICHE.update({
+    "Primo alla torre": "COMBATTIMENTO (vale anche in dungeon e boss): il primo colpo che va a segno infligge il danno totale ×{combattimento.primo_colpo.moltiplicatore_danno}. ASSALTO — HARD COUNTER del Clone: se lo bersagli, ATK ×{assalto.clone.atk_mul}.",
+    "Pazzo temporale": "COMBATTIMENTO (vale anche in dungeon e boss): a inizio scontro compare Snap! e hai il {combattimento.seed.proc:pct} di fissare il seed a {combattimento.seed.seed} per tutta la sequenza casuale dello scontro. ASSALTO: stessa logica con il {assalto.seed.proc:pct}.",
+    "Evocatore del vero potere": "COMBATTIMENTO (vale anche in dungeon e boss): prima di ogni tuo attacco compare un canto; hai il {combattimento.canto.proc:pct} di sostituire il tuo anello per il resto dello scontro con {combattimento.canto.anello}.",
+    "GunSlingher": "COMBATTIMENTO (vale anche in dungeon e boss): a inizio scontro spari da {combattimento.raffica.colpi_min} a {combattimento.raffica.colpi_max} colpi prima della normale azione, ciascuno da {combattimento.raffica.danno_per_colpo} danni. ASSALTO: se esiste un Clone gli spari da {assalto.raffica_clone.colpi_min} a {assalto.raffica_clone.colpi_max} colpi da {assalto.raffica_clone.danno_per_colpo} danni prima che reagisca.",
+    "Arcidemone": "COMBATTIMENTO (vale anche in dungeon e boss): quando l'avversario recupera HP durante un turno, guadagni {combattimento.cura_nemica.atk:signed} ATK per il resto dello scontro.",
+    "Big Game Hunter": "COMBATTIMENTO (vale anche in dungeon e boss): all'inizio dello scontro imposti la tua AGI uguale all'AGI corrente dell'avversario.",
+})

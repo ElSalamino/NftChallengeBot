@@ -2313,3 +2313,37 @@ frasi_set.update({
     "Cacciatore d'esce": "Ogni colpo può richiamarne un secondo, meno potente ma abbastanza fastidioso da fare la differenza.",
     "Duro a morire": "Non elegante, non veloce, semplicemente molto difficile da buttare giù.",
 })
+
+
+# --- QUARTA ONDATA SET: SEI SET ---
+classi.update({
+    "Primo alla torre": ["NotteSferza", "Un machete"],
+    "Pazzo temporale": ["Lama temporale", "Maschera del folle"],
+    "Evocatore del vero potere": ["Stocco magico", "Piuma vulcanica"],
+    "GunSlingher": ["Pistola del west", "Pessime idee"],
+    "Arcidemone": ["Zweihander", "Marchio del dannato"],
+    "Big Game Hunter": ["Arco pesante", "Un libro su tutte le creature"],
+})
+
+Approccini.update({
+    "Primo alla torre": ["Aggressivo", "Spinto", "Autorevole"],
+    "Pazzo temporale": ["Rischioso", "Ingannevole", "Agile"],
+    "Evocatore del vero potere": ["Conservativo", "Autorevole", "Spavaldo"],
+    "GunSlingher": ["Aggressivo", "Agile", "Spavaldo"],
+    "Arcidemone": ["Malevolo", "Vendicativo", "Aggressivo"],
+    "Big Game Hunter": ["Agile", "Conservativo", "Distaccato"],
+})
+
+bonus.update({nome: {"hp": 0, "def": 0, "atk": 0, "agi": 0} for nome in [
+    "Primo alla torre", "Pazzo temporale", "Evocatore del vero potere",
+    "GunSlingher", "Arcidemone", "Big Game Hunter"
+]})
+
+frasi_set.update({
+    "Primo alla torre": "Il primo colpo decide chi comanda: apri lo scontro con una botta doppia e i cloni imparano subito a non stare sulla tua strada.",
+    "Pazzo temporale": "Snap. Il caso smette di essere caso e per un attimo il tempo decide di ripetersi esattamente come vuoi tu.",
+    "Evocatore del vero potere": "Ogni attacco merita un canto. Quasi sempre resta solo una canzone, ma ogni tanto risponde qualcosa di decisamente troppo potente.",
+    "GunSlingher": "Prima si spara, poi eventualmente si fanno le presentazioni: una raffica apre lo scontro prima che qualcuno possa reagire.",
+    "Arcidemone": "La cura degli altri è un insulto personale: ogni volta che il nemico recupera vita, la tua rabbia diventa potenza.",
+    "Big Game Hunter": "Prima di cacciare una bestia bisogna muoversi come lei: all'inizio dello scontro ne copi immediatamente l'agilità.",
+})
