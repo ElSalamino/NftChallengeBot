@@ -46,8 +46,8 @@ jobs:
               "Cacciatore d'esce": ("Coltelli da lancio", "Armatura di esche"),
               "Duro a morire": ("Stecca di ferro", "Un tavolo speziato"),
           }
-          armi = {x.split(" LV")[0] for x in liste.armi}
-          protezioni = {x.split(" LV")[0] for x in liste.protezioni}
+          armi = set(liste.armi) | set(liste.armiextra)
+          protezioni = set(liste.protezioni) | set(liste.protezioniextra)
           for nome, (arma, protezione) in attesi.items():
               assert liste.classi[nome] == [arma, protezione], (nome, liste.classi[nome])
               assert arma in armi, (nome, arma)
