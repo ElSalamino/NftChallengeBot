@@ -136,7 +136,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "scelta variagate" : ['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -187,7 +187,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "nulla per tutto" : ['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -238,7 +238,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "la classe è acqua": ['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -289,7 +289,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV0', 'Un teschio antico', 'Uncino rituale LV0', 'Copricapo maori LV0', 'Totem spirituale LV0', 'Stecca tori LV0','Sgabello da bar LV0', 'Un tavolo speziato LV0',
              'Una mazza ferrata LV0', 'Un machete LV0', 'Scudo del paladino LV0', "Scudo d'ossidiana LV0", "Teschio d'ossidiana LV0", 'Coltelli da lancio LV0', 'Arco pesante LV0', 'Bomba sneaky LV0',
              'Palla Ombra LV0', 'Palla chiodata LV0', 'Bastone sferico LV0', 'NotteSferza LV0', 'Lama temporale LV0',"Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0",
-             "Nucleo della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0", 'Fumetto hot degli anni 70'],
              
              "scontro magico":['Libro del bene e del male', 'Leggi dello spazio', 'Pergamena del potere', 'Tavoletta antica', 'Libro etereo', 'Conoscenze perdute', "Mantra dell'aria",
              'Libro della fede', 'Guida a piante e veleni', 'Scritto sulle luci', 'Tavole della legge', 'Raccolta del deserto', 'Stampa guerrigliera', 'Ordine di leva',
@@ -377,7 +377,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV5', 'Un teschio antico', 'Uncino rituale LV5', 'Copricapo maori LV5', 'Totem spirituale LV5', 'Stecca tori LV5','Sgabello da bar LV5', 'Un tavolo speziato LV5',
              'Una mazza ferrata LV5', 'Un machete LV5', 'Scudo del paladino LV5', "Scudo d'ossidiana LV5", "Teschio d'ossidiana LV5", 'Coltelli da lancio LV5', 'Arco pesante LV5', 'Bomba sneaky LV5',
              'Palla Ombra LV5', 'Palla chiodata LV5', 'Bastone sferico LV5', 'NotteSferza LV5', 'Lama temporale LV5',"Centro temporale LV5","Benda maledetta LV5","Armatura di carne LV5","Anima dispersa LV5",
-             "Nucleo della tempesta LV5","Corona maledetta LV5","Il ciondolo della creazione LV5","Zanna del aliena LV5", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV5","Corona maledetta LV5","Il ciondolo della creazione LV5","Zanna del aliena LV5", 'Fumetto hot degli anni 70'],
              
              "rissa in arena":['Base +', 'Aggressivo+', 'Agile +','Compasso', 'Roccia viva', 'Vincastro', 'Fascette luminose', 'Fantasmino luminoso', 'Corteccia naturale', 'Scudiero fidato',
               "Vasetto all'orlo",'Sgabello da bar LV5', 'Un tavolo speziato LV5',
@@ -437,7 +437,7 @@ arenamod = {"normale": ['Libro del bene e del male', 'Leggi dello spazio', 'Perg
              'Ninfea stagnia LV-5', 'Un teschio antico', 'Uncino rituale LV-5', 'Copricapo maori LV-5', 'Totem spirituale LV-5', 'Stecca tori LV-5','Sgabello da bar LV-5', 'Un tavolo speziato LV-5',
              'Una mazza ferrata LV-5', 'Un machete LV-5', 'Scudo del paladino LV-5', "Scudo d'ossidiana LV-5", "Teschio d'ossidiana LV-5", 'Coltelli da lancio LV-5', 'Arco pesante LV-5', 'Bomba sneaky LV-5',
              'Palla Ombra LV-5', 'Palla chiodata LV-5', 'Bastone sferico LV-5', 'NotteSferza LV-5', 'Lama temporale LV-5',"Centro temporale LV-5","Benda maledetta LV-5","Armatura di carne LV-5","Anima dispersa LV-5",
-             "Nucleo della tempesta LV-5","Corona maledetta LV-5","Il ciondolo della creazione LV-5","Zanna del aliena LV-5", 'Fumetto hot degli anni 70'],
+             "Origine della tempesta LV-5","Corona maledetta LV-5","Il ciondolo della creazione LV-5","Zanna del aliena LV-5", 'Fumetto hot degli anni 70'],
 
              "vecchi tempi" : ['Chiavi' 'Effige della tribe', 'Scarica di adrenalina', 'Lapsus vitale', 'Elsa vitale', 'Benedizione sanguinolenta',
              'Corna da toro', 'Sassolino scintillante', "Pegno di amicizia", 'Veleno del folle', 'Guanto del falco', 'Testuggine del vecchio saggio', 'Campanellina concentrante', "Bilanciere",
@@ -998,7 +998,7 @@ casa_nemici = {'Dune di rione': ['Pollosauro', 'Pistolero', 'Automa massivo', 'E
 
 
 classi = {"Esperto di animali":["Una valigia senza fine","Un libro su tutte le creature"]
-    ,"Pescatore":[],"Re del raaave":["Staffa da rave","Corona del rave"],"Piccolo kraken":["Un dente di kraken","Delle squame viscide"],
+    ,"Pescatore":["Canna blu","Cappellino da pescatore"],"Re del raaave":["Staffa da rave","Corona del rave"],"Piccolo kraken":["Un dente di kraken","Delle squame viscide"],
           "Pescatore di balene":["Uncino enorme","Chela animata"],
     "Campione del sole": ["Spada del dio della fucina", "Corazza a piastre"],
     "Cercatore di reliquie": ["Artiglio del mostro", "Bussola taumaturgica"],
@@ -1580,11 +1580,11 @@ usabilitutti = [
 ]
 
 eventi = {
-    "Velo di catena": "Magia antica 💫",
-    "Spada del dio della fucina": "Magia antica 💫",
-    "Fuoco purificatore": "Magia antica 💫",
-    "Bussola taumaturgica": "Magia antica 💫",
-    "Lama Mentale": "Magia antica 💫",
+    "Velo di catena": "Eroi di altrove 💫",
+    "Spada del dio della fucina": "Eroi di altrove 💫",
+    "Fuoco purificatore": "Eroi di altrove 💫",
+    "Bussola taumaturgica": "Eroi di altrove 💫",
+    "Lama Mentale": "Eroi di altrove 💫",
     "Neo blaster": "Cyberarena 🤖",
     "Spada a protoni": "Cyberarena 🤖",
     "Z-Saber": "Cyberarena 🤖",
@@ -1619,7 +1619,10 @@ eventi = {
     "Origine della tempesta":"Eroi della tempesta ⛈",
     "Corona maledetta":"Eroi della tempesta ⛈",
     "Il ciondolo della creazione":"Eroi della tempesta ⛈",
-    "Zanna del aliena":"Eroi della tempesta ⛈"
+    "Zanna del aliena":"Eroi della tempesta ⛈",
+    "Lama temporale":"Eroi della tempesta ⛈",
+    "Una valigia senza fine":"Eroi della tempesta ⛈",
+    "Un libro su tutte le creature":"Eroi della tempesta ⛈"
 }
 
 nemici ={'Orconte': {'Nome': 'Orconte', 'hp': 899, 'def': 471, 'atk': 92, 'agi': 8, 'Ap': 'Base', 'schivato': False, 'anello': None, 'boost': {'sfida': {}}, 'set': 'Cultista pazzo'},
@@ -2153,4 +2156,315 @@ protezioniextra = {
     "Origine della tempesta":{"hp": 0, "atk": 100, "def": 100, "agi": 0, "type": "🛡"},
     "Corona maledetta":{"hp": 0, "atk": 80, "def": 80, "agi": 8, "type": "🛡"},
     "Il ciondolo della creazione":{"hp": 0, "atk": 95, "def": 95, "agi": 2, "type": "🛡"},
+}
+
+# --- SET EROI DELLA TEMPESTA: CATALOGO ---
+classi.update({
+    "Guerriero Temporale": ["Lama temporale", "Centro temporale"],
+    "Dannato primordiale": ["Una bibbia inversa", "Benda maledetta"],
+    "Macellatore": ["Mannaia pazza", "Anima dispersa"],
+    "Mente centrale": ["Zanna del aliena", "Benda maledetta"],
+    "Amletico": ["Lama Mentale", "Corona maledetta"],
+    "Accumulatore di meraviglie": ["Una valigia senza fine", "Il ciondolo della creazione"],
+    "Anima della festa": ["Staffa da rave", "Centro temporale"],
+    "Zanno": ["Zanna del aliena", "Dente infernale"],
+    "Uditore del profondo": ["Tentacolo viscido", "Armatura di carne"],
+    "Monarca della tempesta di fuoco": ["Fiamma bluastra", "Un copricapo rossastro"],
+    "Evocatore delle maree": ["Tentacolo viscido", "Il ciondolo della creazione"],
+    "Mecha sciamano": ["Stecca tori", "Assetto mecha"],
+})
+
+Approccini.update({
+    "Guerriero Temporale": ["Difensivo", "Schivo", "Impavido"],
+    "Dannato primordiale": ["Aggressivo", "Rabbioso", "Spinto"],
+    "Macellatore": ["Conservativo", "Difensivo", "Spinto"],
+    "Mente centrale": ["Aggressivo", "Spavaldo", "Rischioso"],
+    "Amletico": ["Conservativo", "Spinto", "Malevolo"],
+    "Accumulatore di meraviglie": ["Spinto", "Autorevole", "Conservativo"],
+    "Anima della festa": ["Aggressivo", "Agile", "Spinto"],
+    "Zanno": ["Rabbioso", "Aggressivo", "Spavaldo"],
+    "Uditore del profondo": ["Conservativo", "Difensivo", "Rischioso"],
+    "Monarca della tempesta di fuoco": ["Difensivo", "Conservativo", "Impavido"],
+    "Evocatore delle maree": ["Aggressivo", "Rabbioso", "Spavaldo"],
+    "Mecha sciamano": ["Difensivo", "Impavido", "Spinto"],
+})
+
+bonus.update({
+    "Guerriero Temporale": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Dannato primordiale": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Macellatore": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Mente centrale": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Amletico": {"hp": 50, "def": 0, "atk": 0, "agi": 0},
+    "Accumulatore di meraviglie": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Anima della festa": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Zanno": {"hp": 0, "def": 0, "atk": 300, "agi": 0},
+    "Uditore del profondo": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Monarca della tempesta di fuoco": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Evocatore delle maree": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Mecha sciamano": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+})
+
+frasi_set.update({
+    "Guerriero Temporale": "Il tempo non ti lascia morire facilmente: in sfida combatti con soli 100 HP, ma puoi tornare in piedi fino a cinque volte.",
+    "Dannato primordiale": "Il male divora ogni difesa: in sfida e in assalto tutta la DEF viene convertita in ATK.",
+    "Macellatore": "Una schivata non basta a scappare: in sfida puoi riacciuffare chi evita il colpo e punirlo al doppio.",
+    "Mente centrale": "Sei non ironicamente diventato la mente centrale di una razza aliena: durante gli assalti gli alieni possono colpire ogni struttura attraversata.",
+    "Amletico": "Potere o sopravvivenza? In sfida e in assalto puoi sacrificare metà della vita per trasformarla in attacco. Hai inoltre 50 HP extra.",
+    "Accumulatore di meraviglie": "Una valigia infinita risolve qualsiasi problema, dal vaso alla Luna: ogni turno può comparire qualcosa che altera il colpo.",
+    "Anima della festa": "La festa cresce turno dopo turno: recuperi seguaci che aumentano tutte le statistiche e in assalto sfrutti meglio chi ti ha preceduto.",
+    "Zanno": "Zanne. Tante zanne. Soprattutto +300 ATK.",
+    "Uditore del profondo": "A un solo punto vita qualcosa dal profondo risponde. E risponde con un miliardo di danni.",
+    "Monarca della tempesta di fuoco": "In sfida combatti come se avessi sempre Iridescente, Minimista, Primo impatto e Icore.",
+    "Evocatore delle maree": "Ogni assalto richiama Onde dell'abisso; se cadi, il tuo impatto genera uno tsunami contro tutte le strutture.",
+    "Mecha sciamano": "In sfida il mecha consuma 10 HP a turno e forza nuovamente il tuo approccio, esasperandone le statistiche.",
+})
+
+def set_per_oggetto(nome_oggetto):
+    """Restituisce tutti i set che richiedono l'oggetto, ignorando l'eventuale livello LV."""
+    base = str(nome_oggetto).split(" LV")[0]
+    trovati = []
+    for nome_set, componenti in classi.items():
+        if not nome_set or not componenti:
+            continue
+        if base in componenti:
+            trovati.append(nome_set)
+    return sorted(trovati, key=str.lower)
+
+
+# --- SECONDA ONDATA SET: CATALOGO ---
+classi.update({
+    "Anima persa": ["Bastone del folle", "Anima dispersa"],
+    "Disabilitatore provetto": ["Cacciavite multiuso", "Delle squame viscide"],
+    "Controllore del cielo": ["Artiglio di Drago", "Ali piumate"],
+    "Eterna sventura": ["Guanti di cormorant", "Corona maledetta"],
+    "Pescatore alternativo": ["Ascia bipenne", "Cappellino da pescatore"],
+    "Esca vivente": ["Canna blu", "Armatura di carne"],
+    "Giustiziere a V": ["Frusta telaia", "Armatura del folle"],
+})
+Approccini.update({
+    "Anima persa": ["Conservativo", "Difensivo", "Impavido"],
+    "Disabilitatore provetto": ["Aggressivo", "Spinto", "Autorevole"],
+    "Controllore del cielo": ["Agile", "Schivo", "Conservativo"],
+    "Eterna sventura": ["Malevolo", "Aggressivo", "Vendicativo"],
+    "Pescatore alternativo": ["Rischioso", "Aggressivo", "Spavaldo"],
+    "Esca vivente": ["Rischioso", "Impavido", "Conservativo"],
+    "Giustiziere a V": ["Agile", "Vendicativo", "Spinto"],
+})
+bonus.update({nome: {"hp": 0, "def": 0, "atk": 0, "agi": 0} for nome in [
+    "Anima persa", "Disabilitatore provetto", "Controllore del cielo", "Eterna sventura",
+    "Pescatore alternativo", "Esca vivente", "Giustiziere a V"
+]})
+frasi_set.update({
+    "Anima persa": "Non puoi più scappare dal colpo: quando il corpo proverebbe a schivare, l'anima resta e ti regala vita per continuare a combattere.",
+    "Disabilitatore provetto": "Viti, cavi e un pessimo rapporto con i muri: in assalto sai esattamente cosa smontare per farli crollare.",
+    "Controllore del cielo": "Ogni cura ti porta più in alto: recuperare vita alimenta anche attacco e difesa fino a renderti padrone del cielo.",
+    "Eterna sventura": "Ogni colpo può lasciare qualcosa di peggio di una ferita: l'avversario perde lentamente la capacità di reagire.",
+    "Pescatore alternativo": "La pesca è secondaria: ogni turno puoi buttare via prudenza e difesa per trasformarti in una macchina d'attacco.",
+    "Esca vivente": "La difesa non serve se sei tu l'esca: entri in sfida e in assalto completamente scoperto.",
+    "Giustiziere a V": "Il giudizio arriva dopo qualche turno: diventi molto più agile e contro gli accampamenti non conosci mezze misure.",
+})
+
+
+# --- TERZA ONDATA SET: NOVE SET ---
+classi.update({
+    "Monarca oscuro": ["Palla Ombra", "Scudo d'ossidiana"],
+    "Oscurato": ["NotteSferza", "Teschio d'ossidiana"],
+    "Demone delle lame": ["Coltelli da lancio", "Un machete"],
+    "Re dei gadget": ["Bomba sneaky", "Bastone sferico"],
+    "Il comico": ["Bomba sneaky", "Sgabello da bar"],
+    "Survival medievale": ["Spada della vitalità", "Un armatura in filo spinato"],
+    "Duellista vermico": ["Spada d'oro fortissima", "Secchiello di vermi"],
+    "Cacciatore d'esce": ["Coltelli da lancio", "Armatura di esche"],
+    "Duro a morire": ["Stecca di ferro", "Un tavolo speziato"],
+})
+
+Approccini.update({
+    "Monarca oscuro": ["Malevolo", "Vendicativo", "Difensivo"],
+    "Oscurato": ["Vendicativo", "Difensivo", "Conservativo"],
+    "Demone delle lame": ["Aggressivo", "Spinto", "Agile"],
+    "Re dei gadget": ["Autorevole", "Conservativo", "Agile"],
+    "Il comico": ["Spavaldo", "Rischioso", "Agile"],
+    "Survival medievale": ["Conservativo", "Impavido", "Difensivo"],
+    "Duellista vermico": ["Spavaldo", "Aggressivo", "Rischioso"],
+    "Cacciatore d'esce": ["Aggressivo", "Agile", "Spinto"],
+    "Duro a morire": ["Difensivo", "Conservativo", "Impavido"],
+})
+
+bonus.update({
+    "Monarca oscuro": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Oscurato": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Demone delle lame": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Re dei gadget": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Il comico": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Survival medievale": {"hp": 500, "def": 0, "atk": 0, "agi": 0},
+    "Duellista vermico": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Cacciatore d'esce": {"hp": 0, "def": 0, "atk": 0, "agi": 0},
+    "Duro a morire": {"hp": 0, "def": 222, "atk": 0, "agi": 0},
+})
+
+frasi_set.update({
+    "Monarca oscuro": "La battaglia comincia già nella penombra: il nemico entra debilitato e in assalto l'ombra di chi ti ha preceduto si abbatte sul bersaglio.",
+    "Oscurato": "Il dolore non resta mai da una parte sola: una parte di ogni ferita torna sempre indietro.",
+    "Demone delle lame": "Ogni lama trova un secondo varco: i tuoi colpi mordono più a fondo in ogni combattimento.",
+    "Re dei gadget": "Non serve capire come funzioni: basta avere abbastanza gadget da sembrare improvvisamente molto più intelligente.",
+    "Il comico": "Un sonoro CLAP e la concentrazione sparisce: l'avversario può diventare il proprio peggior nemico.",
+    "Survival medievale": "Vecchia scuola, molta vita: sopravvivere è più semplice quando parti con parecchia carne in più.",
+    "Duellista vermico": "Il primo verme è inevitabile. Se il gusto prende piede, potresti non smettere più di mangiarne.",
+    "Cacciatore d'esce": "Ogni colpo può richiamarne un secondo, meno potente ma abbastanza fastidioso da fare la differenza.",
+    "Duro a morire": "Non elegante, non veloce, semplicemente molto difficile da buttare giù.",
+})
+
+
+# --- QUARTA ONDATA SET: SEI SET ---
+classi.update({
+    "Primo alla torre": ["NotteSferza", "Un machete"],
+    "Pazzo temporale": ["Lama temporale", "Maschera del folle"],
+    "Evocatore del vero potere": ["Stocco magico", "Piuma vulcanica"],
+    "GunSlingher": ["Pistola del west", "Pessime idee"],
+    "Arcidemone": ["Zweihander", "Marchio del dannato"],
+    "Big Game Hunter": ["Arco pesante", "Un libro su tutte le creature"],
+})
+
+Approccini.update({
+    "Primo alla torre": ["Aggressivo", "Spinto", "Autorevole"],
+    "Pazzo temporale": ["Rischioso", "Ingannevole", "Agile"],
+    "Evocatore del vero potere": ["Conservativo", "Autorevole", "Spavaldo"],
+    "GunSlingher": ["Aggressivo", "Agile", "Spavaldo"],
+    "Arcidemone": ["Malevolo", "Vendicativo", "Aggressivo"],
+    "Big Game Hunter": ["Agile", "Conservativo", "Distaccato"],
+})
+
+bonus.update({nome: {"hp": 0, "def": 0, "atk": 0, "agi": 0} for nome in [
+    "Primo alla torre", "Pazzo temporale", "Evocatore del vero potere",
+    "GunSlingher", "Arcidemone", "Big Game Hunter"
+]})
+
+frasi_set.update({
+    "Primo alla torre": "Il primo colpo decide chi comanda: apri lo scontro con una botta doppia e i cloni imparano subito a non stare sulla tua strada.",
+    "Pazzo temporale": "Snap. Il caso smette di essere caso e per un attimo il tempo decide di ripetersi esattamente come vuoi tu.",
+    "Evocatore del vero potere": "Ogni attacco merita un canto. Quasi sempre resta solo una canzone, ma ogni tanto risponde qualcosa di decisamente troppo potente.",
+    "GunSlingher": "Prima si spara, poi eventualmente si fanno le presentazioni: una raffica apre lo scontro prima che qualcuno possa reagire.",
+    "Arcidemone": "La cura degli altri è un insulto personale: ogni volta che il nemico recupera vita, la tua rabbia diventa potenza.",
+    "Big Game Hunter": "Prima di cacciare una bestia bisogna muoversi come lei: all'inizio dello scontro ne copi immediatamente l'agilità.",
+})
+
+
+# --- QUINTA ONDATA SET: TREDICI SET ---
+classi.update({
+    "Nucleo dell'uragano": ["Uncino rituale", "Origine della tempesta"],
+    "Tormento di fuoco": ["Spada del dio della fucina", "Origine della tempesta"],
+    "Girarrosto": ["Frusta di salsiccia", "Bastone sferico"],
+    "Venere di ferro": ["Spina insanguinata", "Scaglioni pesanti"],
+    "Rosso D'ossidina": ["Canna rossa", "Scudo d'ossidiana"],
+    "Oltraggioso": ["Blasfemia", "Armatura pesantissima"],
+    "Festante oscuro": ["Palla Ombra", "Corona del rave"],
+    "Legionaro di Evelin": ["Corvo amichevole", "Scudo del comandante"],
+    "Neo Genesi": ["Spada a protoni", "Piuma celeste"],
+    "Intermezzo": ["Lancia celeste", "Palla chiodata"],
+    "Obscurio": ["Palla Ombra", "Velo di catena"],
+    "Primo al comando": ["Martello del folle", "Scudo del comandante"],
+    "Luce persa": ["Spada del crociato", "Anima dispersa"],
+})
+
+Approccini.update({
+    "Nucleo dell'uragano": ["Agile", "Spinto", "Impavido"],
+    "Tormento di fuoco": ["Aggressivo", "Malevolo", "Spinto"],
+    "Girarrosto": ["Conservativo", "Impavido", "Spavaldo"],
+    "Venere di ferro": ["Difensivo", "Conservativo", "Impavido"],
+    "Rosso D'ossidina": ["Aggressivo", "Spavaldo", "Agile"],
+    "Oltraggioso": ["Malevolo", "Spavaldo", "Impavido"],
+    "Festante oscuro": ["Conservativo", "Ingannevole", "Agile"],
+    "Legionaro di Evelin": ["Autorevole", "Aggressivo", "Spinto"],
+    "Neo Genesi": ["Agile", "Spinto", "Autorevole"],
+    "Intermezzo": ["Agile", "Conservativo", "Difensivo"],
+    "Obscurio": ["Ingannevole", "Malevolo", "Conservativo"],
+    "Primo al comando": ["Autorevole", "Spinto", "Impavido"],
+    "Luce persa": ["Aggressivo", "Impavido", "Spinto"],
+})
+
+bonus.update({nome: {"hp": 0, "def": 0, "atk": 0, "agi": 0} for nome in [
+    "Nucleo dell'uragano", "Tormento di fuoco", "Girarrosto", "Venere di ferro",
+    "Rosso D'ossidina", "Oltraggioso", "Festante oscuro", "Legionaro di Evelin",
+    "Neo Genesi", "Intermezzo", "Obscurio", "Primo al comando", "Luce persa"
+]})
+
+frasi_set.update({
+    "Nucleo dell'uragano": "Il vento aspetta che il nemico si affidi al proprio anello: appena il potere si manifesta, l'uragano gli si rivolta contro.",
+    "Tormento di fuoco": "Ogni scintilla di potere avversaria alimenta un tormento che brucia usando la forza stessa di chi lo ha evocato.",
+    "Girarrosto": "Puoi cuocere lentamente quanto vuoi: la prima volta che sembri davvero cotto, torni improvvisamente in perfetta forma.",
+    "Venere di ferro": "Ogni colpo affonda meno del previsto: spine e ferro assorbono una parte costante della violenza in arrivo.",
+    "Rosso D'ossidina": "Ogni colpo riuscito ti convince ancora di più della tua strategia: diventi sempre più simile al tuo stesso approccio.",
+    "Oltraggioso": "Oltraggi perfino il concetto di danno: nessun singolo colpo riesce a superare il limite che imponi allo scontro.",
+    "Festante oscuro": "Dentro di te festeggiano ombre senza fine: prendono i colpi al tuo posto, ma a ogni turno una parte del loro dolore torna a reclamarti.",
+    "Legionaro di Evelin": "Evelin detta il ritmo: nei turni dispari il colpo trova sempre un rinforzo, mentre gli accampamenti preferiscono non discutere.",
+    "Neo Genesi": "La nuova genesi procede a impulsi regolari: nei turni pari libera una scarica pulita che accompagna il colpo.",
+    "Intermezzo": "Ogni schivata è una nota accumulata. A tre, cinque e otto cariche il crescendo diventa sempre più difficile da fermare.",
+    "Obscurio": "La luce della guarigione non trova strada nell'oscurità: davanti a te recuperare vita diventa semplicemente impossibile.",
+    "Primo al comando": "Ogni anello che osa attivarsi diventa un segnale per il comandante: il caos degli altri si trasforma immediatamente in nuova vita.",
+    "Luce persa": "Abbandoni ogni agilità e la trasformi in potere puro: niente più evasione, soltanto attacco e difesa alimentati dalla luce perduta.",
+})
+
+# --- AGGIORNAMENTO FARO E NUOVI NEMICI DUNGEON ---
+_NUOVI_NEMICI_DUNGEON = {
+    "Vortice di fuoco": {"Nome": "Vortice di fuoco", "hp": 850, "def": 120, "atk": 480, "agi": 70, "Ap": "Base", "schivato": False, "anello": "Dance Dance Revolution", "boost": {"sfida": {}}, "set": "Fire lord"},
+    "Friggitrice infestata": {"Nome": "Friggitrice infestata", "hp": 1000, "def": 260, "atk": 230, "agi": 65, "Ap": "Base", "schivato": False, "anello": "Anello di totano", "boost": {"sfida": {}}, "set": "Forma elettro"},
+    "Bruciatore infestata": {"Nome": "Bruciatore infestata", "hp": 900, "def": 180, "atk": 420, "agi": 30, "Ap": "Base", "schivato": False, "anello": "Campanellina concentrante", "boost": {"sfida": {}}, "set": "Forma fuoco"},
+    "Ventilatore infestata": {"Nome": "Ventilatore infestata", "hp": 850, "def": 220, "atk": 180, "agi": 90, "Ap": "Base", "schivato": False, "anello": "Tasto B", "boost": {"sfida": {}}, "set": "Forma lunare"},
+    "Battitore infestato": {"Nome": "Battitore infestato", "hp": 1200, "def": 420, "atk": 160, "agi": 20, "Ap": "Base", "schivato": False, "anello": "Anello dell'occulto", "boost": {"sfida": {}}, "set": "Forma terra"},
+    "Maialetto Malevolo": {"Nome": "Maialetto Malevolo", "hp": 1100, "def": 180, "atk": 310, "agi": 35, "Ap": "Base", "schivato": False, "anello": "Aura pessima", "boost": {"sfida": {}}, "set": "Incantatore di controparte"},
+    "Neutralizzatore": {"Nome": "Neutralizzatore", "hp": 1300, "def": 500, "atk": 120, "agi": 15, "Ap": "Base", "schivato": False, "anello": "Compasso", "boost": {"sfida": {}}, "set": "Maestro delle tartarughe"},
+    "Spirito rincorrente": {"Nome": "Spirito rincorrente", "hp": 800, "def": 120, "atk": 220, "agi": 95, "Ap": "Base", "schivato": False, "anello": "Amuleto del protettore", "boost": {"sfida": {}}, "set": "Mariachi"},
+    "Cacciatore di magie": {"Nome": "Cacciatore di magie", "hp": 950, "def": 250, "atk": 300, "agi": 55, "Ap": "Base", "schivato": False, "anello": "Elsa vitale", "boost": {"sfida": {}}, "set": "Nucleo dell'uragano"},
+    "Cammello zombie": {"Nome": "Cammello zombie", "hp": 1400, "def": 300, "atk": 240, "agi": 12, "Ap": "Base", "schivato": False, "anello": "Effige della tribe", "boost": {"sfida": {}}, "set": "Ricercatore del pericolo"},
+    "Terminatore": {"Nome": "Terminatore", "hp": 1250, "def": 380, "atk": 360, "agi": 22, "Ap": "Base", "schivato": False, "anello": "Cuffia da boia", "boost": {"sfida": {}}, "set": "Shogun moderno"},
+    "Bomba vivente": {"Nome": "Bomba vivente", "hp": 700, "def": 80, "atk": 650, "agi": 25, "Ap": "Base", "schivato": False, "anello": "Vincastro", "boost": {"sfida": {}}, "set": "Uditore del profondo"},
+    "Caricatore inbloccabile": {"Nome": "Caricatore inbloccabile", "hp": 1500, "def": 350, "atk": 330, "agi": 10, "Ap": "Base", "schivato": False, "anello": "Ali di luminite", "boost": {"sfida": {}}, "set": "Pescatore alternativo"},
+    "Gorgone": {"Nome": "Gorgone", "hp": 1050, "def": 300, "atk": 230, "agi": 40, "Ap": "Base", "schivato": False, "anello": "Cinta del comandante", "boost": {"sfida": {}}, "set": "Regina golgari"},
+    "Marchiatore": {"Nome": "Marchiatore", "hp": 950, "def": 200, "atk": 280, "agi": 50, "Ap": "Base", "schivato": False, "anello": "Ricordo straziante", "boost": {"sfida": {}}, "set": "Oracolo del buio"},
+    "Immortale": {"Nome": "Immortale", "hp": 1800, "def": 250, "atk": 160, "agi": 20, "Ap": "Base", "schivato": False, "anello": "Lapsus vitale", "boost": {"sfida": {}}, "set": "Festante oscuro"},
+    "Ombra devastante": {"Nome": "Ombra devastante", "hp": 900, "def": 160, "atk": 430, "agi": 75, "Ap": "Base", "schivato": False, "anello": "Scarica di adrenalina", "boost": {"sfida": {}}, "set": "Oscurato"},
+    "Primo alla torre": {"Nome": "Primo alla torre", "hp": 1000, "def": 280, "atk": 360, "agi": 45, "Ap": "Base", "schivato": False, "anello": "GDR semplificato", "boost": {"sfida": {}}, "set": "Primo alla torre"},
+}
+nemici.update(_NUOVI_NEMICI_DUNGEON)
+
+# Ogni nuovo nemico compare almeno in una zona coerente col tema.
+_DISTRIBUZIONE_NUOVI_NEMICI = {
+    "Dune di rione": ["Terminatore"],
+    "Delta del fiume Vern": ["Spirito rincorrente"],
+    "Monte cashmere": ["Caricatore inbloccabile"],
+    "Allevamento spettrale": ["Maialetto Malevolo", "Immortale"],
+    "Città di mezzo": ["Friggitrice infestata", "Battitore infestato"],
+    "Ordine della rocca": ["Neutralizzatore", "Primo alla torre"],
+    "Piana dell'inzio": ["Marchiatore"],
+    "Antico deserto": ["Cammello zombie", "Vortice di fuoco"],
+    "Selva dei predatori": ["Gorgone", "Ombra devastante"],
+    "Grotte tori": ["Bruciatore infestata", "Bomba vivente"],
+    "Circolo polare": ["Ventilatore infestata"],
+    "Sentieri spersi": ["Cacciatore di magie"],
+}
+for _zona_nuova, _nemici_nuovi in _DISTRIBUZIONE_NUOVI_NEMICI.items():
+    for _nome_nuovo in _nemici_nuovi:
+        if _nome_nuovo not in casa_nemici[_zona_nuova]:
+            casa_nemici[_zona_nuova].append(_nome_nuovo)
+
+if "Faro" not in stanze:
+    stanze.append("Faro")
+for _scelta_faro in ("Vedere", "Essere visto"):
+    if _scelta_faro not in scelte:
+        scelte.append(_scelta_faro)
+
+# Riabilitato nel roster dei boss giornalieri.
+Boss["Franco est"] = {
+    "hp": 1000,
+    "def": 200,
+    "atk": 200,
+    "agi": 35,
+    "Nome": "Franco est",
+    "schivato": False,
+    "anello": "Anello superfortissimo ma proprio rotto sgravatissimo",
+    "protezione": None,
+    "arma": None,
+    "boost": {"sfida": {}},
+    "Ap": "Base",
+    "set": None,
 }

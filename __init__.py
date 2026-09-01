@@ -1,6 +1,7 @@
 # coding=utf-8
 import copy,html,json,random,sys,time,asyncio,gc, importlib
 from io import BytesIO, StringIO
+from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from pyrogram import Client, ContinuePropagation, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -110,7 +111,7 @@ for armature in liste.armi:
 
     
 
-tempesta = ["Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0","Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0"]
+tempesta = ["Centro temporale LV0","Benda maledetta LV0","Armatura di carne LV0","Anima dispersa LV0","Origine della tempesta LV0","Corona maledetta LV0","Il ciondolo della creazione LV0","Zanna del aliena LV0","Assetto mecha LV0","Lama temporale LV0","Una valigia senza fine LV0","Un libro su tutte le creature LV0"]
 zombie = ["Un armatura in filo spinato LV0","Un pompa del nonno LV0","Due gemelle luccicanti LV0","Una katana ben affilata LV0","Un fucile a pallettoni LV0","Una bandana da tipo tosto LV0","Delle placche metalliche LV0","Un visore laser LV0","Un manganello LV0",]
 megaman = ["Neo blaster LV0","Spada a protoni LV0","Z-Saber LV0","Chip terra LV0","Chip fuoco LV0","Chip elettro LV0","Chip lunare LV0",]
 megaset = ['Neo blaster', 'Spada a protoni', 'Z-Saber', 'Chip terra', 'Chip fuoco', 'Chip elettro', 'Chip lunare']
@@ -120,7 +121,7 @@ premi_pescatore = ["Canna rossa LV0","Canna blu LV0","Canna magenta LV0","Cappel
 item_pescatore = ["Canna rossa","Canna blu","Canna magenta","Cappellino da pescatore","Armatura di esche","Secchiello di vermi","Giubbina con lenze"]
 
 
-emojiz = {"Velo di catena": "💫","Spada del dio della fucina": "💫","Fuoco purificatore": "💫","Bussola taumaturgica": "💫","Lama Mentale": "💫","Un armatura in filo spinato": "🧟","Un pompa del nonno": "🧟","Due gemelle luccicanti": "🧟","Una katana ben affilata": "🧟","Un fucile a pallettoni": "🧟","Una bandana da tipo tosto": "🧟","Delle placche metalliche": "🧟","Un visore laser": "🧟","Un manganello": "🧟","Mantello rosso": "🔫","Tasto X": "🔫","Tasto B": "🔫","Blasfemia": "🔫","Armatura di cormorant": "🔫","Guanti di cormorant": "🔫","Pistola del west": "🔫","Blaster a turbina": "🔫","Cacciavite multiuso": "🔫","Junior secondo": "🔫","Neo blaster": "🤖","Spada a protoni": "🤖","Z-Saber": "🤖","Chip terra": "🤖","Chip fuoco": "🤖","Chip elettro": "🤖","Chip lunare": "🤖","Assetto mecha":"⛈","Centro temporale":"⛈","Benda maledetta":"⛈","Armatura di carne":"⛈","Anima dispersa":"⛈","Origine della tempesta":"⛈","Corona maledetta":"⛈","Il ciondolo della creazione":"⛈","Zanna del aliena":"⛈"}
+emojiz = {"Velo di catena": "💫","Spada del dio della fucina": "💫","Fuoco purificatore": "💫","Bussola taumaturgica": "💫","Lama Mentale": "💫","Un armatura in filo spinato": "🧟","Un pompa del nonno": "🧟","Due gemelle luccicanti": "🧟","Una katana ben affilata": "🧟","Un fucile a pallettoni": "🧟","Una bandana da tipo tosto": "🧟","Delle placche metalliche": "🧟","Un visore laser": "🧟","Un manganello": "🧟","Mantello rosso": "🔫","Tasto X": "🔫","Tasto B": "🔫","Blasfemia": "🔫","Armatura di cormorant": "🔫","Guanti di cormorant": "🔫","Pistola del west": "🔫","Blaster a turbina": "🔫","Cacciavite multiuso": "🔫","Junior secondo": "🔫","Neo blaster": "🤖","Spada a protoni": "🤖","Z-Saber": "🤖","Chip terra": "🤖","Chip fuoco": "🤖","Chip elettro": "🤖","Chip lunare": "🤖","Assetto mecha":"⛈","Centro temporale":"⛈","Benda maledetta":"⛈","Armatura di carne":"⛈","Anima dispersa":"⛈","Origine della tempesta":"⛈","Corona maledetta":"⛈","Il ciondolo della creazione":"⛈","Zanna del aliena":"⛈","Lama temporale":"⛈","Una valigia senza fine":"⛈","Un libro su tutte le creature":"⛈"}
 
 item_boss = ['Ricordo straziante',"Un terzo occhio","Pessime idee","Marchio del dannato","Aura pessima", 'Una falce spaventosa', 'Un mantello nero cenere', 'Una bibbia inversa', 'Un piccolo uccellino scheletrico', 'Amuleto del protettore', 'Guanto titanico', 'Cinta del comandante', 'Un frammento del potere', 'Un generatore incartato', 'Una tempesta in barattolo', 'Catenaccio demoniaco', 'Dente infernale', "Chiavi dell'aldilà", 'Tentacolo viscido', 'Coda-mazza', 'Cuore delle sabbie', 'Spada di sangue di demone', 'Un copricapo rossastro', 'Coda demoniaca', 'Fiamma bluastra', 'Forcone fiammeggiante', 'Una spilla rossa', 'Vanga da cimitero', 'Sacco da cadaveri', "Anello dell'occulto", 'Corvo amichevole', 'Ali piumate', 'Artiglio del mostro', 'Unto e lercio', 'Fanghiglia della palude', 'Laniccio del pantano', 'Ninfea stagnia', 'Un teschio antico', 'Uncino rituale', 'Copricapo maori', 'Effige della tribe', 'Totem spirituale', 'Stecca tori']
 
@@ -325,13 +326,10 @@ def premio_exp(a, b, text):
             vertutto = item_trovabili + gungeon 
         if evento["evento"] == "magic":
             vertutto = item_trovabili + magic 
+        if evento["evento"] == "tempesta":
+            vertutto = item_trovabili + tempesta
 
         contentino = random.choice(vertutto)
-        if (
-            a["scheda"]["anello"] == "Un generatore incartato"
-            and 0.06 > random.random()
-        ):
-            contentino = "Un oggetto incartato"
         try:
             a["zaino"][contentino] += quantita_drop
         except:
@@ -413,13 +411,10 @@ def premio_exp(a, b, text):
             vertutto = item_trovabili + gungeon + gungeon
         if evento["evento"] == "magic":
             vertutto = item_trovabili + magic + magic + magic
+        if evento["evento"] == "tempesta":
+            vertutto = item_trovabili + tempesta + tempesta + tempesta
 
         contentino = random.choice(vertutto)
-        if (
-            b["scheda"]["anello"] == "Un generatore incartato"
-            and 0.06 > random.random()
-        ):
-            contentino = "Un oggetto incartato"
 
         if "l-streak" in b:
             b["l-streak"] = 0
@@ -497,6 +492,30 @@ def premio_exp(a, b, text):
                 pass
             
             
+
+    # Generatore incartato: premio extra indipendente dal drop normale.
+    for combattente_generatore in (a, b):
+        try:
+            usa_generatore = combattente_generatore["scheda"].get("anello") == "Un generatore incartato"
+        except Exception:
+            usa_generatore = False
+        if not usa_generatore:
+            continue
+        if nft.anello_ok(random.random(), "Un generatore incartato", "ricompense", "incartato"):
+            quantita_generatore = int(nft.anello_val("Un generatore incartato", "ricompense", "incartato", "quantita", 1))
+            try:
+                combattente_generatore["zaino"]["Un oggetto incartato"] += quantita_generatore
+            except:
+                combattente_generatore["zaino"]["Un oggetto incartato"] = quantita_generatore
+            if combattente_generatore.get("notifiche", {}).get("oggetti") != "no":
+                try:
+                    app.send_message(
+                        combattente_generatore["scheda"]["Nome"],
+                        f"Il Generatore incartato si attiva: +{quantita_generatore} Oggetto incartato!",
+                    )
+                except:
+                    pass
+
 import asyncio
 
 
@@ -1112,6 +1131,8 @@ async def fine(client, message):
                                         vertutto = tuttov + gungeon + gungeon
             if evento["evento"] == "magic":
                                         vertutto = tuttov + magic + magic + magic
+            if evento["evento"] == "tempesta":
+                                        vertutto = tuttov + tempesta + tempesta + tempesta
             for gwefqw in range(win):
                 vinto = random.choice(vertutto)
                 try:
@@ -1191,18 +1212,35 @@ def reset(client, message):
 @app.on_message(filters.command("ban") & filters.user(autorizzati)
 )
 def reset(client, message):
+    if not message.reply_to_message:
+        app.send_message(message.chat.id, "Usa /ban in risposta alla persona da bannare!")
+        return
     if len(message.command) == 1:
-        app.kick_chat_member(message.chat.id,message.reply_to_message.from_user.id)
-        app.send_message(message.chat.id,f"{message.reply_to_message.from_user.username} bannato per seeeempre!")
+        app.ban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+        app.send_message(message.chat.id, f"{message.reply_to_message.from_user.username} bannato per seeeempre!")
     else:
-        app.kick_chat_member(message.chat.id,message.reply_to_message.from_user.id, int(time.time() + int(message.command[1])))
-        app.send_message(message.chat.id,f"{message.reply_to_message.from_user.username} bannato per un pochino di secondi, tipo {message.command[1]}!")
+        try:
+            secondi = max(30, int(message.command[1]))
+        except (TypeError, ValueError):
+            app.send_message(message.chat.id, "Durata non valida. Usa /ban secondi rispondendo alla persona.")
+            return
+        app.ban_chat_member(
+            message.chat.id,
+            message.reply_to_message.from_user.id,
+            datetime.now() + timedelta(seconds=secondi),
+        )
+        app.send_message(message.chat.id, f"{message.reply_to_message.from_user.username} bannato per {secondi} secondi!")
 
 @app.on_message(filters.command("kick") & filters.user(autorizzati)
 )
 def reset(client, message):
-    app.kick_chat_member(message.chat.id,message.reply_to_message.from_user.id, int(time.time() + 30))
-    app.send_message(message.chat.id,f"{message.reply_to_message.from_user.username} cacciato via dal gruppo!")
+    if not message.reply_to_message:
+        app.send_message(message.chat.id, "Usa /kick in risposta alla persona da cacciare!")
+        return
+    user_id = message.reply_to_message.from_user.id
+    app.ban_chat_member(message.chat.id, user_id)
+    app.unban_chat_member(message.chat.id, user_id)
+    app.send_message(message.chat.id, f"{message.reply_to_message.from_user.username} cacciato via dal gruppo!")
 
 @app.on_message(filters.command("sban") & filters.user(autorizzati)
 )
@@ -1212,7 +1250,7 @@ def reset(client, message):
         app.send_message(message.chat.id,f"No ecco, devi fare /sban in risposta alla persona!")
     else:
         try:
-            app.unban_chat_member(message.chat.id, message.reply_to_message.from_user.username)
+            app.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
         
             app.send_message(message.chat.id,f"{message.reply_to_message.from_user.username} sbannato!")
         except:
@@ -1276,12 +1314,14 @@ def _attiva_mod_weekend(mod):
 def reset(client, message):
     
     if len(trader["vorrei"]) == 0:
-        scelto = random.choice(["gungeon", "zombie", "mega", "magic"])
+        scelto = random.choice(["gungeon", "zombie", "mega", "magic", "tempesta"])
     else:
         scelto = trader["vorrei"][0]
         trader["vorrei"] = list()
     mod = random.choice(nft.WEEKEND_MOD_POOL)
     evento["mod"] = mod
+    if scelto == "tempesta":
+        testo = "Gli Eroi della Tempesta ⛈ irrompono nel mondo!\nNuovi equip e set Tempesta sono disponibili nelle ricompense!"
     evento["evento"] = scelto
     _attiva_mod_weekend(mod)
 
@@ -1336,12 +1376,14 @@ def reset(client, message):
 def inizio_weew():
     
     if len(trader["vorrei"]) == 0:
-        scelto = random.choice(["gungeon", "zombie", "mega", "magic"])
+        scelto = random.choice(["gungeon", "zombie", "mega", "magic", "tempesta"])
     else:
         scelto = trader["vorrei"][0]
         trader["vorrei"] = list()
     mod = random.choice(nft.WEEKEND_MOD_POOL)
     evento["mod"] = mod
+    if scelto == "tempesta":
+        testo = "Gli Eroi della Tempesta ⛈ irrompono nel mondo!\nNuovi equip e set Tempesta sono disponibili nelle ricompense!"
     evento["evento"] = scelto
     _attiva_mod_weekend(mod)
 
@@ -1441,6 +1483,8 @@ def auto_incarico():
                                             vertutto = tuttov + gungeon + gungeon
                 if evento["evento"] == "magic":
                                             vertutto = tuttov + magic + magic + magic
+                if evento["evento"] == "tempesta":
+                                            vertutto = tuttov + tempesta + tempesta + tempesta
                 for gwefqw in range(win):
                     vinto = random.choice(vertutto)
                     try:
@@ -2538,14 +2582,16 @@ async def arenaff(client, message):
                     reply_to_message_id=player[username]["arena"]["pin"]
                 )
             except Exception as h:
-                player[username].pop("arena")
-                try:
-                    await client.delete(
-                    chat_id=message.chat.id,
-                    reply_to_message_id=player[username]["arena"]["pin"]
-                )
-                except:
-                    pass
+                arena_pin = player[username].get("arena", {}).get("pin")
+                player[username].pop("arena", None)
+                if arena_pin is not None:
+                    try:
+                        await client.delete_messages(
+                            chat_id=message.chat.id,
+                            message_ids=arena_pin
+                        )
+                    except Exception:
+                        pass
                 await message.reply(f"L'arena è stata chiusa per attività sospette\n{h}")
         else:
             bottoni = list()
@@ -2943,8 +2989,7 @@ async def notifiches(client, message):
     await app.send_message(message.chat.id,text=testo, reply_markup=reply_markup)
 
 
-@app.on_message(filters.regex(r"^Invita 📮")|filters.command(["invita", "invita@NFTchallengebot"]) & ~filters.user(bannati)
-)
+@app.on_message((filters.regex(r"^Invita 📮") | filters.command(["invita", "invita@NFTchallengebot"])) & ~filters.user(bannati))
 async def invita(client, message):
     username = message.from_user.username
 
@@ -3513,6 +3558,13 @@ Ne possiedi {qt} copie.
                     t += f"\n**{eventoz}**"
             except:
                 pass
+
+            try:
+                set_oggetto = liste.set_per_oggetto(risultati[0])
+                if set_oggetto:
+                    t += "\n🧩 **Set:** " + ", ".join(set_oggetto)
+            except:
+                pass
             
             try:
 
@@ -3538,8 +3590,7 @@ def gentop(d, v, tipo):
         x += 1
     return v
 
-@app.on_message(filters.regex(r"^Top 🔝")|filters.command(["top", "top@NFTchallengebot"]) & ~filters.user(bannati) & ~filters.chat(non_qui)
-)
+@app.on_message((filters.regex(r"^Top 🔝") | filters.command(["top", "top@NFTchallengebot"])) & ~filters.user(bannati) & ~filters.chat(non_qui))
 async def top(client, message):
     try:
         if len(message.command) == 1:
@@ -3853,6 +3904,9 @@ from pykeyboard import InlineKeyboard
 
 @app.on_message( ~filters.user(bannati) & filters.command(["duello"]))
 async def duello(client, message):
+    if message.reply_to_message is None and len(message.command) < 2:
+        await message.reply("Usa /duello @utente oppure rispondi a un messaggio.")
+        return
     if message.reply_to_message == None:
                     to = message.command[1].replace("@", "")
                     for x in list(player):
@@ -3892,7 +3946,7 @@ async def duello(client, message):
         await message.reply("Lo sfidato è in un duello!")
     
     
-@app.on_message( ~filters.user(bannati) & filters.regex(r"^Me 👤")| filters.command(["me", "me@NFTchallengebot"]))
+@app.on_message(~filters.user(bannati) & (filters.regex(r"^Me 👤") | filters.command(["me", "me@NFTchallengebot"])))
 async def me(client, message):
     try:
         if len(message.command) == 1 and message.reply_to_message == None:
@@ -4387,6 +4441,445 @@ async def me(client, message):
             except:
                 pass
 
+SFIDA_BOT_NAME = "Daniele"
+SFIDA_BOT_BASE_STATS = {"hp": 1000, "atk": 100, "def": 100, "agi": 20}
+SFIDA_BOT_COSTI_STAT = {"hp": 1, "atk": 4, "def": 4, "agi": 20}
+
+def _sfida_reale_disponibile(nome, username):
+    return (
+        nome in player
+        and nome != username
+        and nome in trader["battaglieri"]
+        and nome not in inabilitati
+        and not player[nome].get("preso", False)
+    )
+
+def _trova_sfidante_reale(username):
+    preferenziali = trader.get("preferenziale", [])
+    for indice, nome in enumerate(list(preferenziali)):
+        if _sfida_reale_disponibile(nome, username):
+            try:
+                preferenziali.pop(indice)
+            except Exception:
+                try:
+                    preferenziali.remove(nome)
+                except Exception:
+                    pass
+            return nome
+
+    disponibili = [
+        nome for nome in player
+        if _sfida_reale_disponibile(nome, username)
+    ]
+    if not disponibili:
+        return None
+
+    ranking = {username: player[username]["oggi"] + player[username]["livello"] + (player[username]["punti"] / 3)}
+    for nome in disponibili:
+        ranking[nome] = player[nome]["oggi"] + player[nome]["livello"] + (player[nome]["punti"] / 3)
+    sort_orders = sorted(ranking.items(), key=lambda x: x[1], reverse=True)
+
+    try:
+        sfidante = nft.match(sort_orders, username)
+    except Exception:
+        sfidante = None
+    if sfidante not in disponibili:
+        sfidante = random.choice(disponibili)
+    return sfidante
+
+def _daniele_livello_item(item):
+    if not item or " LV" not in str(item):
+        return None
+    livello = str(item).rsplit(" LV", 1)[1]
+    if livello == "X":
+        return 10
+    if livello == "MAX":
+        return 15
+    try:
+        return int(livello)
+    except Exception:
+        return None
+
+def _daniele_suffisso_livello(livello):
+    livello = max(0, min(15, int(livello)))
+    if livello == 10:
+        return "X"
+    if livello >= 15:
+        return "MAX"
+    return str(livello)
+
+def _daniele_livello_equip_fallback(utente):
+    try:
+        livello = round(
+            (
+                utente.get("livello", 1)
+                + (utente.get("topP", 0) / 2)
+                + (len(utente.get("incantamenti", {})) / 2)
+            ) / 5
+        )
+    except Exception:
+        livello = 0
+    return max(0, min(15, int(livello)))
+
+def _daniele_distribuisci_cap(scheda, cap):
+    restante = max(0, int(cap or 0))
+    # Pesi inversi al costo: in media ogni statistica riceve una quota
+    # simile del budget CAP, ma la distribuzione resta completamente casuale.
+    while restante > 0:
+        disponibili = [
+            stat for stat, costo in SFIDA_BOT_COSTI_STAT.items()
+            if costo <= restante
+        ]
+        if not disponibili:
+            break
+        pesi = [1 / SFIDA_BOT_COSTI_STAT[stat] for stat in disponibili]
+        stat = random.choices(disponibili, weights=pesi, k=1)[0]
+        costo = SFIDA_BOT_COSTI_STAT[stat]
+        scheda[stat] += 1
+        restante -= costo
+
+def _daniele_set_casuale(livello_arma, livello_protezione):
+    suf_arma = _daniele_suffisso_livello(livello_arma)
+    suf_prot = _daniele_suffisso_livello(livello_protezione)
+    possibili = []
+
+    for nome_set, componenti in liste.classi.items():
+        if not isinstance(componenti, (list, tuple)) or len(componenti) != 2:
+            continue
+        primo, secondo = componenti
+        combinazioni = [
+            (f"{primo} LV{suf_arma}", f"{secondo} LV{suf_prot}"),
+            (f"{secondo} LV{suf_arma}", f"{primo} LV{suf_prot}"),
+        ]
+        for arma_bot, protezione_bot in combinazioni:
+            if arma_bot in armi and protezione_bot in protezioni:
+                possibili.append((nome_set, arma_bot, protezione_bot))
+                break
+
+    if not possibili:
+        return None, None, None
+    return random.choice(possibili)
+
+def _genera_daniele(utente):
+    scheda_utente = utente["scheda"]
+    livello_fallback = _daniele_livello_equip_fallback(utente)
+    livello_arma = _daniele_livello_item(scheda_utente.get("arma"))
+    livello_protezione = _daniele_livello_item(scheda_utente.get("protezione"))
+    if livello_arma is None:
+        livello_arma = livello_fallback
+    if livello_protezione is None:
+        livello_protezione = livello_fallback
+
+    nome_set, arma_bot, protezione_bot = _daniele_set_casuale(
+        livello_arma, livello_protezione
+    )
+
+    bot = {
+        "Nome": SFIDA_BOT_NAME,
+        "hp": SFIDA_BOT_BASE_STATS["hp"],
+        "atk": SFIDA_BOT_BASE_STATS["atk"],
+        "def": SFIDA_BOT_BASE_STATS["def"],
+        "agi": SFIDA_BOT_BASE_STATS["agi"],
+        "int": 0,
+        "Ap": "Base",
+        "schivato": False,
+        "anello": random.choice(list(liste.anelli)) if liste.anelli else None,
+        "protezione": None,
+        "arma": None,
+        "boost": {"sfida": {}, "assalto": {}},
+        "set": nome_set,
+        "incantamenti": [],
+        "fatto": 0,
+    }
+
+    # Il CAP è il budget realmente speso negli usabili permanenti e non
+    # contiene i bonus dell'equip. Il livello entra invece nel livello equip.
+    cap_speso = max(0, int(utente.get("cap", 0) or 0))
+    _daniele_distribuisci_cap(bot, cap_speso)
+
+    if arma_bot is not None:
+        nft.equiA(bot, arma_bot, armi)
+    if protezione_bot is not None:
+        nft.equiP1(bot, protezione_bot, protezioni)
+
+    bot["set"] = nome_set
+    approcci = ["Base"] + list(liste.Approccini.get(nome_set, []))
+    bot["Ap"] = random.choice(approcci)
+    return bot, cap_speso
+
+def _daniele_sale_livello(username):
+    utente = player[username]
+    exp = utente["exp"]
+    if exp["expattuale"] <= exp["nextlv"]:
+        return
+
+    utente["livello"] += 1
+    exp["expattuale"] = 1
+    exp["nextlv"] += 10
+    gloria = utente["livello"] * 10
+    utente["gloria"] = utente.get("gloria", 0) + gloria
+
+    incartati = round(utente["livello"] / 10)
+    if incartati > 0:
+        nft.gestione_zaino(utente["zaino"], "add", "Un oggetto incartato", incartati)
+    nft.gestione_zaino(utente["zaino"], "add", "Una licenza per animali domestici", 1)
+    try:
+        app.send_message(
+            username,
+            f"Sei salito di livello!\nOttieni {gloria} gloria e {incartati} oggetti incartati!",
+        )
+    except Exception:
+        pass
+
+def _daniele_premio_sfida(username, vittoria):
+    utente = player[username]
+    scheda = utente["scheda"]
+    possibilita = 0.2 if vittoria else 0.1
+
+    if scheda.get("set") == "Pilota":
+        possibilita += nft.proc_val("Pilota", "ricompense", "exp", "bonus_probabilita_pct") / 100
+    if vittoria and scheda.get("set") == "Sopravvissuto":
+        possibilita += nft.proc_val("Sopravvissuto", "ricompense", "exp", "bonus_probabilita_pct") / 100
+    fortunello = scheda.get("boost", {}).get("sfida", {}).get("Fortunello")
+    if fortunello:
+        possibilita += (
+            nft.effetto_val("Fortunello", "sfida", "premio_oggetto", "bonus_probabilita_per_livello_pct")
+            * fortunello.get("lv", 0)
+            / 100
+        )
+
+    if possibilita > random.random() and utente.get("location") != "Hub":
+        vertutto = liste.pool[utente["location"]]
+        if evento.get("evento") == "mega":
+            vertutto = vertutto + megaman + (megaman if not vittoria else [])
+        elif evento.get("evento") == "zombie":
+            vertutto = vertutto + zombie + (zombie if not vittoria else [])
+        elif evento.get("evento") == "gungeon":
+            vertutto = vertutto + gungeon + (gungeon if not vittoria else [])
+        elif evento.get("evento") == "magic":
+            vertutto = vertutto + magic + magic + (magic if not vittoria else [])
+        elif evento.get("evento") == "tempesta":
+            vertutto = vertutto + tempesta + tempesta + (tempesta if not vittoria else [])
+
+        contentino = random.choice(vertutto)
+        if scheda.get("anello") == "Un generatore incartato" and random.random() < 0.06:
+            contentino = "Un oggetto incartato"
+        quantita = int(nft.weekend_mod_val(_mod_weekend_corrente(), "quantita_drop_pvp", 1))
+        nft.gestione_zaino(utente["zaino"], "add", contentino, quantita)
+        if utente.get("notifiche", {}).get("oggetti") != "no":
+            try:
+                app.send_message(username, f"Ottieni {quantita}x {contentino} dalla sfida con Daniele!")
+            except Exception:
+                pass
+
+    chance_exp = 0.8 if vittoria else 0.4
+    if random.random() < chance_exp:
+        exp_vinta = 2 if vittoria else 1
+        try:
+            if utente.get("setta", {}).get("benedizione") == "Corvo":
+                loc = utente["setta"]["loc"]
+                bonus_corvo = round(trader["sette"][loc]["power"] * (trader["sette"][loc]["%"] / 100))
+                if bonus_corvo >= random.randint(0, 100):
+                    exp_vinta += 1
+        except Exception:
+            pass
+        utente["exp"]["expattuale"] += exp_vinta
+        if utente.get("notifiche", {}).get("exp") != "no":
+            try:
+                app.send_message(username, f"Inoltre guadagni {exp_vinta} exp!")
+            except Exception:
+                pass
+        _daniele_sale_livello(username)
+
+def _daniele_registra_risultato(username, vittoria, user1, user2, rip):
+    utente = player[username]
+    punti = 12  # Daniele simula un avversario con gli stessi punti classifica.
+    if evento.get("mod") == "punti_extra":
+        punti += nft.weekend_mod_val("punti_extra", "punti_extra", 5)
+
+    if vittoria:
+        if utente["scheda"].get("anello") == "Anello d'oro fortissimo":
+            punti += 2
+        if utente["scheda"].get("set") == "Pilota":
+            punti += nft.proc_val("Pilota", "ricompense", "duello", "punti_bonus")
+        utente["punti"] += max(0, round(punti))
+        utente["w"] += 1
+        utente["l-streak"] = 0
+    else:
+        if utente["scheda"].get("anello") == "Anello d'oro fortissimo":
+            punti -= 2
+        if utente["scheda"].get("set") == "Lupo di mare":
+            punti += nft.proc_val("Lupo di mare", "ricompense", "duello", "punti_malus")
+        punti = max(0, round(punti))
+        utente["punti"] = max(0, utente["punti"] - punti)
+        utente["l"] += 1
+        utente["l-streak"] = utente.get("l-streak", 0) + 1
+        if utente["l-streak"] == 15 and "Caduta con stile" not in utente["obbiettivi"]:
+            utente["obbiettivi"].append("Caduta con stile")
+
+    utente["oggi"] += 1
+    utente["totali"] += 1
+    utente["aigettoni"]["sfide"] += 1
+    if utente["aigettoni"]["sfide"] >= 100:
+        nft.gestione_zaino(utente["zaino"], "add", "Gettone arena", 1)
+        utente["aigettoni"]["sfide"] = 0
+        try:
+            app.send_message(username, "Vinci inoltre un gettone arena!")
+        except Exception:
+            pass
+
+    if "Prima sfida" not in utente["obbiettivi"] and utente["totali"] >= 1:
+        utente["obbiettivi"].append("Prima sfida")
+    if "Iperattivo" not in utente["obbiettivi"] and utente["oggi"] >= 2500:
+        utente["obbiettivi"].append("Iperattivo")
+    if "Sfidante tosto" not in utente["obbiettivi"] and utente["totali"] >= 4500:
+        utente["obbiettivi"].append("Sfidante tosto")
+    if "Campione di sfida" not in utente["obbiettivi"] and utente["totali"] >= 8000:
+        utente["obbiettivi"].append("Campione di sfida")
+    if "SUPER SFIDANTE" not in utente["obbiettivi"] and utente["totali"] >= 12500:
+        utente["obbiettivi"].append("SUPER SFIDANTE")
+    if "Danneggiatore" not in utente["obbiettivi"] and user1.get("fatto", 0) >= 5555:
+        utente["obbiettivi"].append("Danneggiatore")
+    if "Schiappetta" not in utente["obbiettivi"] and user1.get("fatto", 0) <= 100:
+        utente["obbiettivi"].append("Schiappetta")
+
+    _daniele_premio_sfida(username, vittoria)
+    return max(0, round(punti))
+
+def _risolvi_sfida_daniele(sfidha):
+    username = sfidha["a"]
+    g = sfidha.get("a_mess")
+    try:
+        user1 = copy.deepcopy(player[username]["scheda"])
+        player[username].setdefault("Approcci", {})
+        approccio = player[username]["Approcci"].pop(SFIDA_BOT_NAME, None)
+        if approccio is not None:
+            validi = ["Base"] + list(liste.Approccini.get(user1.get("set"), []))
+            user1["Ap"] = approccio if approccio in validi else "Base"
+
+        user2, cap_speso = _genera_daniele(player[username])
+        nome1 = username
+        nome2 = SFIDA_BOT_NAME
+        text = (
+            f"Nessun avversario reale era disponibile: arriva {nome2}, fratello di Ermenegildo!\n"
+            f"{nome2} usa {user2['set']} con {user2['arma']} e {user2['protezione']}.\n"
+            f"Ha distribuito casualmente {cap_speso} punti CAP, porta {user2['anello']} "
+            f"e sceglie {user2['Ap']}.\n\n"
+            f"Sfida tra {nome1} e {nome2}!\n"
+            f"{nome1} sceglie {user1['Ap']}, mentre {nome2} sceglie {user2['Ap']}!\n\n"
+        )
+
+        if user1.get("protezione") == "armatura sakuretsu LV0":
+            arma = user1.get("arma")
+            if arma in armi:
+                for stat in ["hp", "def", "atk", "agi"]:
+                    user1[stat] += armi[arma][stat]
+                text += f"L'armatura di {nome1} muta!\n"
+
+        if user1.get("set") == "Paladino":
+            user1["Scudo"] = nft.proc_val("Paladino", "arena", "scudo", "hp_scudo")
+        if user2.get("set") == "Paladino":
+            user2["Scudo"] = nft.proc_val("Paladino", "arena", "scudo", "hp_scudo")
+        if user1.get("set") == "Serial killer":
+            user2["hp"] = round(user2["hp"] * (nft.proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
+        if user2.get("set") == "Serial killer":
+            user1["hp"] = round(user1["hp"] * (nft.proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
+
+        nft.boost(user1, liste.Approcci)
+        nft.boost(user2, liste.Approcci)
+        user1["incantamenti"] = nft.get_ench(player[username])
+        user2["incantamenti"] = []
+        user1["fatto"] = 0
+        user2["fatto"] = 0
+        if user1.get("set") in liste.bonus:
+            nft.classe(user1, user1["set"], liste.bonus)
+        if user2.get("set") in liste.bonus:
+            nft.classe(user2, user2["set"], liste.bonus)
+
+        if user1.get("anello") == "Pegno di amicizia":
+            text += f"\nPartendo dal presupposto che {nome1} è un grande amico di {nome2}...\n"
+        if user2.get("anello") == "Pegno di amicizia":
+            text += f"\nConsiderando che {nome2} è un grande amico di {nome1}...\n"
+        if user1.get("anello") == "Fascette luminose":
+            text += f"\nEntra sul ring {nome1}!\n\n"
+        if user2.get("anello") == "Fascette luminose":
+            text += f"\nE si presenta a noi {nome2}!\n\n"
+
+        if random.random() < 0.2 and "pet" in player[username]:
+            pet = player[username]["pet"]
+            text += f"\n{pet} fa il tifo per {nome1}!\n\n"
+            user1["hp"] += 1
+
+        vittoria = False
+        rip = 0
+        eventzo = trader["Giovedì"]
+        while True:
+            rip += 1
+            text += nft.turno(user2, user1, eventzo)
+            if nft.is_dead(user1):
+                vittoria = False
+                break
+            if nft.is_dead(user2):
+                vittoria = True
+                break
+            text += nft.turno(user1, user2, eventzo)
+            if nft.is_dead(user2):
+                vittoria = True
+                break
+            if nft.is_dead(user1):
+                vittoria = False
+                break
+            if rip == 150:
+                text += f"\nLa battaglia ha stremato {nome1}, che cade a terra sfinito!\n"
+                vittoria = False
+                break
+
+        nft.controllo_effetti_sfida(username, player)
+        punti = _daniele_registra_risultato(username, vittoria, user1, user2, rip)
+        if vittoria:
+            finale = f"\n{nome1} batte {nome2} in {rip} turni! +{punti} punti."
+        else:
+            finale = f"\n{nome2} batte {nome1} in {rip} turni! -{punti} punti."
+        text += finale
+        compatto = (
+            f"{'Vinci' if vittoria else 'Perdi'} contro {nome2} ({user2['Ap']}) "
+            f"in {rip} turni. {'+' if vittoria else '-'}{punti} punti."
+        )
+
+        if g is not None:
+            if player[username].get("notifiche", {}).get("compatte") == "si":
+                try:
+                    g.edit(compatto)
+                except Exception:
+                    pass
+            else:
+                try:
+                    g.edit(text)
+                except Exception:
+                    try:
+                        g.delete()
+                    except Exception:
+                        pass
+                    for blocco in nft.separatore(text):
+                        try:
+                            app.send_message(username, blocco)
+                        except Exception:
+                            pass
+        else:
+            for blocco in nft.separatore(text):
+                try:
+                    app.send_message(username, blocco)
+                except Exception:
+                    pass
+    except Exception as err:
+        try:
+            app.send_message(username, f"Daniele si è perso per strada ({type(err).__name__}). Riprova la sfida.")
+        except Exception:
+            pass
+    finally:
+        if username in player:
+            player[username]["preso"] = False
+
 pescaTORI = list()
 @sched.scheduled_job("interval",seconds=10)
 def sfide_brain():
@@ -4401,6 +4894,9 @@ def sfide_brain():
             
                 username = sfidha["a"]
                 to.append(sfida)
+                if sfidha.get("bot", False):
+                    _risolvi_sfida_daniele(sfidha)
+                    continue
                 nome1 = username
                 player[username]["preso"] = False
                 nome2 = sfidha["b"]
@@ -4448,7 +4944,7 @@ def sfide_brain():
                                 player[sfidante]["Approcci"].pop(username)
                     except:
                                 pass
-                if sfidante in list(inabilitati):
+                if not sfidante_bot and sfidante in list(inabilitati):
                     player[username]["preso"] = False
                     try:
                         sesso.edit("Vorrei farti sfidare ma aimè sei morto!")
@@ -5448,6 +5944,8 @@ async def usa(client, message):
                                         vertutto = tuttov + gungeon + gungeon
                                     if evento["evento"] == "magic":
                                         vertutto = tuttov + magic + magic + magic
+                                    if evento["evento"] == "tempesta":
+                                        vertutto = tuttov + tempesta + tempesta + tempesta
 
                                     
                                     if rep == 1:
@@ -6030,7 +6528,7 @@ async def negozio(client, message):
         await app.send_message(message.chat.id,txt, reply_markup=reply_markup)
 
 
-@app.on_message( ~filters.user(bannati) & filters.regex(r"^Info 🗞")|filters.command(["info"]))
+@app.on_message(~filters.user(bannati) & (filters.regex(r"^Info 🗞") | filters.command(["info"])))
 async def eenfo(client, message):
     iscritti = len(player)
     trovabili = len(tuttov)
@@ -6964,26 +7462,12 @@ async def sfida(client, message):
                             pass
         
         player[username]["preso"] = True
-        d = dict()
-        x = 0
-        prefe = False
-        sfidante = None
-        if len(trader["preferenziale"]) > 0:
-            if username != trader["preferenziale"][0]:
-                sfidante = trader["preferenziale"][0]
-                trader["preferenziale"].pop(0)
-        if sfidante == None:
-            for tipo in player:
-                if tipo not in trader["battaglieri"] or tipo in inabilitati:
-                            pass
-                else:
-                    x += 1
-                    d[tipo] = player[tipo]["oggi"] + player[tipo]["livello"]  + (player[tipo]["punti"]/3)
-                    sort_orders = sorted(d.items(), key=lambda x: x[1], reverse=True)
-
-            sfidante = nft.match(sort_orders, message.from_user.username)
+        sfidante = _trova_sfidante_reale(username)
+        sfidante_bot = sfidante is None
+        if sfidante_bot:
+            sfidante = SFIDA_BOT_NAME
         
-        if sfidante in list(inabilitati):
+        if not sfidante_bot and sfidante in list(inabilitati):
                 await app.send_message(message.chat.id,"Il tuo avversario è morto!")
                 player[username]["preso"] = False
         else:
@@ -7008,12 +7492,33 @@ async def sfida(client, message):
                 tempo = _tempo_sfida_weekend()
                 nome1 = username
                 nome2 = sfidante
-                if nome1 == nome2:
+                if sfidante_bot:
+                    player[username].setdefault("Approcci", {})
+                    txt = (
+                        f"Nessun avversario reale disponibile: arriva {SFIDA_BOT_NAME}, "
+                        "fratello di Ermenegildo!\n"
+                        f"Hai {tempo} secondi per scegliere l'approccio."
+                    )
+                    bottoni = []
+                    for appz in ["Base"] + list(liste.Approccini.get(player[nome1]["scheda"].get("set"), [])):
+                        bottoni.append([
+                            InlineKeyboardButton(appz, callback_data=f"approzzi*{appz}_{SFIDA_BOT_NAME}")
+                        ])
+                    reply_markup = InlineKeyboardMarkup(bottoni)
+                    g = await app.send_message(nome1, txt, reply_markup=reply_markup)
+                    strader["sfide"][str(username) + str(time.time())] = {
+                        "a": username,
+                        "b": SFIDA_BOT_NAME,
+                        "a_mess": g,
+                        "b_mess": None,
+                        "ora": time.time(),
+                        "tempo": tempo,
+                        "bot": True,
+                    }
+                elif nome1 == nome2:
                     await app.send_message(message.chat.id,"Nessuno in vista!")
                     player[username]["preso"] = False
                 else:
-                    
-                    
                     txt = f"Stai sfidando {sfidante}!\nHai {tempo} secondi per scegliere l'approccio!"
                     bottoni = list()
                     for appz in ["Base"] + liste.Approccini[player[nome1]["scheda"]["set"]]:
@@ -7028,12 +7533,12 @@ async def sfida(client, message):
                     for appz in ["Base"] + liste.Approccini[player[nome2]["scheda"]["set"]]:
                             bottoni.append([InlineKeyboardButton(appz, callback_data=f"approzzi*{appz}_{username}")])
                     reply_markup = InlineKeyboardMarkup(bottoni)
-                        
-                    if "liste.Approcci" not in player[username]:
-                            player[username]["liste.Approcci"] = dict()
-                    if "liste.Approcci" not in player[sfidante]:
-                            player[sfidante]["liste.Approcci"] = dict()
-                        
+
+                    if "Approcci" not in player[username]:
+                            player[username]["Approcci"] = dict()
+                    if "Approcci" not in player[sfidante]:
+                            player[sfidante]["Approcci"] = dict()
+
                     try:
                         sesso = await app.send_message(
                             sfidante, txt, reply_markup=reply_markup
@@ -7787,7 +8292,7 @@ async def rissona(clinet,message):
     scelta = message.data.split("_")[1]
     await nft.incarico(scelta,player,message.from_user.username,clan,message,app)
 
-@app.on_callback_query(~filters.user(bannati) & filters.regex("suggerisci*"))
+@app.on_callback_query(~filters.user(bannati) & filters.regex(r"^suggerisci\*"))
 async def rissona(clinet,message):
     scelta = message.data.split("*")[1]
     await nft.suggerimenti_inline(scelta,message.from_user.username,message,trader,app)
@@ -7841,13 +8346,13 @@ async def rissona(clinet,message):
     await nft.cambio_not(scelta,player,message.from_user.username,app,message)
 
 
-@app.on_callback_query(~filters.user(bannati) & filters.regex("approzzi*"))
+@app.on_callback_query(~filters.user(bannati) & filters.regex(r"^approzzi\*"))
 async def rissona(clinet,message):
     scelta = message.data.split("*")[1]
     await nft.cambio_approccio(scelta,player,message.from_user.username,app,message)
     
     
-@app.on_callback_query(~filters.user(bannati) & filters.regex("nomina?"))
+@app.on_callback_query(~filters.user(bannati) & filters.regex(r"^nomina\?"))
 async def rissona(clinet,message):
     scelta = message.data.split("?")
     
@@ -8314,6 +8819,14 @@ async def villaggio(clinet,message):
     else:
         await message.message.edit("Non hai un clan")
 
+
+
+@app.on_callback_query(group=999)
+async def _ack_callback_query(client, query):
+    try:
+        await query.answer()
+    except Exception:
+        pass
 
 
 gc.collect()

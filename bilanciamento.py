@@ -989,3 +989,206 @@ EFFETTI_CONFIG = {
         }
     }
 }
+
+# --- SET EROI DELLA TEMPESTA: BILANCIAMENTO ---
+PROC_CLASSI.update({
+    "Guerriero Temporale": {
+        "sfida": {"ciclo_temporale": {"hp": 100, "resurrezioni": 5}},
+    },
+    "Dannato primordiale": {
+        "sfida": {"conversione": {"proc": 100}},
+        "assalto": {"conversione": {"proc": 100}},
+    },
+    "Macellatore": {
+        "sfida": {"presa_schivata": {"proc": 50, "moltiplicatore_danno": 2}},
+    },
+    "Mente centrale": {
+        "assalto": {"alieno": {"proc": 50, "divisore_atk": 20}},
+    },
+    "Amletico": {
+        "sfida": {"sacrificio": {"proc": 50, "percento_hp": 50}},
+        "assalto": {"sacrificio": {"proc": 50, "percento_hp": 50}},
+    },
+    "Accumulatore di meraviglie": {
+        "sfida": {
+            "evocazione": {
+                "proc": 50,
+                "oggetti": {
+                    "Un vaso": 5,
+                    "Un sasso di medie dimensioni": 10,
+                    "Un idropulitrice": 15,
+                    "cento fiammiferi": 20,
+                    "una mustang": 30,
+                    "Sei cammelli": 40,
+                    "LA LUNA": 100,
+                },
+            }
+        },
+    },
+    "Anima della festa": {
+        "sfida": {"seguaci": {"seguaci_per_turno": 1, "percento_stat_per_seguace": 2}},
+        "assalto": {"last": {"moltiplicatore": 1.5}},
+    },
+    "Zanno": {
+        "generale": {"set_base": {"solo_bonus_base": True}},
+    },
+    "Uditore del profondo": {
+        "sfida": {"richiamo": {"hp_trigger": 1, "danno": 1000000000}},
+        "assalto": {"richiamo": {"hp_trigger": 1, "danno": 1000000000}},
+    },
+    "Monarca della tempesta di fuoco": {
+        "sfida": {"incantamenti": {"nomi": ["Iridescente", "Minimista", "Primo impatto", "Icore"]}},
+    },
+    "Evocatore delle maree": {
+        "assalto": {
+            "onda": {"incantesimo": "Onde dell'abisso"},
+            "tsunami": {"percento_atk": 10},
+        },
+    },
+    "Mecha sciamano": {
+        "sfida": {"riuso_approccio": {"danno_hp": 10}},
+    },
+})
+
+
+# --- SECONDA ONDATA SET: BILANCIAMENTO ---
+PROC_CLASSI.update({
+    "Anima persa": {"sfida": {"schivata_negata": {"hp": 200}}},
+    "Disabilitatore provetto": {"assalto": {"muraglione": {"atk_mul": 4}}},
+    "Controllore del cielo": {"sfida": {"cura_in_potere": {"atk_divisore": 2, "def_divisore": 2}}},
+    "Eterna sventura": {"sfida": {"sventura": {"proc": 20, "atk_target": -10, "def_target": -10, "agi_target": -10}}},
+    "Pescatore alternativo": {"sfida": {"azzardo": {"proc": 50, "atk_mul": 2, "def_mul": 0.5}}},
+    "Esca vivente": {"sfida": {"esca": {"def": 0}}, "assalto": {"esca": {"def": 0}}},
+    "Giustiziere a V": {"sfida": {"giudizio": {"turno_min": 4, "agi_mul": 2}}, "assalto": {"accampamento": {"atk_mul": 6}}},
+})
+
+
+# --- TERZA ONDATA SET: NOVE SET ---
+PROC_CLASSI.update({
+    "Monarca oscuro": {
+        "combattimento": {"inizio": {"hp_target_percento": 60}},
+        "assalto": {"last": {"danno_per_last": 10, "finestra_secondi": 301}},
+    },
+    "Oscurato": {
+        "combattimento": {"riflesso": {"percento": 5}},
+        "assalto": {"riflesso": {"percento": 5}},
+    },
+    "Demone delle lame": {
+        "combattimento": {"danno_extra": {"percento": 20}},
+        "assalto": {"danno_extra": {"percento": 30}},
+    },
+    "Re dei gadget": {
+        "combattimento": {"intelletto": {"int": 200}},
+    },
+    "Il comico": {
+        "combattimento": {"confusione": {"proc": 15}},
+        "assalto": {"clap": {"solo_testo": True}},
+    },
+    "Survival medievale": {
+        "generale": {"set_base": {"solo_bonus_base": True}},
+    },
+    "Duellista vermico": {
+        "combattimento": {"vermi": {"proc": 11, "primo_garantito": True, "atk": 1, "def": 1, "hp": 20}},
+        "assalto": {"vermi": {"proc": 11, "primo_garantito": True, "atk": 1, "def": 1, "hp": 20}},
+    },
+    "Cacciatore d'esce": {
+        "combattimento": {"secondo_colpo": {"proc": 40, "percento_danno": 50}},
+        "assalto": {"secondo_colpo": {"proc": 40, "percento_danno": 50}},
+    },
+    "Duro a morire": {
+        "generale": {"set_base": {"solo_bonus_base": True}},
+    },
+})
+
+
+# --- QUARTA ONDATA SET: SEI SET ---
+PROC_CLASSI.update({
+    "Primo alla torre": {
+        "combattimento": {"primo_colpo": {"moltiplicatore_danno": 2}},
+        "assalto": {"clone": {"atk_mul": 4}},
+    },
+    "Pazzo temporale": {
+        "combattimento": {"seed": {"proc": 90, "seed": "Anello perfezionista"}},
+        "assalto": {"seed": {"proc": 90, "seed": "Anello perfezionista"}},
+    },
+    "Evocatore del vero potere": {
+        "combattimento": {"canto": {"proc": 1, "anello": "Anello superfortissimo ma proprio rotto sgravatissimo"}},
+    },
+    "GunSlingher": {
+        "combattimento": {"raffica": {"colpi_min": 1, "colpi_max": 6, "danno_per_colpo": 20}},
+        "assalto": {"raffica_clone": {"colpi_min": 1, "colpi_max": 6, "danno_per_colpo": 60}},
+    },
+    "Arcidemone": {
+        "combattimento": {"cura_nemica": {"atk": 4000}},
+    },
+    "Big Game Hunter": {
+        "combattimento": {"copia_agilita": {"attivo": True}},
+    },
+})
+
+
+# --- QUINTA ONDATA SET: TREDICI SET ---
+PROC_CLASSI.update({
+    "Nucleo dell'uragano": {
+        "combattimento": {"proc_anello_avversario": {"percento_atk_proprio": 10}},
+        "assalto": {"immunita": {"struttura": "Spuntone malefico", "messaggio": "🌪 Il vento spazza via la trappola dello Spuntone malefico!"}},
+    },
+    "Tormento di fuoco": {
+        "combattimento": {"proc_anello_avversario": {"percento_atk_avversario": 10}},
+        "assalto": {"immunita": {"struttura": "Fabbro incantaspade", "messaggio": "🔥 Il Fabbro incantaspade non riesce a scalfirti: il tormento di fuoco lo sovrasta!"}},
+    },
+    "Girarrosto": {
+        "combattimento": {"salvezza": {"hp_soglia_percento": 50, "hp_ripristino_percento": 100, "usi": 1}},
+        "assalto": {"salvezza": {"hp_soglia_percento": 50, "hp_ripristino_percento": 100, "usi": 1}},
+    },
+    "Venere di ferro": {
+        "combattimento": {"riduzione_danno": {"percento": 20}},
+        "assalto": {"riduzione_danno": {"percento": 30}},
+    },
+    "Rosso D'ossidina": {
+        "combattimento": {"riuso_approccio": {"attivo": True}},
+        "assalto": {"immunita": {"struttura": "Sedimento del cucciolo", "messaggio": "🔴 Il drago è troppo arrabbiato per riuscire a farti del male!"}},
+    },
+    "Oltraggioso": {
+        "combattimento": {"cap_danno": {"massimo": 50}},
+        "assalto": {"immunita": {"struttura": "Chiesa", "messaggio": "⛪ L'oltraggio è tale che perfino la Chiesa rinuncia a danneggiarti!"}},
+    },
+    "Festante oscuro": {
+        "combattimento": {"fantasmi": {"percento_ritorno": 50}},
+        "assalto": {"immunita": {"struttura": "Cane da guardia", "messaggio": "👻 Il Cane da guardia si perde tra le ombre e non riesce a colpirti!"}},
+    },
+    "Legionaro di Evelin": {
+        "combattimento": {"danno_turno": {"parita": "dispari", "danno": 50}},
+        "assalto": {"immunita": {"struttura": "Accampamento", "messaggio": "🦅 Nessuno nell'Accampamento vuole mettersi contro Evelin!"}},
+    },
+    "Neo Genesi": {
+        "combattimento": {"danno_turno": {"parita": "pari", "danno": 50}},
+        "assalto": {"immunita": {"struttura": "Spaventapasseri ornamentale", "messaggio": "✨ Lo Spaventapasseri ornamentale non osa muoversi davanti a cotanta potenza!"}},
+    },
+    "Intermezzo": {
+        "combattimento": {"cariche_schivata": {"soglia_1": 3, "bonus_1": 5, "soglia_2": 5, "bonus_2": 15, "soglia_3": 8, "moltiplicatore": 2}},
+        "assalto": {"immunita": {"struttura": "Muraglione extra", "messaggio": "🪽 Fluttui oltre il Muraglione extra in completa tranquillità!"}},
+    },
+    "Obscurio": {
+        "combattimento": {"anti_cura": {"attivo": True}},
+        "assalto": {"immunita": {"struttura": "Stazione laser di sicurezza", "messaggio": "🌑 La luce compressa della Stazione laser non riesce a illuminarti!"}},
+    },
+    "Primo al comando": {
+        "combattimento": {"proc_anello": {"cura": 30}},
+        "assalto": {"immunita": {"struttura": "Clone", "messaggio": "🫡 Il Clone riconosce il Primo al comando e non riesce a danneggiarlo!"}},
+    },
+    "Luce persa": {
+        "combattimento": {"conversione": {"agi_mul": 4, "quota_atk": 0.5, "quota_def": 0.5}},
+        "assalto": {"conversione": {"agi_mul": 4, "quota_atk": 0.5, "quota_def": 0.5}},
+    },
+})
+
+
+# --- FARO E GENERATORE INCARTATO ---
+PROC_ANELLI.setdefault("Un generatore incartato", {})["ricompense"] = {
+    "incartato": {"proc": 66, "quantita": 1},
+}
+DUNGEON_CONFIG.setdefault("stanze", {})["Faro"] = {
+    "Vedere": {"livello_premio": 2},
+    "Essere visto": {"boss_aggiunti": 2},
+}
