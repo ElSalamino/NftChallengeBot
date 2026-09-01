@@ -1182,3 +1182,13 @@ PROC_CLASSI.update({
         "assalto": {"conversione": {"agi_mul": 4, "quota_atk": 0.5, "quota_def": 0.5}},
     },
 })
+
+
+# --- FARO E GENERATORE INCARTATO ---
+PROC_ANELLI.setdefault("Un generatore incartato", {})["ricompense"] = {
+    "incartato": {"proc": 66, "quantita": 1},
+}
+DUNGEON_CONFIG.setdefault("stanze", {})["Faro"] = {
+    "Vedere": {"livello_premio": 2},
+    "Essere visto": {"boss_aggiunti": 2},
+}

@@ -12,7 +12,7 @@ FRASI_ANELLI_TECNICHE = {
     "Guanto titanico": "Nel {turno.difesa.proc:pct} dei turni la tua presenza spegne quasi del tutto il colpo avversario, portandone la base a {turno.difesa.dps_base} prima di sottrarre la sua INT.",
     "Stemma della rocca": "Nel {turno.rocca.proc:pct} dei turni la rocca ti rende più resistente: guadagni {turno.rocca.def_base} difesa più la tua INT.",
     "Un frammento del potere": "È piccolo solo fuori: ha il {turno.attacco.proc:pct} di liberare il suo potere quando attacchi e il {turno.difesa.proc:pct} quando difendi, trasformandosi nell'anello più assurdo del gioco.",
-    "Un generatore incartato": "A fine sfida può aprirti una possibilità extra di trovare un Incartato: non cambia il combattimento, ma può rendere molto più interessante quello che trovi dopo.",
+    "Un generatore incartato": "A fine sfida hai il {ricompense.incartato.proc:pct} di trovare {ricompense.incartato.quantita} Oggetto incartato extra.",
     "Occhio del falco": "Negli assalti aiuti ogni compagno con almeno {assalto.aura.minimo} AGI, oppure con il {assalto.aura.percento_stat:pct} della tua AGI se il risultato è maggiore.",
     "Carica mobile": "Negli assalti hai il {assalto.esplosione.proc:pct} di far saltare una parte della difesa nemica con un'esplosione da {assalto.esplosione.danno_min} a {assalto.esplosione.danno_max} danni.",
     "Ricordo straziante": "Nel {turno.intangibile.proc:pct} dei turni svanisci per un istante e il colpo ti attraversa senza fare nulla: danno e modificatore vengono portati a {turno.intangibile.danno}.",

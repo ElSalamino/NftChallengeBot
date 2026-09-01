@@ -2403,3 +2403,68 @@ frasi_set.update({
     "Primo al comando": "Ogni anello che osa attivarsi diventa un segnale per il comandante: il caos degli altri si trasforma immediatamente in nuova vita.",
     "Luce persa": "Abbandoni ogni agilità e la trasformi in potere puro: niente più evasione, soltanto attacco e difesa alimentati dalla luce perduta.",
 })
+
+# --- AGGIORNAMENTO FARO E NUOVI NEMICI DUNGEON ---
+_NUOVI_NEMICI_DUNGEON = {
+    "Vortice di fuoco": {"Nome": "Vortice di fuoco", "hp": 850, "def": 120, "atk": 480, "agi": 70, "Ap": "Base", "schivato": False, "anello": "Dance Dance Revolution", "boost": {"sfida": {}}, "set": "Fire lord"},
+    "Friggitrice infestata": {"Nome": "Friggitrice infestata", "hp": 1000, "def": 260, "atk": 230, "agi": 65, "Ap": "Base", "schivato": False, "anello": "Anello di totano", "boost": {"sfida": {}}, "set": "Forma elettro"},
+    "Bruciatore infestata": {"Nome": "Bruciatore infestata", "hp": 900, "def": 180, "atk": 420, "agi": 30, "Ap": "Base", "schivato": False, "anello": "Campanellina concentrante", "boost": {"sfida": {}}, "set": "Forma fuoco"},
+    "Ventilatore infestata": {"Nome": "Ventilatore infestata", "hp": 850, "def": 220, "atk": 180, "agi": 90, "Ap": "Base", "schivato": False, "anello": "Tasto B", "boost": {"sfida": {}}, "set": "Forma lunare"},
+    "Battitore infestato": {"Nome": "Battitore infestato", "hp": 1200, "def": 420, "atk": 160, "agi": 20, "Ap": "Base", "schivato": False, "anello": "Anello dell'occulto", "boost": {"sfida": {}}, "set": "Forma terra"},
+    "Maialetto Malevolo": {"Nome": "Maialetto Malevolo", "hp": 1100, "def": 180, "atk": 310, "agi": 35, "Ap": "Base", "schivato": False, "anello": "Aura pessima", "boost": {"sfida": {}}, "set": "Incantatore di controparte"},
+    "Neutralizzatore": {"Nome": "Neutralizzatore", "hp": 1300, "def": 500, "atk": 120, "agi": 15, "Ap": "Base", "schivato": False, "anello": "Compasso", "boost": {"sfida": {}}, "set": "Maestro delle tartarughe"},
+    "Spirito rincorrente": {"Nome": "Spirito rincorrente", "hp": 800, "def": 120, "atk": 220, "agi": 95, "Ap": "Base", "schivato": False, "anello": "Amuleto del protettore", "boost": {"sfida": {}}, "set": "Mariachi"},
+    "Cacciatore di magie": {"Nome": "Cacciatore di magie", "hp": 950, "def": 250, "atk": 300, "agi": 55, "Ap": "Base", "schivato": False, "anello": "Elsa vitale", "boost": {"sfida": {}}, "set": "Nucleo dell'uragano"},
+    "Cammello zombie": {"Nome": "Cammello zombie", "hp": 1400, "def": 300, "atk": 240, "agi": 12, "Ap": "Base", "schivato": False, "anello": "Effige della tribe", "boost": {"sfida": {}}, "set": "Ricercatore del pericolo"},
+    "Terminatore": {"Nome": "Terminatore", "hp": 1250, "def": 380, "atk": 360, "agi": 22, "Ap": "Base", "schivato": False, "anello": "Cuffia da boia", "boost": {"sfida": {}}, "set": "Shogun moderno"},
+    "Bomba vivente": {"Nome": "Bomba vivente", "hp": 700, "def": 80, "atk": 650, "agi": 25, "Ap": "Base", "schivato": False, "anello": "Vincastro", "boost": {"sfida": {}}, "set": "Uditore del profondo"},
+    "Caricatore inbloccabile": {"Nome": "Caricatore inbloccabile", "hp": 1500, "def": 350, "atk": 330, "agi": 10, "Ap": "Base", "schivato": False, "anello": "Ali di luminite", "boost": {"sfida": {}}, "set": "Pescatore alternativo"},
+    "Gorgone": {"Nome": "Gorgone", "hp": 1050, "def": 300, "atk": 230, "agi": 40, "Ap": "Base", "schivato": False, "anello": "Cinta del comandante", "boost": {"sfida": {}}, "set": "Regina golgari"},
+    "Marchiatore": {"Nome": "Marchiatore", "hp": 950, "def": 200, "atk": 280, "agi": 50, "Ap": "Base", "schivato": False, "anello": "Ricordo straziante", "boost": {"sfida": {}}, "set": "Oracolo del buio"},
+    "Immortale": {"Nome": "Immortale", "hp": 1800, "def": 250, "atk": 160, "agi": 20, "Ap": "Base", "schivato": False, "anello": "Lapsus vitale", "boost": {"sfida": {}}, "set": "Festante oscuro"},
+    "Ombra devastante": {"Nome": "Ombra devastante", "hp": 900, "def": 160, "atk": 430, "agi": 75, "Ap": "Base", "schivato": False, "anello": "Scarica di adrenalina", "boost": {"sfida": {}}, "set": "Oscurato"},
+    "Primo alla torre": {"Nome": "Primo alla torre", "hp": 1000, "def": 280, "atk": 360, "agi": 45, "Ap": "Base", "schivato": False, "anello": "GDR semplificato", "boost": {"sfida": {}}, "set": "Primo alla torre"},
+}
+nemici.update(_NUOVI_NEMICI_DUNGEON)
+
+# Ogni nuovo nemico compare almeno in una zona coerente col tema.
+_DISTRIBUZIONE_NUOVI_NEMICI = {
+    "Dune di rione": ["Terminatore"],
+    "Delta del fiume Vern": ["Spirito rincorrente"],
+    "Monte cashmere": ["Caricatore inbloccabile"],
+    "Allevamento spettrale": ["Maialetto Malevolo", "Immortale"],
+    "Città di mezzo": ["Friggitrice infestata", "Battitore infestato"],
+    "Ordine della rocca": ["Neutralizzatore", "Primo alla torre"],
+    "Piana dell'inzio": ["Marchiatore"],
+    "Antico deserto": ["Cammello zombie", "Vortice di fuoco"],
+    "Selva dei predatori": ["Gorgone", "Ombra devastante"],
+    "Grotte tori": ["Bruciatore infestata", "Bomba vivente"],
+    "Circolo polare": ["Ventilatore infestata"],
+    "Sentieri spersi": ["Cacciatore di magie"],
+}
+for _zona_nuova, _nemici_nuovi in _DISTRIBUZIONE_NUOVI_NEMICI.items():
+    for _nome_nuovo in _nemici_nuovi:
+        if _nome_nuovo not in casa_nemici[_zona_nuova]:
+            casa_nemici[_zona_nuova].append(_nome_nuovo)
+
+if "Faro" not in stanze:
+    stanze.append("Faro")
+for _scelta_faro in ("Vedere", "Essere visto"):
+    if _scelta_faro not in scelte:
+        scelte.append(_scelta_faro)
+
+# Riabilitato nel roster dei boss giornalieri.
+Boss["Franco est"] = {
+    "hp": 1000,
+    "def": 200,
+    "atk": 200,
+    "agi": 35,
+    "Nome": "Franco est",
+    "schivato": False,
+    "anello": "Anello superfortissimo ma proprio rotto sgravatissimo",
+    "protezione": None,
+    "arma": None,
+    "boost": {"sfida": {}},
+    "Ap": "Base",
+    "set": None,
+}

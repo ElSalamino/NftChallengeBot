@@ -330,11 +330,6 @@ def premio_exp(a, b, text):
             vertutto = item_trovabili + tempesta
 
         contentino = random.choice(vertutto)
-        if (
-            a["scheda"]["anello"] == "Un generatore incartato"
-            and 0.06 > random.random()
-        ):
-            contentino = "Un oggetto incartato"
         try:
             a["zaino"][contentino] += quantita_drop
         except:
@@ -420,11 +415,6 @@ def premio_exp(a, b, text):
             vertutto = item_trovabili + tempesta + tempesta + tempesta
 
         contentino = random.choice(vertutto)
-        if (
-            b["scheda"]["anello"] == "Un generatore incartato"
-            and 0.06 > random.random()
-        ):
-            contentino = "Un oggetto incartato"
 
         if "l-streak" in b:
             b["l-streak"] = 0
@@ -502,6 +492,30 @@ def premio_exp(a, b, text):
                 pass
             
             
+
+    # Generatore incartato: premio extra indipendente dal drop normale.
+    for combattente_generatore in (a, b):
+        try:
+            usa_generatore = combattente_generatore["scheda"].get("anello") == "Un generatore incartato"
+        except Exception:
+            usa_generatore = False
+        if not usa_generatore:
+            continue
+        if nft.anello_ok(random.random(), "Un generatore incartato", "ricompense", "incartato"):
+            quantita_generatore = int(nft.anello_val("Un generatore incartato", "ricompense", "incartato", "quantita", 1))
+            try:
+                combattente_generatore["zaino"]["Un oggetto incartato"] += quantita_generatore
+            except:
+                combattente_generatore["zaino"]["Un oggetto incartato"] = quantita_generatore
+            if combattente_generatore.get("notifiche", {}).get("oggetti") != "no":
+                try:
+                    app.send_message(
+                        combattente_generatore["scheda"]["Nome"],
+                        f"Il Generatore incartato si attiva: +{quantita_generatore} Oggetto incartato!",
+                    )
+                except:
+                    pass
+
 import asyncio
 
 

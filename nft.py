@@ -3643,6 +3643,25 @@ def possi(quantio):
 
 
 
+
+def _componenti_set_faro(nome_set):
+    """Componenti regalabili dal Faro per set normali e Forme Mega."""
+    if nome_set in classi:
+        return list(classi[nome_set])
+    forme = {
+        "Forma terra": ["Neo blaster", "Spada a protoni", "Z-Saber", "Chip terra"],
+        "Forma fuoco": ["Neo blaster", "Spada a protoni", "Z-Saber", "Chip fuoco"],
+        "Forma lunare": ["Neo blaster", "Spada a protoni", "Z-Saber", "Chip lunare"],
+        "Forma elettro": ["Neo blaster", "Spada a protoni", "Z-Saber", "Chip elettro"],
+    }
+    return forme.get(nome_set, [])
+
+
+def _oggetto_set_faro(componente, livello=2):
+    base = str(componente).split(" LV", 1)[0]
+    return f"{base} LV{int(livello)}"
+
+
 async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dungeon,globali,inabilitati,scelte,tutto,tuttov,megaman,zombie,gungeon,magic,protezioni,armi,trader):
     _snapshot_premi_weekend = _snapshot_premi_dungeon(player[username])
     if scelta not in nemici:
@@ -3661,6 +3680,29 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
             last_dungeon[username] = now
             if scelta in scelte:
                 text = f"Scegli {scelta}\n"
+                if scelta == "Vedere" and "Faro" in player[username]["dungeon"]["mostri"]:
+                    stanza = "Faro"
+                    locali_faro = list(casa_nemici[player[username]["location"]])
+                    nemico_faro = random.choice(locali_faro)
+                    set_faro = nemici[nemico_faro].get("set")
+                    componenti_faro = _componenti_set_faro(set_faro)
+                    if componenti_faro:
+                        livello_faro = dungeon_val("Faro", "Vedere", "livello_premio", 2)
+                        oggetto_faro = _oggetto_set_faro(random.choice(componenti_faro), livello_faro)
+                        gestione_zaino(player[username]["zaino"], "add", oggetto_faro, 1)
+                        text += f"{nemico_faro} ti vede, la luce ti dà una buona sagoma e decide di donarti **{oggetto_faro}** del set **{set_faro}**.\
+"
+                    else:
+                        text += f"{nemico_faro} ti vede, ma la luce non riesce a materializzare un oggetto del suo set **{set_faro}**.\
+"
+
+                if scelta == "Essere visto" and "Faro" in player[username]["dungeon"]["mostri"]:
+                    stanza = "Faro"
+                    text += "Una luce malevola ti illumina, altrove qualcosa ti vede....\
+"
+                    quanti_boss_faro = int(dungeon_val("Faro", "Essere visto", "boss_aggiunti", 2))
+                    player[username]["dungeon"]["mostri"].extend(["Boss"] * quanti_boss_faro)
+
                 if (scelta == "Tocchi la crepa"
                     and "Crepaccio"
                     in player[username]["dungeon"]["mostri"]):
@@ -4416,6 +4458,16 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
             else:
                 fines = False
                 text = f"Esplorando il dungeon raggiungi {scelta}!\n"
+                if scelta == "Faro":
+                    text += "Entri in una stanza inquietantemente grande, tanto da non vederne la fine...\
+Un faro si apre in lontananza e pone la domanda...\
+Vuoi vedere o essere visto?"
+                    bottoni = []
+                    for appz in ["Vedere", "Essere visto"]:
+                        bottoni.append([InlineKeyboardButton(appz, callback_data=f"dungi_{appz}")])
+                    reply_markup = InlineKeyboardMarkup(bottoni)
+                    await app.send_message(chat_id=username, text=text, reply_markup=reply_markup)
+
                 if scelta == "Stanza del sonno":
                     text += "Una strana nebbia si alza e l'intera stanza si riempe..."
                     bottoni = list()
