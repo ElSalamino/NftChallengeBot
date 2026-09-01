@@ -1,0 +1,30 @@
+name: Audit frasi set
+
+on:
+  push:
+    paths:
+      - 'frasi_set.py'
+      - 'bilanciamento.py'
+      - '.github/audit_frasi_set.py'
+      - '.github/workflows/audit-frasi-set.yml'
+  pull_request:
+    paths:
+      - 'frasi_set.py'
+      - 'bilanciamento.py'
+      - '.github/audit_frasi_set.py'
+      - '.github/workflows/audit-frasi-set.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compila file
+        run: python -m py_compile frasi_set.py bilanciamento.py .github/audit_frasi_set.py
+      - name: Audit variabili frasi set
+        run: python .github/audit_frasi_set.py
+      - name: Controlla diff
+        run: git diff --check

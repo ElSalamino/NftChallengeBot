@@ -4,800 +4,11 @@ from pyrogram import Client, ContinuePropagation, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import date
 from liste import *
+from bilanciamento import PROC_CLASSI, PROC_ANELLI, NUCLEI_CONFIG, DUNGEON_CONFIG, INCANTESIMI_CONFIG, EFFETTI_CONFIG, WEEKEND_MOD_CONFIG, WEEKEND_MOD_POOL
+from frasi_set import FRASI_SET_TECNICHE
+from frasi_anelli import FRASI_ANELLI_TECNICHE
+from frasi_incantesimi import FRASI_INCANTESIMI_TECNICHE
 from pyrogram.errors import FloodWait
-
-# ============================================================
-# DATABASE HARDCODATO PROC CLASSI
-# Tutto il tuning delle classi deve stare qui: probabilita' in %,
-# soglie e valori numerici. Le funzioni di combattimento leggono
-# questo dizionario invece di contenere magic number sparsi.
-# ============================================================
-PROC_CLASSI = {
-    "Cecchino modulare": {
-        "turno": {
-            "powa_per_turno": 1,
-            "colpo_caricato": {"proc": 50, "powa_min": 3, "dps": 50},
-            "colpo_preciso": {"proc": 50, "powa_min": 8, "agi": 50},
-            "colpo_possente": {"proc": 50, "powa_min": 16, "dps": 150},
-            "cura_rapida": {"proc": 50, "powa_min": 24, "cura": 60},
-            "colpo_perforante": {"proc": 50, "powa_min": 32, "difesa_target": 5},
-        }
-    },
-    "Uomo di classe": {
-        "turno": {
-            "spumeggiante_attacco": {"proc": 85},
-            "spumeggiante_difesa": {"proc": 88},
-        },
-        "assalto": {
-            "spumeggiante": {"proc": 35, "agi_difesa": -40},
-        },
-    },
-    "Chierico": {
-        "turno": {"cura": {"proc": 50, "hp_max": 3000, "cura_percento_hp": 1.5, "cura_base": 2}},
-        "assalto": {"cura": {"proc": 10, "cura": 15}},
-    },
-    "Vigilante": {
-        "turno": {
-            "cambio_proiettili_attacco": {"proc": 40, "bonus_difesa": 10},
-            "cambio_proiettili_difesa": {"proc": 30},
-        },
-    },
-    "Maestro delle tartarughe": {
-        "turno": {"insegnamenti": {"proc": 20, "riduzione_difesa_target": 100}},
-        "assalto": {"carapace": {"proc": 10, "def": 35}},
-    },
-    "Druido della selva": {
-        "turno": {"inselvatichisce": {"proc": 45, "atk": 3, "def": 4, "agi": 2}},
-        "assalto": {"natura": {"proc": 30, "atk": 15, "def": 15, "agi": 7}},
-    },
-    "Incantatore di controparte": {
-        "turno": {"potere_cosmico": {"proc": 80}},
-    },
-    "PiroIncantatore": {
-        "turno": {"golem_fuoco": {"proc": 30, "agi": 200, "dps_da_def_divisore": 5}},
-        "assalto": {"cucciolo_drago": {"proc": 12, "atk": 33}},
-    },
-    "Arciere di prima linea": {
-        "turno": {"sfinimento": {"proc": 25, "def_target": -60, "def_min": 1}},
-        "assalto": {"fabbro": {"proc": 30, "atk_per_livello": 5, "def_per_livello": 5}},
-    },
-    "Forma elettro": {
-        "turno": {"chip": {"proc": 16, "agi": 1000001, "dps": 50}},
-    },
-    "Forma fuoco": {
-        "turno": {"chip": {"proc": 16, "dps": 350}},
-    },
-    "Forma terra": {
-        "turno": {"chip_difesa": {"proc": 16, "dps": -350}},
-    },
-    "Forma lunare": {
-        "turno": {"chip_difesa": {"proc": 16, "agi_main": -20, "agi_oppo": 20}},
-    },
-    "Ghoul": {
-        "turno": {"pressione": {"proc": 44, "atk_target": -10, "def_target": -10}},
-        "assalto": {"terrore_clone": {"proc": 15, "atk_clone": -30, "def_clone": -50}},
-    },
-    "Portatore di morte": {
-        "turno": {
-            "crescita": {"proc": 45, "atk": 2, "def": 2, "agi": 2},
-            "debuff_difesa": {"proc": 40, "atk": -2, "def": -2, "agi": -2},
-        },
-        "assalto": {"bonus_gadget": {"moltiplicatore": 2}},
-    },
-    "Contrabbandiere": {
-        "turno": {
-            "detonazione": {"proc": 20, "hp_trigger": 250, "cariche_trigger": 10, "danno_per_carica": 30},
-            "piazza_carica": {"proc": 50, "cariche": 1},
-        },
-        "assalto": {"laser": {"proc": 80}},
-    },
-    "Terrore delle ombre": {
-        "turno": {"marchio": {"proc_aggiungi": 40, "proc_effetto": 20, "atk_per_marchio": 5, "def_per_marchio": 5, "agi_per_marchio": 1}},
-    },
-    "Oracolo del buio": {
-        "turno": {"marchio": {"proc_aggiungi": 40, "proc_effetto": 20, "atk_per_marchio": -5, "def_per_marchio": -5, "agi_per_marchio": -1}},
-    },
-    "Sciamano della verità": {
-        "turno": {"marchio": {"proc_aggiungi": 40, "proc_effetto": 30, "cura_per_marchio": 10}},
-    },
-    "Dannato": {
-        "turno": {"marchio": {"proc_aggiungi": 40, "proc_effetto": 20, "danno_per_marchio": 5}},
-    },
-    "Dipper": {
-        "turno": {"marchio": {"proc_aggiungi": 40, "proc_effetto": 30, "marchi_min": 10, "divisore_hp": 2}},
-    },
-    "Cacciatore di bestie": {
-        "turno": {
-            "previsione_attacco": {"proc": 30, "agi": 5600},
-            "previsione_difesa": {"proc": 20, "agi": 800},
-        },
-        "assalto": {"previsione": {"proc": 30, "agi": 60}},
-    },
-    "Ice and fire": {
-        "turno": {
-            "calore": {"proc": 20, "atk": 30},
-            "gelo": {"proc": 15, "def": 30},
-        },
-        "assalto": {"drago_scaccia_drago": {"proc": 50, "dps": 700}},
-    },
-    "Cacciatore di uomini": {
-        "turno": {"trappola": {"proc": 22, "agi_target": -15}},
-    },
-    "Ricercatore del pericolo": {
-        "turno": {"contrattacco_schivata": {"proc": 60, "mod": 0.3}},
-        "assalto": {"adrenalina": {"proc": 30, "atk": 20}},
-    },
-    "IppoFan": {
-        "turno": {"copia_attacco": {"proc": 66}},
-        "assalto": {"cannoncino": {"proc": 50}},
-    },
-    "Maledetto": {
-        "turno": {"maledizione": {"proc": 15, "hp_riferimento": 1000, "danno_min": 10}},
-        "assalto": {"maledizione": {"proc": 40, "percento_hp": 8}},
-    },
-    "Campione del sole": {
-        "turno": {"colpo_caricato": {"proc_fallback": 70, "hp_trigger": 300, "mol_min_hp": 4, "mol_min_fallback": 5, "moltiplicatore": 0.55}},
-        "assalto": {"fabbro": {"proc": 90, "atk": 30, "def": 20}},
-    },
-    "Segna ombre": {
-        "turno": {"mimica_difesa": {"proc": 66}},
-    },
-    "Drago": {
-        "turno": {"scaglie": {"proc": 33, "riduzione_mod": 0.5, "proc_rottura_arma": 50, "atk_target": -22}},
-        "assalto": {"cucciolo": {"proc": 10, "atk": 50}},
-    },
-    "Anima oscura": {
-        "turno": {"parry": {"proc": 12, "moltiplicatore_atk": 1.1}},
-        "assalto": {"fabbro": {"proc": 30}},
-    },
-    "Abitante": {
-        "turno": {"radice": {"proc": 12, "moltiplicatore_def": 1.1}},
-        "assalto": {"alberelli": {"proc": 20, "bonus_atk_nemici": -20}},
-    },
-    "Gangster": {
-        "turno": {"lega": {"proc": 10}},
-    },
-    "Marines": {
-        "turno": {"armatura": {"proc": 30, "riduzione_danno_percento": 40, "danno_min": 1}},
-    },
-    "Illusionista": {
-        "turno": {"copie_difesa": {"proc": 50, "proc_originale": 33}},
-        "assalto": {"copie": {"proc": 15, "agi_difesa": -30}},
-    },
-    "Betatester": {
-        "turno": {"spada_beta": {"proc": 20, "danno": 175}},
-        "assalto": {"spada_beta": {"proc": 20, "dps": 1033}},
-    },
-    "Avventuriero delle praterie": {
-        "turno": {"respira": {"proc": 90, "atk": 50, "def": 30, "agi": 4}},
-    },
-    "Shogun moderno": {
-        "turno": {"doppio_colpo": {"proc": 20, "moltiplicatore_min": 0.8, "moltiplicatore_max": 1.2}},
-        "assalto": {"doppio_colpo": {"proc": 20, "denominatore": 55, "random_min": 0.7, "random_max": 1.3}},
-    },
-    "Manipolatore di morte": {
-        "turno": {"scheletri": {"proc": 20, "hp_riferimento": 1200, "hp_per_scheletro": 100, "mod_min": 0.2, "mod_max": 0.3, "crescita_danno_scudo": 15, "crescita_danno_hp": 5}},
-        "assalto": {"distrazione": {"proc": 10, "agi": 10}},
-    },
-    "Mago mentale": {
-        "turno": {"showtime": {"proc": 20, "colpi_min": 1, "colpi_max": 7, "mod_min": 0.1, "mod_max": 0.4, "autodanno_proc": 20, "crescita_danno": 25}},
-    },
-    "Guardiano della bestie": {
-        "turno": {
-            "powe_per_turno": 1,
-            "volpe": {"proc": 30, "powe_min": 3, "def": 10},
-            "lupo": {"proc": 30, "powe_min": 9, "atk": 10},
-            "ratti": {"proc": 30, "powe_min": 17, "agi": 5},
-            "orsi": {"proc": 30, "powe_min": 25, "atk": 50},
-            "serpenti": {"proc": 30, "powe_min": 33, "agi_target": -10},
-            "presenza_lunare": {"proc": 50, "powe_min": 65, "def_mul": 2},
-        },
-    },
-    "Fiamma pura": {
-        "turno": {"arena_brucia": {"proc": 65, "danno_main": 100, "danno_oppo": 100}},
-        "assalto": {"esplosione_morte": {"proc": 60, "danno_struttura": 45, "hp_min_struttura": 45}},
-    },
-    "Crociato": {
-        "turno": {"punizione_schivata": {"proc": 50, "divisore_dps": 3, "random_min": 0.9, "random_max": 1.4, "danno_min": 30}},
-        "assalto": {"muraglione": {"proc": 50, "moltiplicatore_extra": 4}},
-    },
-    "Medico improvvisato": {
-        "turno": {"cura_schivata": {"proc": 50, "divisore_dps": 2.2, "random_min": 0.7, "random_max": 1.1}},
-        "assalto": {"cura": {"proc": 10, "cura": 50}},
-    },
-    "Vampiro": {
-        "turno": {"morso": {"proc": 20, "divisore": 12, "cura_cap": 142, "cap_trigger": 150}},
-        "assalto": {"pipistrello": {"proc": 20, "agi": 30}},
-    },
-    "Guaritore da campo": {
-        "turno": {"rinsana": {"proc": 75, "divisore": 9}},
-        "assalto": {"cura": {"proc": 20, "cura": 7}},
-    },
-    "Cacciatore": {
-        "turno": {"junior": {"proc": 20, "denominatore": 70, "moltiplicatore": 0.75}},
-        "assalto": {"draghetto": {"proc": 50, "dps": 1000}},
-    },
-    "Orrido": {
-        "turno": {"sgignolo": {"proc": 70, "denominatore": 140, "moltiplicatore": 0.5}},
-        "assalto": {"sgignolo": {"proc": 42, "danno": 33}, "danno_target": 33},
-    },
-    "Pazzoide glamour": {
-        "turno": {"pazzia": {"proc": 90}},
-        "assalto": {"cura_target": {"proc": 70}},
-    },
-    "Primo alla bandiera": {
-        "turno": {"colpito": {"proc": 35, "divisore_bonus": 2, "cura_divisore": 12}},
-        "assalto": {"cannoncino": {"proc": 30, "dps": 1400}},
-    },
-    "Difensore delle mareggiate": {
-        "turno": {
-            "fauna": {
-                "proc": 24,
-                "soglia_sogliola": 10, "sogliola_min": 0.1, "sogliola_max": 0.4,
-                "soglia_scorpione": 50, "scorpione_min": 0.3, "scorpione_max": 0.5,
-                "soglia_spada": 80, "spada_min": 0.6, "spada_max": 0.8,
-                "balena_min": 0.8, "balena_max": 1.2,
-            }
-        },
-        "assalto": {"fauna": {"proc": 10, "atk": 35}},
-    },
-    "Cercatore di reliquie": {
-        "turno": {"reliquia": {"proc": 24, "agi": 15, "hp": 150, "def": 60, "atk": 250, "soglia1": 10, "soglia2": 50, "soglia3": 80}},
-        "assalto": {"cannoncino": {"proc": 50, "def": 70}},
-    },
-    "Fire lord": {
-        "turno": {"muori_insetto": {"proc": 8, "danno": 80, "smateriabile_proc": 10}},
-        "assalto": {"catena": {"tentativi": 20, "stop_proc": 60, "danno": 80, "hp_min": 80}},
-    },
-    "Combattente 2D": {
-        "turno": {"evocazione": {"proc": 33, "soglia_occhio": 30, "soglia_zombie": 50, "soglia_raggio": 92, "atk": 8, "def": 5, "agi": 8, "danno_zombie": 40, "raggio_min": 0.7, "raggio_max": 1.2}},
-        "assalto": {"raggio_lunare": {"proc": 20, "denominatore": 75, "random_min": 1, "random_max": 1.7}},
-    },
-    "Accolito": {
-        "turno": {
-            "potere": {"danno_fatto_min": 1100, "atk": 180, "def": 180, "hp": 10, "agi": 15},
-            "difesa_cura": {"proc": 10, "divisore": 1.8, "base": 10},
-        },
-    },
-    "Esperto di animali": {
-        "turno": {
-            "dragone_stelle": {"proc": 20, "dps_mul": 1.5},
-            "fantasma_ritorno": {"proc": 20, "dps_mul": 0.5},
-            "ratto_tombe": {"hp_target_max": 100},
-            "balena_territoriale": {"proc": 20, "def": 44},
-            "silvantropo": {"proc": 20, "cura": 120},
-            "orsodruido": {"proc": 25, "random_min": 0.3, "random_max": 0.8},
-        },
-    },
-    "Sanguinolento": {
-        "turno": {"sangue_difesa": {"proc": 40, "divisore": 3}},
-        "assalto": {"sangue": {"proc": 12, "divisore_atk": 8, "divisore_def": 8}},
-    },
-    "Ufficiale dell'oltretomba": {
-        "turno": {
-            "marchio": {"proc_aggiungi": 40},
-            "demoni_difesa": {"proc": 25, "random_min": 0.5, "random_max": 1.0},
-        },
-    },
-    "Cercatore": {
-        "turno": {"demoni_difesa": {"proc": 40, "random_min": 0.1, "random_max": 1.5}},
-        "assalto": {"accampamento": {"proc": 10, "atk": 20}},
-    },
-    "Cavaliere delle spine": {
-        "turno": {"spine_difesa": {"proc": 50, "random_min": 0.6, "random_max": 1.0}},
-        "assalto": {
-            "spuntone_schivato": {"proc": 30, "def": 22, "atk": 22},
-            "spuntone_colpito": {"proc": 30, "def": 33},
-        },
-    },
-    "Mariachi": {
-        "turno": {"resurrezione_difesa": {"proc": 40, "hp": 250, "atk": 200, "def": 200}},
-        "assalto": {"resurrezione": {"proc": 12, "hp": 1000}},
-    },
-    "Scudiero del boschetto": {
-        "assalto": {"spaventapasseri": {"atk": 30, "def": 20}},
-    },
-    "Regina golgari": {
-        "turno": {"pietrifica": {"proc": 30, "def_main": 35, "atk_main": -35, "agi_main": -5}},
-        "assalto": {"clone": {"proc": 20}},
-    },
-    "Juggernaut": {
-        "assalto": {"cane": {"proc": 10}},
-    },
-    "Guerriero 3D": {
-        "assalto": {"cucciolo": {"proc": 15}},
-    },
-    "Elfo silvano": {
-        "assalto": {"evasione": {"proc": 95, "moltiplicatore_bonus_agi": 0.5}},
-    },
-    "Ombra silenziosa": {
-        "turno": {
-            "silenzio_spumeggiante": {"proc": 20},
-            "silenzio_druido": {"proc": 20},
-            "silenzio_crescita": {"proc": 20},
-            "silenzio_fanghiglia": {"proc": 10},
-            "silenzio_elsa": {"proc": 10},
-            "silenzio_vincastro": {"proc": 2},
-            "silenzio_corna": {"proc": 20},
-            "silenzio_ali": {"proc": 10},
-            "silenzio_portatore": {"proc": 20},
-            "silenzio_pazzoide": {"proc": 20},
-            "silenzio_sanguinolento": {"proc": 5},
-            "silenzio_adrenalina": {"proc": 90},
-            "silenzio_occulto": {"proc": 90},
-        },
-        "assalto": {"centrale": {"proc": 90, "atk": 150}},
-    },
-    "Assassino delle ombre": {
-        "assalto": {"centrale": {"proc": 80, "proc_post": 70, "danno_per_livello": 3, "hp_min": 50}},
-    },
-    "Sopravvissuto": {
-        "assalto": {"sopravvive": {"proc": 82, "atk_divisore": 20}},
-    },
-    "Bug Abuser": {
-        "turno": {
-            "bug": {"proc": 30},
-            "golem_fuoco": {"proc": 30, "agi": 200, "dps_da_def_divisore": 5},
-            "druido": {"proc": 20, "atk": 3, "def": 4, "agi": 2},
-            "tartaruga": {"proc": 20, "riduzione_difesa": 100},
-            "vigilante": {"proc": 20},
-            "chip_fuoco": {"proc": 20, "dps": 350},
-        },
-        "assalto": {"target": {"proc": 20, "s1": 3, "s2": 33, "s3": 53, "s4": 83, "dps1": 500, "dps2": 1400, "percento_hp": 8, "dps4": 1333, "dps5": 800}},
-    },
-    "Spacca Mostri": {
-        "assalto": {"clone": {"proc": 50, "dps": 1000}},
-    },
-    "Cultista pazzo": {
-        "turno": {"veleno_folle": {"proc": 50, "bonus_dps": 250, "malus_dps": 100}},
-        "assalto": {"ultimo_colpo": {"proc": 8, "danno": 100, "hp_min": 100}},
-    },
-    "Guardiano del passaggio": {
-        "turno": {"resurrezione": {"proc": 30, "hp_base": 500}},
-        "assalto": {"resurrezione": {"proc": 12, "hp": 1000}},
-    },
-    "Thunderlord": {
-        "assalto": {"tuono": {"proc": 80, "colpi": 3, "danno": 60, "hp_min": 80}},
-    },
-    "Lanciatore olimpico": {
-        "assalto": {"tridente": {"proc": 50, "danno": 80, "hp_min": 80}},
-    },
-    "Cacciatore della feccia": {
-        "assalto": {"massa_nemici": {"proc": 30, "atk_per_nemico": 5, "def_per_nemico": 5}},
-    },
-    "Ultima speranza": {
-        "assalto": {"paura": {"proc": 30, "bonus_def_nemico": -10}},
-    },
-}
-
-
-# ============================================================
-# DATABASE HARDCODATO DEGLI ANELLI
-# ============================================================
-# Tutto il tuning degli anelli usato da turno()/assedio() vive qui:
-# - proc: probabilita' percentuale (0..100)
-# - soglie/requisiti: hp_min, hp_max, limiti_stat, ecc.
-# - valori: danno, cura, modificatori, bonus/malus statistiche
-#
-# La logica delle funzioni applica gli effetti, ma non contiene piu'
-# i numeri di bilanciamento degli anelli.
-PROC_ANELLI = {
-    "Anello perfezionista": {
-        "generale": {"seed": "Anello perfezionista"},
-    },
-    "Un frammento del potere": {
-        "turno": {
-            "attacco": {"proc": 3, "trasforma_in": "Anello superfortissimo ma proprio rotto sgravatissimo"},
-            "difesa": {"proc": 2, "trasforma_in": "Anello superfortissimo ma proprio rotto sgravatissimo"},
-        },
-    },
-    "Aura pessima": {
-        "turno": {"aura": {"moltiplicatore_difesa_target": 0.8}},
-    },
-    "Effige della tribe": {
-        "turno": {
-            "cura_spettrale": {
-                "proc": 20,
-                "hp_max": 3500,
-                "cura_percento_hp": 10,
-                "equivalenti": ["Anello superfortissimo ma proprio rotto sgravatissimo"],
-                "speciali": {"Ipposciamano indemoniato": {"proc": 80, "hp_max": 5500}},
-            },
-        },
-    },
-    "Fanghiglia della palude": {
-        "turno": {"fango": {"proc": 50, "hp_min": 450, "atk": 11, "def": 11, "hp": -25}},
-    },
-    "Elsa vitale": {
-        "turno": {"crescita": {"proc": 60, "hp_divisore": 10, "agi_divisore": 2}},
-    },
-    "Veleno del folle": {
-        "turno": {"veleno": {"proc": 50, "bonus_dps": 250, "malus_dps": 100}},
-    },
-    "Guanto del falco": {
-        "turno": {"falcon_punch": {"proc": 20, "difesa_base": 100}},
-    },
-    "Campanellina concentrante": {
-        "turno": {"concentrazione": {"proc": 30, "agi": 1000001, "nomi_equivalenti": ["Cerbero sdentato"]}},
-    },
-    "Roccia viva": {
-        "turno": {"golem": {"proc": 20, "bonus_def": 5}},
-    },
-    "Vincastro": {
-        "turno": {
-            "attacco": {"proc": 7, "difesa_base": 45},
-            "difesa": {"proc": 7, "dps": 35},
-        },
-    },
-    "Proteina brullicanti": {
-        "turno": {"massa": {"proc": 18, "moltiplicatore_extra_dps": 1.8}},
-    },
-    "Corna da toro": {
-        "turno": {
-            "terrore": {
-                "proc": 50,
-                "hp_divisore": 10,
-                "agi_divisore": 3,
-                "nomi_equivalenti": ["Cerbero sdentato"],
-            },
-        },
-    },
-    "Corteccia naturale": {
-        "turno": {"crescita": {"proc": 45, "atk_base": 8, "def_base": 8, "agi": 3}},
-    },
-    "Muschio Selvaggio": {
-        "turno": {
-            "selvaggio": {
-                "proc": 22,
-                "limiti_stat": {"agi": 525, "hp": 2200, "def": 3500, "atk": 3500},
-            },
-        },
-    },
-    "Pozione di furia": {
-        "turno": {"furia": {"proc": 25, "atk_base": 35}},
-    },
-    "Cinta del comandante": {
-        "turno": {"comando": {"proc": 25, "atk_target_base": 35}},
-    },
-    "Fantasmino luminoso": {
-        "turno": {
-            "debuff": {
-                "proc": 44,
-                "agi": -4,
-                "atk_base": -8,
-                "def_base": -8,
-                "nomi_equivalenti": ["Carl, il becchino"],
-            },
-        },
-    },
-    "Ali di luminite": {
-        "turno": {"volo": {"proc": 35, "agi_difesa": 260}},
-    },
-    "Amuleto del protettore": {
-        "turno": {"protezione": {"proc": 18, "moltiplicatore_bonus": 1}},
-    },
-    "Guanto titanico": {
-        "turno": {"difesa": {"proc": 20, "dps_base": 100}},
-    },
-    "Stemma della rocca": {
-        "turno": {"rocca": {"proc": 25, "def_base": 35}},
-    },
-    "Coda demoniaca": {
-        "turno": {
-            "schivata": {"lastD_reset": 0},
-            "dolore": {"divisore_chance": 1000, "bonus_speciale": 0.2, "nome_speciale": "Demone spezza-ossa", "danno": 0, "mod": 0},
-        },
-    },
-    "Testuggine del vecchio saggio": {
-        "turno": {"atterraggio": {"moltiplicatore_mod": 0.7}},
-    },
-    "Fascette luminose": {
-        "turno": {"atterraggio": {"proc": 60, "mod": 0.3}},
-    },
-    "Compasso": {
-        "turno": {"bilanciamento": {"proc": 88, "mod": 1.2}},
-    },
-    "Bilanciere": {
-        "turno": {"bilanciamento": {"proc": 88, "mod": 1.2}},
-    },
-    "Pegno di amicizia": {
-        "turno": {"difesa": {"moltiplicatore_danno": 0.9, "sottrai_int": True}},
-    },
-    "Tasto B": {
-        "turno": {"roll": {"proc": 15, "mod": 0}},
-    },
-    "Tasto X": {
-        "turno": {"obliteratore": {"proc": 12, "divisore_mod": 5, "bonus_stat_base": 7}},
-    },
-    "Scudiero fidato": {
-        "turno": {"blocco": {"proc": 25, "danno": 0}},
-    },
-    "Aureola": {
-        "turno": {"salvezza": {"proc": 35, "moltiplicatore_danno": 0.45, "danno_min": 1}},
-    },
-    "Ricordo straziante": {
-        "turno": {"intangibile": {"proc": 15, "danno": 0, "mod": 0, "nomi_equivalenti": ["Fantasma del rimorso"]}},
-    },
-    "Spuntoni": {
-        "turno": {"danno_extra": {"proc": 55, "mod": 0.4}},
-    },
-    "Scarica di adrenalina": {
-        "turno": {"adrenalina": {"proc": 40, "offset_danno": 2, "divisore": 2, "bonus_finale": 1}},
-    },
-    "Lapsus vitale": {
-        "turno": {"cura_danno": {"proc": 40, "offset_danno": 2, "divisore": 2, "nomi_equivalenti": ["Ipposciamano indemoniato"]}},
-    },
-    "Vasetto all'orlo": {
-        "turno": {"contrattacco": {"proc": 25, "random_min": 0.5, "random_max": 1}},
-    },
-    "Chiavi dell'aldilà": {
-        "turno": {"resurrezione": {"proc": 30, "hp_base": 500}},
-    },
-    "Benedizione sanguinolenta": {
-        "turno": {"cura_danno": {"proc": 22, "divisore": 2, "nomi_equivalenti": ["Ipposciamano indemoniato"]}},
-    },
-    "Anello dell'occulto": {
-        "turno": {"trascinamento": {"proc": 20, "dps_divisore": 3, "random_min": 0.3, "random_max": 1.5}},
-    },
-    "Anello di totano": {
-        "turno": {
-            "cura": {
-                "proc": 45,
-                "cura_colpito": 15,
-                "cura_schivato": 25,
-                "random_min": 0.8,
-                "random_max": 1.8,
-                "moltiplicatore_mod_schivato": 1.3,
-            },
-        },
-    },
-    "Cuffia da boia": {
-        "turno": {"esecuzione": {"hp_target_base": 100, "hp_finale": 0}},
-    },
-    "Cuore delle sabbie": {
-        "turno": {"insabbiato": {"proc": 25, "lv": 2, "dur": 1, "lv_incremento": 1, "nomi_equivalenti": ["Leviatano delle sabbi"]}},
-    },
-    "Chiavi": {
-        "turno": {"batmobile": {"proc": 33, "danno": 35}},
-    },
-    "Scudo levitante": {
-        "assalto": {"aura": {"stat": "def", "valore": 20}},
-    },
-    "Stemma del leader": {
-        "assalto": {"aura": {"stat": "atk", "valore": 20}},
-    },
-    "Occhio del falco": {
-        "assalto": {"aura": {"stat": "agi", "valore": 5}},
-    },
-    "Carica mobile": {
-        "assalto": {"esplosione": {"proc": 20, "danno_min": 20, "danno_max": 150}},
-    },
-}
-
-
-# ============================================================
-# DATABASE HARDCODATO DUNGEON
-# ============================================================
-# Tutto il tuning del dungeon vive qui, soprattutto quello delle stanze.
-# Percentuali espresse 0..100.
-#
-# Convenzioni:
-# - *_pct = probabilita' effettiva dell'evento.
-# - *_soglia_pct = soglia cumulativa sullo stesso roll casuale (serve per
-#   mantenere IDENTICO il comportamento delle vecchie catene if/elif).
-# - difficolta = coefficiente delle prove STAT >= difficolta * roll.
-# - danno positivo aumenta il danno accumulato; cura positiva lo riduce.
-#
-# Alcune vecchie catene hanno soglie sovrapposte/irraggiungibili: sono
-# mantenute tali apposta durante questo refactor, per non cambiare balance.
-DUNGEON_CONFIG = {
-    "generale": {
-        "cooldown_stanza": 35,
-        "cooldown_scelta": 1.1,
-        "mod_stop_dg": -5,
-        "mod_piu_dg": 5,
-        "mod_nop": -60,
-        "cura_fine_scelta": 20,
-        "grado_fine_scelta": 1,
-    },
-    "generazione": {
-        "stanze_min": 2,
-        "stanze_max": 8,
-        "visibilita_min": 1,
-        "visibilita_max": 9,
-        "stanze_extra_per_piano": 1,
-    },
-    "boss": {
-        "exp_pct": 80,
-        "exp": 3,
-        "grado": 2,
-        "gloria": 20,
-        "lv_divisore_piano": 2.6,
-        "lv_max_normale": 4,
-        "lv_alto_pct": 50,
-        "lv_alto": "4",
-        "lv_basso": "3",
-    },
-    "mostro": {
-        "exp_pct": 50,
-        "exp": 2,
-        "grado": 2,
-    },
-    "stanze": {
-        "Crepaccio": {
-            "Tocchi la crepa": {"espansione_pct": 50},
-        },
-        "Stanza": {
-            "Sali": {"click_inerte_pct": 10, "cura": 450, "piani": -1},
-            "Scendi": {"click_inerte_pct": 10, "danno": 500, "piani": 1},
-        },
-        "Spada conficcata": {
-            "Estrai la spada": {
-                "giorni_validi": [17, 21],
-                "stat_base": {"hp": 1000, "atk": 100, "def": 100, "agi": 20},
-            },
-        },
-        "Distributore": {
-            "Metti monetina": {
-                "gloria_min": 2,
-                "costo_gloria": 1,
-                "fragola_soglia_pct": 20,
-                "kiwi_soglia_pct": 30,
-                "stanza_soglia_pct": 40,
-                "nemico_soglia_pct": 50,
-                "pesce_soglia_pct": 60,
-                "latte_soglia_pct": 70,
-                "gloria_soglia_pct": 80,
-                "cura_fragola": 20,
-                "cura_kiwi": 25,
-                "cura_pesce": 5,
-                "danno_latte": 35,
-                "premio_gloria": 4,
-            },
-        },
-        "Bisca": {
-            "Scommetti": {"puntata": 150, "carta_min": 1, "carta_max": 15},
-        },
-        "Fabbro": {
-            "Avvicinati": {
-                "interazione_pct": 98,
-                "base_gloria": 150,
-                "quantita_grande": 5,
-                "quantita_minima": 2,
-            },
-        },
-        "Fattoria": {
-            "Mungi le mucche": {"latte": 2},
-        },
-        "Stanza del sonno": {
-            "Immergitici": {
-                "perdi_oggetto_soglia_pct": 10,
-                "danno_soglia_pct": 50,
-                "cura_soglia_pct": 70,
-                "duplica_soglia_pct": 90,
-                "danno": 100,
-                "cura": 200,
-            },
-        },
-        "Chiesa": {
-            "Prega": {
-                "classi_gradite": [
-                    "Crociato", "Chierico", "Forma terra", "Forma fuoco",
-                    "Forma lunare", "Forma elettro", "Cultista oscuro",
-                    "Dolce mietitore", "Medievalista", "Cultista pazzo", "IppoFan",
-                ],
-                "guardie_fermano_pct": 60,
-                "danno_cacciata": 123,
-            },
-        },
-        "Bar": {
-            "Gira per la locanda": {
-                "acqua_soglia_pct": 50,
-                "latte_soglia_pct": 80,
-                "loop_soglia_pct": 90,
-                "boss_soglia_pct": 10,
-                "acqua": 5,
-                "latte": 2,
-                "stanze_loop": 2,
-                "nemici_crew": 3,
-            },
-            "Bevi": {
-                "salta_stanza_soglia_pct": 40,
-                "randomizza_danno_soglia_pct": 20,
-                "danno_random_min": -501,
-                "danno_random_max": 1500,
-            },
-        },
-        "Piedistallo": {
-            "Subito": {"successo_pct": 50, "quantita_premio": 2},
-        },
-        "Cucina": {
-            "Ne prendo una": {"successo_pct": 70, "incapacita_pct": 10, "spezie": 1},
-            "Ne prendo 5": {"successo_pct": 50, "incapacita_pct": 20, "spezie": 5},
-            "Ne prendo 10": {"successo_pct": 20, "incapacita_pct": 30, "spezie": 10},
-            "Prendo il tavolo intero": {"successo_pct": 5, "spezie": 15},
-        },
-        "Stagno": {
-            "Peschiamo!": {"difficolta": 4000, "gloria_per_kg": 0.4, "morte_soglia_pct": 20},
-        },
-        "Locanda spettrale": {
-            "Entraci": {
-                "evento_negativo_pct": 50,
-                "fantasmi_soglia_pct": 2,
-                "moltiplicatore_danno_fantasmi": 2,
-                "danno_caduta": 100,
-                "cura_riposo": 300,
-            },
-            "Svegliati": {"scaglione_soglia_pct": 1, "conferma_soglia_pct": 1},
-        },
-        "Pilastri": {
-            "Ti ci avvicini": {"fulmine_pct": 50, "danno_fulmine": 999, "danno_premio": -300},
-        },
-        "Parco": {
-            "Fuggi": {
-                "difficolta": 200,
-                "lv1_soglia_pct": 20,
-                "lv2_soglia_pct": 55,
-                "incapacita_soglia_pct": 50,
-            },
-            "Fermali": {"difficolta": 1300, "lv1_soglia_pct": 20, "lv2_soglia_pct": 55},
-            "Parlaci": {"incapacita_pct": 60, "scaglione_soglia_pct": 1},
-        },
-        "Arena": {
-            "Disco ricurvo": {"difficolta": 4000},
-            "Disco acuminato": {"difficolta": 4000},
-            "Disco bilanciato": {"difficolta": 4000},
-        },
-        "Tempio azteco": {
-            "Un mattone ancestrale": {"difficolta": 45},
-            "Una piuma azteca": {"difficolta": 150},
-            "Un cappello da esploratore": {"difficolta": 5000},
-        },
-        "Fonte magica": {
-            "evento": {"cura_pct": 40, "cura": 200},
-        },
-        "Lupo solitario": {
-            "evento": {
-                "nessun_lupo_soglia_pct": 40,
-                "attacco_lupo_soglia_pct": 40,
-                "cura": 50,
-                "danno": 70,
-            },
-        },
-        "Segreta abbandonata": {
-            "evento": {
-                "loot_pct": 40,
-                "loot": ["Un fune di fuga", "Uno stimpak", "Candela blu", "Ultimo barlore"],
-            },
-        },
-        "Luci ed ombre": {
-            "evento": {
-                "punizione_pct": 80,
-                "approcci_oscuri": ["Base", "Agile", "Spinto", "Statico", "Aggressivo", "Rabbioso", "Spavaldo", "Malevolo"],
-            },
-        },
-        "Armeria": {"evento": {"nessun_evento_pct": 30}},
-        "MetaMusicoteca": {"evento": {"crack_musica_pct": 1}},
-        "Biblioteca": {"evento": {"vuota_pct": 70}},
-        "Cunicolo": {
-            "evento": {
-                "scaglione_soglia_pct": 1,
-                "conferma_scaglione_soglia_pct": 1,
-                "crollo_pct": 2,
-                "piani_crollo": -1,
-            },
-        },
-        "Sabbie mobili": {
-            "evento": {
-                "caduta_pct": 80,
-                "pat_min": 666,
-                "salvataggio_pet_soglia_pct": 40,
-                "scaglione_soglia_pct": 1,
-            },
-        },
-    },
-}
-
 
 def proc_cfg(classe, contesto, nome):
     """Restituisce la configurazione di un proc di classe."""
@@ -838,6 +49,227 @@ def anello_val(anello, contesto, nome, chiave, default=None):
     """Legge un valore di tuning dell'anello."""
     return anello_cfg(anello, contesto, nome).get(chiave, default)
 
+
+_WEEKEND_MOD_ATTIVO = None
+
+
+def weekend_mod_cfg(mod):
+    return WEEKEND_MOD_CONFIG.get(mod, {})
+
+
+def weekend_mod_val(mod, chiave, default=None):
+    return weekend_mod_cfg(mod).get(chiave, default)
+
+
+def weekend_mod_descrizione(mod):
+    cfg = weekend_mod_cfg(mod)
+    if not cfg:
+        return "Nessun modificatore."
+    return f"{cfg.get('nome', mod)} — {cfg.get('descrizione', '')}".strip()
+
+
+def set_weekend_mod(mod):
+    global _WEEKEND_MOD_ATTIVO
+    _WEEKEND_MOD_ATTIVO = mod
+
+
+def tempo_movimento_corrente(player, username, trader):
+    """Cooldown reale per il movimento, condiviso tra UI e callback."""
+    ccc = 3600
+    if _WEEKEND_MOD_ATTIVO == "senza_frontiere":
+        return weekend_mod_val(_WEEKEND_MOD_ATTIVO, "tempo_movimento", 5)
+    if player[username]["setta"]["benedizione"] == "Verme delle sabbie":
+        a = round(
+            trader["sette"][player[username]["setta"]["loc"]]["power"]
+            * (trader["sette"][player[username]["setta"]["loc"]]["%"] / 100)
+        )
+        ccc *= 1 - (a / 100)
+    return ccc
+
+
+def _snapshot_premi_dungeon(giocatore):
+    exp = giocatore.get("exp", {}).get("expattuale", 0)
+    return {
+        "zaino": copy.deepcopy(giocatore.get("zaino", {})),
+        "gloria": giocatore.get("gloria", 0),
+        "grado": giocatore.get("grado", 0),
+        "exp": exp,
+    }
+
+
+def _duplica_premi_dungeon_da_snapshot(giocatore, prima, evento):
+    """Duplica solo i delta positivi prodotti dal dungeon; costi/perdite restano invariati."""
+    mod = evento.get("mod") if isinstance(evento, dict) else None
+    moltiplicatore = weekend_mod_val(mod, "moltiplicatore_premi_dungeon", 1)
+    if not prima or moltiplicatore <= 1:
+        return
+    extra = moltiplicatore - 1
+
+    zaino = giocatore.setdefault("zaino", {})
+    prima_zaino = prima.get("zaino", {})
+    for oggetto, quantita in list(zaino.items()):
+        try:
+            delta = quantita - prima_zaino.get(oggetto, 0)
+        except TypeError:
+            continue
+        if delta > 0:
+            zaino[oggetto] += delta * extra
+
+    for chiave in ("gloria", "grado"):
+        adesso = giocatore.get(chiave, 0)
+        delta = adesso - prima.get(chiave, 0)
+        if delta > 0:
+            giocatore[chiave] = adesso + delta * extra
+
+    exp_now = giocatore.get("exp", {}).get("expattuale", 0)
+    delta_exp = exp_now - prima.get("exp", 0)
+    if delta_exp > 0:
+        giocatore["exp"]["expattuale"] = exp_now + delta_exp * extra
+
+
+def _applica_stat_dungeon_evento(personaggio, evento):
+    mod = evento.get("mod") if isinstance(evento, dict) else None
+    moltiplicatore = weekend_mod_val(mod, "moltiplicatore_stat_dungeon", 1)
+    if moltiplicatore == 1:
+        return
+    for stat in ("hp", "def", "atk", "agi"):
+        personaggio[stat] = round(personaggio.get(stat, 0) * moltiplicatore)
+
+
+
+def _applica_valvola_inizio_sfida(personaggio):
+    """Applica una sola volta il bonus iniziale della Valvola da 4\" alla copia dello scontro."""
+    nome_anello = 'Valvola da 4"'
+    marker = "_valvola4_applicata"
+    if personaggio.get("anello") != nome_anello or personaggio.get(marker):
+        return ""
+    if not anello_ok(random.random(), nome_anello, "sfida", "inizio"):
+        return ""
+    cfg = anello_cfg(nome_anello, "sfida", "inizio")
+    personaggio["atk"] += cfg["atk"]
+    personaggio["def"] += cfg["def"]
+    personaggio["agi"] += cfg["agi"]
+    personaggio[marker] = True
+    return f"{personaggio['Nome']} si presenta alla sfida con una valvola enorme!\n"
+
+
+def _effetti_anelli_inizio_turno(main, oppo, anello, anellon):
+    """Effetti che scattano all'inizio di ogni turno usando gli anelli locali post-Leggiadra."""
+    text = ""
+
+    # Ogni copia della roulette tira indipendentemente e agisce sul combattente di turno.
+    for ring in (anello, anellon):
+        if ring == "Roulette russa" and anello_ok(random.random(), ring, "turno", "roulette"):
+            danno = anello_val(ring, "turno", "roulette", "danno")
+            main["hp"] -= danno
+            text += f"{main['Nome']} ha perso la roulette russa, {danno} danni!\n"
+        elif ring == "Roulette tibetana" and anello_ok(random.random(), ring, "turno", "roulette"):
+            cura = anello_val(ring, "turno", "roulette", "cura")
+            main["hp"] += cura
+            text += f"{main['Nome']} ha vinto la roulette tibetana, {cura} cure!\n"
+
+    # Ogni Sasso carica a ogni turno, anche quando il proprietario sta difendendo.
+    for proprietario, bersaglio, ring in ((main, oppo, anello), (oppo, main, anellon)):
+        if ring != "Sasso rotolante":
+            continue
+        cfg = anello_cfg(ring, "turno", "valanga")
+        proprietario["_sasso_cariche"] = proprietario.get("_sasso_cariche", 0) + cfg["carica_per_turno"]
+        cariche = proprietario["_sasso_cariche"]
+        if anello_ok(random.random(), ring, "turno", "valanga"):
+            danni = cariche * cfg["danno_per_carica"]
+            bersaglio["hp"] -= danni
+            proprietario["_sasso_cariche"] = 0
+            text += f"Un sasso becca {bersaglio['Nome']} per {danni} danni!\n"
+        else:
+            text += f"Senti un sasso in lontananza... ({cariche} Cariche)\n"
+    return text
+
+
+def incantesimo_cfg(incantesimo, contesto, nome):
+    """Restituisce la configurazione di un effetto di incantesimo."""
+    return INCANTESIMI_CONFIG.get(incantesimo, {}).get(contesto, {}).get(nome, {})
+
+
+def incantesimo_percent(incantesimo, contesto, nome, default=0):
+    """Probabilità dell'incantesimo espressa in percentuale 0..100."""
+    return incantesimo_cfg(incantesimo, contesto, nome).get("proc", default)
+
+
+def incantesimo_ok(numero_casuale, incantesimo, contesto, nome, default=0):
+    """Usa il random già estratto per mantenere il flow storico."""
+    return numero_casuale < (incantesimo_percent(incantesimo, contesto, nome, default) / 100)
+
+
+def incantesimo_val(incantesimo, contesto, nome, chiave, default=None):
+    """Legge un valore di tuning di un incantesimo."""
+    return incantesimo_cfg(incantesimo, contesto, nome).get(chiave, default)
+
+
+def set_cangiante_disponibili():
+    """Set copiabili da Cangiante: esclude quelli che forniscono solo bonus base alle statistiche."""
+    escludi_solo_bonus = incantesimo_val(
+        "Cangiante", "generale", "selezione_set", "escludi_solo_bonus_base", True
+    )
+    return [
+        nome_set
+        for nome_set in classi
+        if not (
+            escludi_solo_bonus
+            and proc_val(nome_set, "generale", "set_base", "solo_bonus_base", False)
+        )
+    ]
+
+
+def calcola_omini_assalto(giocatore, username, last_clan):
+    """Conta gli assaltatori recenti e applica gli stack condivisi di Giallo.
+
+    Ogni proc di Giallo crea entry fittizie distinte dentro lo stesso `last`
+    usato dagli assaltatori reali. In questo modo gli stack sono condivisi
+    dal clan e scadono con la normale finestra di 301 secondi.
+    """
+    ora_omini = time.time()
+    prefisso_giallo = "__giallo__"
+
+    # Rimuove solo i giallini scaduti; le entry dei giocatori reali restano
+    # gestite esattamente come nello storico.
+    for pl, timestamp in list(last_clan.items()):
+        if str(pl).startswith(prefisso_giallo) and (ora_omini - timestamp) >= 301:
+            last_clan.pop(pl, None)
+
+    messaggio_giallo = ""
+    if "Giallo" in giocatore.get("incantamenti", []) and incantesimo_ok(
+        random.random(), "Giallo", "assalto", "aiutanti"
+    ):
+        quanti_giallini = incantesimo_val("Giallo", "assalto", "aiutanti", "aiutanti_extra")
+        token_giallo = time.time_ns()
+        for indice_giallo in range(quanti_giallini):
+            chiave_giallo = f"{prefisso_giallo}{username}__{token_giallo}__{indice_giallo}"
+            last_clan[chiave_giallo] = ora_omini
+        messaggio_giallo = "Venite a me ~~Minions~~ giallini, è ora di distruggere questo posto!\n"
+
+    matx = 0
+    omini_reali = 0
+    giallini_attivi = 0
+    for pl, timestamp in last_clan.items():
+        elapsed = ora_omini - timestamp
+        if elapsed < 301 and username != pl:
+            matx += 1
+            if str(pl).startswith(prefisso_giallo):
+                giallini_attivi += 1
+            else:
+                omini_reali += 1
+
+    return matx, omini_reali, giallini_attivi, messaggio_giallo
+
+
+def effetto_cfg(effetto, contesto, nome):
+    """Restituisce la configurazione di un effetto temporaneo."""
+    return EFFETTI_CONFIG.get(effetto, {}).get(contesto, {}).get(nome, {})
+
+
+def effetto_val(effetto, contesto, nome, chiave, default=None):
+    """Legge un valore di tuning di un effetto temporaneo."""
+    return effetto_cfg(effetto, contesto, nome).get(chiave, default)
 
 
 def dungeon_cfg(stanza, azione="evento"):
@@ -881,6 +313,287 @@ def dungeon_test_percent(valore, stanza, azione, chiave="difficolta", default=0)
 def dungeon_global(sezione, chiave, default=None):
     """Legge impostazioni generali/generazione/boss/mostro del dungeon."""
     return DUNGEON_CONFIG.get(sezione, {}).get(chiave, default)
+
+
+def _titolo_parametro_tecnico(chiave):
+    """Converte le chiavi del database in etichette leggibili senza alterarne il significato."""
+    speciali = {
+        "proc": "Probabilità",
+        "atk": "ATK",
+        "def": "DEF",
+        "agi": "AGI",
+        "hp": "HP",
+        "dps": "DPS",
+        "powa_min": "POWA minima",
+        "powe_min": "POWE minima",
+        "powa_per_turno": "POWA per turno",
+        "powe_per_turno": "POWE per turno",
+        "cura": "Cura",
+        "danno": "Danno",
+        "moltiplicatore": "Moltiplicatore",
+        "divisore": "Divisore",
+        "hp_max": "HP massimi",
+        "hp_min": "HP minimi",
+        "hp_target_max": "HP bersaglio max",
+        "hp_target_min": "HP bersaglio min",
+        "danno_fatto_min": "Danno fatto minimo",
+        "random_min": "Random minimo",
+        "random_max": "Random massimo",
+    }
+    return speciali.get(chiave, str(chiave).replace("_", " ").strip().capitalize())
+
+
+def _is_percentuale_tecnica(chiave):
+    chiave = str(chiave).lower()
+    return (
+        chiave == "proc"
+        or chiave.startswith("proc_")
+        or chiave.endswith("_proc")
+        or "percento" in chiave
+        or chiave.endswith("_pct")
+        or chiave.startswith("soglia")
+        or (len(chiave) > 1 and chiave[0] == "s" and chiave[1:].isdigit())
+    )
+
+
+def _format_valore_tecnico(chiave, valore):
+    if isinstance(valore, bool):
+        return "sì" if valore else "no"
+    if isinstance(valore, (list, tuple, set)):
+        return ", ".join(str(x) for x in valore)
+    if isinstance(valore, float) and valore.is_integer():
+        valore = int(valore)
+    if _is_percentuale_tecnica(chiave) and isinstance(valore, (int, float)):
+        return f"{valore}%"
+    return str(valore)
+
+
+def _righe_config_tecnica(config):
+    righe = []
+    for contesto, dati in config.items():
+        if not isinstance(dati, dict):
+            continue
+
+        titolo_contesto = str(contesto).replace("_", " ").capitalize()
+        effetti = [(nome, parametri) for nome, parametri in dati.items() if isinstance(parametri, dict)]
+        diretti = [(chiave, valore) for chiave, valore in dati.items() if not isinstance(valore, dict)]
+
+        for effetto, parametri in effetti:
+            dettagli = []
+            for chiave, valore in parametri.items():
+                if chiave == "nomi_equivalenti":
+                    continue
+                dettagli.append(
+                    f"{_titolo_parametro_tecnico(chiave)}: {_format_valore_tecnico(chiave, valore)}"
+                )
+            if dettagli:
+                nome_effetto = str(effetto).replace("_", " ").capitalize()
+                righe.append(f"• {titolo_contesto} / {nome_effetto}: " + "; ".join(dettagli))
+
+        if diretti:
+            dettagli = []
+            for chiave, valore in diretti:
+                if chiave == "nomi_equivalenti":
+                    continue
+                dettagli.append(
+                    f"{_titolo_parametro_tecnico(chiave)}: {_format_valore_tecnico(chiave, valore)}"
+                )
+            if dettagli:
+                righe.append(f"• {titolo_contesto}: " + "; ".join(dettagli))
+    return righe
+
+
+def _numero_placeholder_tecnico(valore):
+    if isinstance(valore, float) and valore.is_integer():
+        return str(int(valore))
+    if isinstance(valore, float):
+        return f"{valore:g}"
+    return str(valore)
+
+
+def _valore_placeholder_set(nome, bonus, percorso):
+    parti = percorso.split(".")
+    if parti[0] == "bonus":
+        valore = bonus or {}
+        parti = parti[1:]
+    else:
+        valore = PROC_CLASSI.get(nome, {})
+    for parte in parti:
+        if not isinstance(valore, dict) or parte not in valore:
+            raise KeyError(f"Placeholder set non valido: {nome}.{percorso}")
+        valore = valore[parte]
+    return valore
+
+
+def _format_placeholder_set(valore, formato=""):
+    if formato == "pct":
+        return f"{_numero_placeholder_tecnico(valore)}%"
+    if formato == "x":
+        return f"{_numero_placeholder_tecnico(valore)}x"
+    if formato == "signed":
+        if isinstance(valore, (int, float)) and not isinstance(valore, bool) and valore > 0:
+            return "+" + _numero_placeholder_tecnico(valore)
+        return _numero_placeholder_tecnico(valore)
+    if formato == "abs":
+        return _numero_placeholder_tecnico(abs(valore))
+    if formato == "bool":
+        return "sì" if valore else "no"
+    if formato == "rid_pct":
+        return f"{_numero_placeholder_tecnico((1 - float(valore)) * 100)}%"
+    if formato == "pct_mul":
+        return f"{_numero_placeholder_tecnico(float(valore) * 100)}%"
+    if formato:
+        raise ValueError(f"Formato placeholder non supportato: {formato}")
+    return _numero_placeholder_tecnico(valore)
+
+
+def render_frase_set_tecnica(nome, bonus=None):
+    template = FRASI_SET_TECNICHE.get(nome, "")
+    if not template:
+        return ""
+    parti = []
+    for letterale, campo, formato, conversione in string.Formatter().parse(template):
+        parti.append(letterale)
+        if campo is None:
+            continue
+        if conversione:
+            raise ValueError(f"Conversione placeholder non supportata: {conversione}")
+        valore = _valore_placeholder_set(nome, bonus or {}, campo)
+        parti.append(_format_placeholder_set(valore, formato))
+    return "".join(parti)
+
+
+def descrizione_set_tecnica(nome, bonus=None):
+    """Descrizione meccanica del set, con frase custom e dati analitici."""
+    righe = ["⚙️ Dettagli del set"]
+    bonus = bonus or {}
+    frase_custom = render_frase_set_tecnica(nome, bonus)
+    if frase_custom:
+        righe.append(frase_custom)
+    bonus_testo = []
+    for stat in ("hp", "atk", "def", "agi"):
+        valore = bonus.get(stat, 0)
+        if valore:
+            segno = "+" if valore > 0 else ""
+            bonus_testo.append(f"{stat.upper()} {segno}{valore}")
+    if bonus_testo:
+        righe.append("• Bonus base: " + " | ".join(bonus_testo))
+
+    return "\n".join(righe)
+
+
+def _valore_placeholder_anello(nome, percorso):
+    valore = PROC_ANELLI.get(nome, {})
+    for parte in percorso.split("."):
+        if not isinstance(valore, dict) or parte not in valore:
+            raise KeyError(f"Placeholder anello non valido: {nome}.{percorso}")
+        valore = valore[parte]
+    return valore
+
+
+def render_frase_anello_tecnica(nome):
+    template = FRASI_ANELLI_TECNICHE.get(nome, "")
+    if not template:
+        return ""
+    parti = []
+    for letterale, campo, formato, conversione in string.Formatter().parse(template):
+        parti.append(letterale)
+        if campo is None:
+            continue
+        if conversione:
+            raise ValueError(f"Conversione placeholder non supportata: {conversione}")
+        valore = _valore_placeholder_anello(nome, campo)
+        parti.append(_format_placeholder_set(valore, formato))
+    return "".join(parti)
+
+
+def descrizione_anello_tecnica(nome):
+    """Descrizione leggibile dell'anello, sempre allineata a PROC_ANELLI."""
+    righe = ["⚙️ Dettagli dell'anello"]
+    frase = render_frase_anello_tecnica(nome)
+    if frase:
+        righe.append(frase)
+    return "\n".join(righe)
+
+
+def _valore_placeholder_incantesimo(nome, percorso):
+    valore = INCANTESIMI_CONFIG.get(nome, {})
+    for parte in percorso.split("."):
+        if not isinstance(valore, dict) or parte not in valore:
+            raise KeyError(f"Placeholder incantesimo non valido: {nome}.{percorso}")
+        valore = valore[parte]
+    return valore
+
+
+def render_frase_incantesimo_tecnica(nome):
+    template = FRASI_INCANTESIMI_TECNICHE.get(nome, "")
+    if not template:
+        return ""
+    parti = []
+    for letterale, campo, formato, conversione in string.Formatter().parse(template):
+        parti.append(letterale)
+        if campo is None:
+            continue
+        if conversione:
+            raise ValueError(f"Conversione placeholder non supportata: {conversione}")
+        valore = _valore_placeholder_incantesimo(nome, campo)
+        parti.append(_format_placeholder_set(valore, formato))
+    return "".join(parti)
+
+
+def descrizione_incantesimo_tecnica(nome):
+    """Descrizione umana dell'incantesimo, allineata a INCANTESIMI_CONFIG."""
+    righe = ["⚙️ Dettagli dell'incantesimo"]
+    frase = render_frase_incantesimo_tecnica(nome)
+    if frase:
+        righe.append(frase)
+    return "\n".join(righe)
+
+
+def aggiorna_descrizioni_bilanciamento(liste_module):
+    """Aggiunge alle descrizioni esistenti un blocco tecnico sempre allineato al bilanciamento."""
+    markers = ("\n\n⚙️ Dettagli tecnici", "\n\n⚙️ Dettagli del set", "\n\n⚙️ Dettagli dell'anello", "\n\n⚙️ Dettagli dell'incantesimo")
+
+    for nome in liste_module.classi:
+        base = liste_module.frasi_set.get(nome, f"Set del {nome}.")
+        for marker in markers:
+            base = base.split(marker, 1)[0]
+        base = base.rstrip()
+        bonus_set = getattr(liste_module, "bonus", {}).get(nome, {})
+        liste_module.frasi_set[nome] = base + "\n\n" + descrizione_set_tecnica(nome, bonus_set)
+
+    for nome in list(liste_module.anelli):
+        base = liste_module.anelli[nome]
+        for marker in markers:
+            base = base.split(marker, 1)[0]
+        base = base.rstrip()
+        liste_module.anelli[nome] = base + "\n\n" + descrizione_anello_tecnica(nome)
+
+
+    for _, dati_libro in getattr(liste_module, "libri", {}).items():
+        effetto = dati_libro.get("ef")
+        if effetto not in INCANTESIMI_CONFIG:
+            continue
+        base = dati_libro.get("descrizione", "")
+        for marker in markers:
+            base = base.split(marker, 1)[0]
+        base = base.rstrip()
+        dati_libro["descrizione"] = base + "\n\n" + descrizione_incantesimo_tecnica(effetto)
+
+
+def testo_lista_set(liste_module):
+    """Catalogo completo dei set con i componenti richiesti per completarli."""
+    righe = ["🧩 **SET E COMPONENTI**", ""]
+    for nome in sorted(liste_module.classi, key=lambda x: str(x).lower()):
+        componenti = liste_module.classi[nome]
+        righe.append(f"**{nome}**")
+        if componenti:
+            for componente in componenti:
+                righe.append(f"• `{componente}`")
+        else:
+            righe.append("• _Nessun componente definito_")
+        righe.append("")
+    return "\n".join(righe)
 
 
 def take_boss(lista, numero):
@@ -1457,28 +1170,29 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                 if 4 == 4:                                    
                                     ordine = clan[user["team"]]["orderN"]
                                     giocatore = copy.deepcopy(player[username]["scheda"])
+                                    giocatore["incantamenti"] = get_ench(player[username])
                                     if "pet" in player[username]:
                                         giocatore["animale"] = player[username]["pet"]
-                                    matx = 0
-                                    for pl in clan[user["team"]]["last"]:
-                                        elapsed = time.time() - clan[user["team"]]["last"][pl]
-                                        if elapsed < 301 and username != pl:
-                                            matx += 1
-                                            
+                                    matx, omini_reali, giallini_attivi, messaggio_giallo = calcola_omini_assalto(
+                                        giocatore, username, clan[user["team"]]["last"]
+                                    )
+
                                     serv = matx
-                                    if matx < 2 and giocatore["set"] == 'Eroe caduto':
-                                        serv += 1
+                                    # Anima della festa potenzia solo il contributo di last.
+                                    if giocatore.get("set") == "Anima della festa":
+                                        serv *= proc_val("Anima della festa", "assalto", "last", "moltiplicatore")
+                                    if matx < proc_val("Eroe caduto", "assalto", "supporto_clan", "compagni_soglia") and giocatore["set"] == 'Eroe caduto':
+                                        serv += proc_val("Eroe caduto", "assalto", "supporto_clan", "serv_bonus_nft")
                                         
                                     if giocatore["set"] == 'Eroe della rivolta':
-                                        serv = serv * 1.2
-                                    if player[username]["setta"]["benedizione"] == 'Orso polare' and  matx > 2:
+                                        serv = serv * proc_val("Eroe della rivolta", "assalto", "supporto_clan", "serv_mul")
+                                    if player[username]["setta"]["benedizione"] == 'Orso polare' and matx > 2:
                                         
-                                        a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
+                                        a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"] /100))
                                         serv += (a/4)
-                                    if player[username]["setta"]["benedizione"] == 'Kaimano' and  matx <= 2:
-                                        a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
+                                    if player[username]["setta"]["benedizione"] == 'Kaimano' and matx <= 2:
+                                        a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"] /100))
                                         serv += (a/4)
-                                    
                                     bostabile = ["def", "atk", "agi"]
                                     for stat in bostabile:
     
@@ -1486,7 +1200,7 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                         
                                     classe(giocatore,giocatore["set"],bonus)
                                     
-                                    output = assedio(player,
+                                    output = messaggio_giallo + assedio(player,
                                         giocatore,
                                         nemico,
                                         target,
@@ -1497,7 +1211,9 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                         clan[clan[user["team"]]["inguerra"]]["setting"]
                                         
                                     )
-                                    output += f"\n{matx} persone assaltano con te!"
+                                    output += f"\n{omini_reali} persone assaltano con te!"
+                                    if giallini_attivi:
+                                        output += f" (+{giallini_attivi} giallini attivi)"
                                     player[username]["aigettoni"]["assalti"] += 1
                                     if player[username]["aigettoni"]["assalti"] >= 70:
                                         try:
@@ -1635,10 +1351,7 @@ async def muoveeere(scelta,location,player,message,app, username,trader):
         now = time.time()
 
         elapsed = now - other_time
-        ccc = 3600
-        if player[username]["setta"]["benedizione"] == "Verme delle sabbie":
-            a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
-            ccc *= 1 - (a/100)
+        ccc = tempo_movimento_corrente(player, username, trader)
         
         if elapsed > ccc:
             if scelta in move[player[username]["location"]] or player[username]["location"] == "Hub":
@@ -1663,7 +1376,7 @@ async def muoveeere(scelta,location,player,message,app, username,trader):
             await app.edit_message_text(
                             chat_id=message.message.chat.id,
                             message_id=message.message.message_id,
-                            text=f"Devi aspettare un'ora per muoverti, diciamo che circa ti manca {tempo} ore!",
+                            text=f"Devi aspettare ancora {tempo} per muoverti!",
                     ) 
 
 async def commerciante_inline(scelta,player,username,app,message):
@@ -1992,9 +1705,9 @@ async def bossata(scelta,player,username,app,message,last_boss,inabilitati,armi,
                         user1 = copy.deepcopy(player[username]["scheda"])
                         user2 = copy.deepcopy(Boss[scelta])
                         if user1["set"] == "Paladino":
-                            user1["Scudo"] = 1000
+                            user1["Scudo"] = proc_val("Paladino", "boss", "scudo", "hp_scudo")
                         if user1["set"] == "Serial killer":
-                            user2["hp"] = round(user2["hp"] * 0.75)
+                            user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
 
                         controllo_effetti_sfida(username,player)
                         bostabile = ["hp", "def", "atk", "agi"]
@@ -2286,869 +1999,24 @@ frasi = {"miss":{
 
 }}
 
-def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, setting = dict()):
-    player["fatto"] = 0
-    nome = player["Nome"]
-    set = player.get("set",None)
-    bonus = {"agi": 0, "atk": 0, "def": 0}
-    anello = player["anello"]
-    defense = player["def"]
-    dps = player["atk"]
-    agi = player["agi"]
-    effetti = player["boost"]["assalto"]
-    text = "Inizia il turno d'assedio!\n"
-    if player["anello"] == "Anello perfezionista":
-        random.seed(PROC_ANELLI["Anello perfezionista"]["generale"]["seed"])
-    num = random.random()
-    bacon = False
-    necron = False
-    if "nucleo" in clan[team]:
-        nuc = clan[team]["nucleo"]
-        text += f"\nIl nucleo {nuc} sprigiona la sua forza!\n\n"
-        
-        if nuc not in nuclei:
-            print(nuc)
-        elif nuc == "Nucleo elettrico instabile":
-                player["agi"] += 25
-        elif nuc == "Nucleo marittimo instabile":
-                player["hp"] += 300
-        elif nuc == "Nucleo demoniaco instabile":
-                player["atk"] += 185
-        elif nuc == "Nucleo terrestre instabile":
-                player["def"] += 185
-        elif nuc == "Nucleo selvaggio instabile":
-                player["agi"] += 5
-                player["hp"] += 30
-                player["atk"] += 25
-                player["def"] += 25
-        elif clan[team]["nucleo"] == "Nucleo di bacon instabile":
-                bacon = True
-        elif nuc == "Nucleo Necron instabile" and 0.08 > num:
-            necron = True
+# assedio() spostato in turno_assalto.py
 
-    if meteo in ["Arieggiato","Caldo infernale","Caldo torrido","Tempesta","Arcobaleno","Pioggia"]:
-        if meteo == 'Caldo infernale':
-            bonus["agi"] -= 30
-            text += "Il caldo sovraccarica le difese!\n"
-            if set == "Re del raaave":
-                bonus["agi"] -= 30
-        elif meteo == 'Caldo torrido':
-            bonus["atk"] -= 50
-            text += "Il caldo blocca le difese!\n"
-            if set == "Re del raaave":
-                bonus["atk"] -= 100
-        elif meteo == 'Tempesta':
-            bonus["agi"] += 30
-            text += f"La tempesta blocca {nome} a terra!\n"
-        elif meteo == 'Pioggia':
-            bonus["atk"] += 50
-            text += f"La pioggia raffredda {nome}!\n"
-        elif meteo == 'Arcobaleno':
-            text += f"Sia {nome} che le difese si potenziano per il meteo!"
-            player["atk"] += 75
-            bonus["atk"] += 75
-            if set == "Re del raaave":
-                player["atk"] += 100
-        elif meteo == "Arieggiato":
-            text += f"Il meteo è troppo forte, {nome} non riesce a tenere il proprio equip!\n"
-            set = None
-    
-    if set != None:
-        num = random.random()
-        if set == "Inferno risvegliato":
-            bonus["atk"] += 100
-            player["atk"] += 100
-        elif set == "Thunderlord" and proc_ok(num, set, "assalto", "tuono"):
-            for g in range(proc_val(set, "assalto", "tuono", "colpi")):
-                try:
-                    news = random.choice(list(nemico))
-                    if nemico[news]["hp"] < proc_val(set, "assalto", "tuono", "hp_min"):
-                        break
-                    
-                    danno_tuono = proc_val(set, "assalto", "tuono", "danno")
-                    nemico[news]["hp"] -= danno_tuono
-                    
-                    text += f"\n**{nome} evoca un tuono e infligge {danno_tuono} danni a {news}!**\n"
-                    player["fatto"] += danno_tuono
-                except:
-                    break
-        
-        elif set == 'Lanciatore olimpico' and proc_ok(num, set, "assalto", "tridente"):
-            if nemico[target]["hp"] > proc_val(set, "assalto", "tridente", "hp_min"):
-                nemico[target]["hp"] -= proc_val(set, "assalto", "tridente", "danno")
-                text += f"{nome} lancia il tridente fortissimo e colpisce {target}!\n"
-        elif (set == "Cercatore di reliquie" and proc_ok(num, set, "assalto", "cannoncino") and target == "Cannoncino"):
-            text += "__Oddio una reliquia GIGANTE!__\n"
-            player["def"] += proc_val(set, "assalto", "cannoncino", "def")
-
-        elif set == "Manipolatore di morte" and proc_ok(num, set, "assalto", "distrazione"):
-            text += "__Andate miei cari, distraete le difese!__\n"
-            player["agi"] += proc_val(set, "assalto", "distrazione", "agi")
-        elif set == "Cacciatore della feccia" and proc_ok(num, set, "assalto", "massa_nemici"):
-            player["def"] += proc_val(set, "assalto", "massa_nemici", "def_per_nemico") * len(nemico)
-            player["atk"] += proc_val(set, "assalto", "massa_nemici", "atk_per_nemico") * len(nemico)
-            text += "🆙" * len(nemico) + "\n"
-    
-    num = random.random()    
-    
-    if "Bersaglio enorme" in list(nemico) and 0.2 > num:
-        if set == "Vigilante":
-            text += "__Nessuna distrazione__"
-        else:
-            target = "Bersaglio enorme"
-            if set == "Serial killer":
-                text += f"Anche se sa di aver sbagliato bersaglio {nome} è deciso ad arrivarci!"
-                player["agi"] += 30
-    
-    if "Divino" in effetti:
-        player["atk"] = player["atk"] * 10
-        player["def"] = player["def"] * 10000
-    
-    if anello != None:
-        for pl in clan[team]['membri']:
-            aniel = playerg[pl]["scheda"]["anello"]
-            if aniel in PROC_ANELLI and "aura" in PROC_ANELLI[aniel].get("assalto", {}):
-                cfg_anello = anello_cfg(aniel, "assalto", "aura")
-                stat_anello = cfg_anello["stat"]
-                valore_anello = cfg_anello["valore"]
-                moltiplicatore = 1
-                if set == "Portatore di morte":
-                    moltiplicatore = proc_val(set, "assalto", "bonus_gadget", "moltiplicatore", 2)
-                player[stat_anello] += valore_anello * moltiplicatore
-                if set == "Portatore di morte" and aniel == "Occhio del falco":
-                    text += "L'anello si raddoppia!\n"
-
-            if playerg[pl]["scheda"]["set"] == "Re dei pirati" and pl != nome:
-                dmg = round(max(20,playerg[pl]["scheda"]["atk"]//15))
-                cosa = news = random.choice(list(nemico))
-                nemico[cosa]["hp"] -= dmg
-                text += f"**I\'M IN CHARGEEE NOW, {pl} infligge {dmg} a {cosa}**\n"
-                try:
-                    clan[team]["danno"][pl] += dmg
-                except:
-                    clan[team]["danno"][pl] = dmg
-        if set == "Portatore di morte":
-            text += "I gadget si raddoppiano!\n"
-    
-    if "Fabbro incantaspade" in clan[team]["villaggio"]:
-        player["atk"] += 25 * clan[team]["villaggio"]["Fabbro incantaspade"]["lv"]
-        player["def"] += 25 * clan[team]["villaggio"]["Fabbro incantaspade"]["lv"]
-        if set == "Arciere di prima linea" and proc_ok(num, set, "assalto", "fabbro"):
-            player["atk"] += proc_val(set, "assalto", "fabbro", "atk_per_livello") * clan[team]["villaggio"]["Fabbro incantaspade"]["lv"]
-            player["def"] += proc_val(set, "assalto", "fabbro", "def_per_livello") * clan[team]["villaggio"]["Fabbro incantaspade"]["lv"]
-            text += "Fabbro potenziato dal set "
-        text += "⚔️"
-    text += "\n"
-    for difesa in order:
-        
-        if difesa in nemico:
-            text += "\n"
-            if bacon:
-                player["hp"] += 11
-            if nemico[difesa]["hp"] <= 0:
-                nemico.pop(difesa)
-            else:
-                defense = player["def"]
-                dps = player["atk"]
-                agi = player["agi"]
-                attaccon = (starmi[difesa]["atk"] + starmi[difesa]["atk"] * (nemico[difesa]["lv"] / 10) + bonus["atk"])
-                difesan = (starmi[difesa]["def"] + starmi[difesa]["def"] * (nemico[difesa]["lv"] / 10) + bonus["def"])
-                agin = (starmi[difesa]["agi"] + starmi[difesa]["agi"] * (nemico[difesa]["lv"] / 10) + bonus["agi"])
-                    
-                if set != None:
-                    num = random.random()
-                    if set == "Ultima speranza" and proc_ok(num, set, "assalto", "paura"):
-                        text += "__Il fatto che non sei morto spaventa i nemici!__\n"
-                        bonus["def"] += proc_val(set, "assalto", "paura", "bonus_def_nemico")
-                    elif set == "Macellaio":
-                        defense += player["hp"] / 20
-                    elif set == 'Spadaccino Musashi':
-                        defense = defense * 1.2                    
-                    elif set == "Proiettile":
-                        defense += 40
-                    elif set == "Illusionista" and proc_ok(num, set, "assalto", "copie"):
-                        agin += proc_val(set, "assalto", "copie", "agi_difesa")
-                        text += f"Copie di {nome} si spargono a caso!\n"
-
-                    elif set == "Uomo di classe" and proc_ok(num, set, "assalto", "spumeggiante"):
-                        dps = attaccon
-                        defense = difesan
-                        agin += proc_val(set, "assalto", "spumeggiante", "agi_difesa")
-                        text += "**Spumeggiante!**\n"
-
-                    elif set == "Maestro delle tartarughe" and proc_ok(num, set, "assalto", "carapace"):
-                        player["def"] += proc_val(set, "assalto", "carapace", "def")
-                        text += f"__{nome} sfrutta il carapace come difesa!__\n"
-
-                    elif set == "Difensore delle mareggiate" and proc_ok(num, set, "assalto", "fauna"):
-                        player["atk"] += proc_val(set, "assalto", "fauna", "atk")
-                        text += f"__{nome} viene supportato dalla fauna ittica!__\n"
-
-                    elif set == "Uomo di un tempo":
-                        player["hp"] += 5
-
-                    elif set == "Chierico" and proc_ok(num, set, "assalto", "cura"):
-                        player["hp"] += proc_val(set, "assalto", "cura", "cura")
-                        text += "__Una luce aiuta nel recupero delle forze ☦️__\n"
-
-                    elif set == "Medico improvvisato" and proc_ok(num, set, "assalto", "cura"):
-                        player["hp"] += proc_val(set, "assalto", "cura", "cura")
-                        text += "__Il totem cura un poco ☦️__\n"
-
-                    elif set == "Guaritore da campo" and proc_ok(num, set, "assalto", "cura"):
-                        player["hp"] += proc_val(set, "assalto", "cura", "cura")
-                        text += "__Della cura viene dispersa nell'aria ☦️__\n"
-
-                    elif set == "Druido della selva" and proc_ok(num, set, "assalto", "natura"):
-                        player["atk"] += proc_val(set, "assalto", "natura", "atk")
-                        player["def"] += proc_val(set, "assalto", "natura", "def")
-                        player["agi"] += proc_val(set, "assalto", "natura", "agi")
-                        text += f"__{nome} usa il potere della natura per crescere!__\n"
-
-                    elif set == "Cacciatore di bestie" and proc_ok(num, set, "assalto", "previsione"):
-                        agi += proc_val(set, "assalto", "previsione", "agi")
-                        text += f"__{nome} capisce cosa sta per succedere!__\n"
-
-                    elif set == "Vampiro" and proc_ok(num, set, "assalto", "pipistrello"):
-                        agi += proc_val(set, "assalto", "pipistrello", "agi")
-                        text += f"__{nome} si trasforma in un pipistrello per provare ad eludere le difese!__\n"
-
-                    elif set == "Ricercatore del pericolo" and proc_ok(num, set, "assalto", "adrenalina"):
-                        player["atk"] += proc_val(set, "assalto", "adrenalina", "atk")
-                        text += f"__{nome} carica con l'adrenalina il colpo!__\n"
-                    elif set == "Abitante" and proc_ok(num, set, "assalto", "alberelli"):
-                        bonus["atk"] += proc_val(set, "assalto", "alberelli", "bonus_atk_nemici")
-                        text += f"__{nome} pianta alberelli e scava buce per difendersi!__\n"
-                    elif set == "Elfo silvano" and proc_ok(num, set, "assalto", "evasione"):
-                        bonus["agi"] *= proc_val(set, "assalto", "evasione", "moltiplicatore_bonus_agi")
-                
-                if len(nemico) == 1:
-                    text += "Ormai resta poco da fare per le difese...\n\n"
-                    attaccon -= 100
-                    agin -= 10
-                    difesan -= 300
-                    if difesan < 0:
-                        difesan = 0
-                
-                if difesa == "Clone":
-                    try:
-                        cattivoni = clan[team]["inguerra"]
-                        if cattivoni == None:
-                            cattivoni = nemico["inguerra"]
-                        nomeclone = clan[cattivoni]["Sacrificio"]
-                        if nomeclone != None:
-
-                            attaccon = nemico["Clone"]["atk"]
-                            difesan = nemico["Clone"]["def"]
-                            agin = nemico["Clone"]["agi"]
-                            if setting["Clone"] == "Difensivo":
-                                agin -= 40
-                                text += f"{nomeclone} cerca di correre alla pulsantiera!\n"
-                        else:
-                            nomeclone = "Una massa informe"
-                            attaccon = 0
-                            difesan = 0
-                            agin = 0
-
-                        if set == "Ghoul" and proc_ok(num, set, "assalto", "terrore_clone"):
-                            text += f"__{nomeclone} è terrorizzato da {nome}__"
-                            attaccon += proc_val(set, "assalto", "terrore_clone", "atk_clone")
-                            difesan += proc_val(set, "assalto", "terrore_clone", "def_clone")
-                    except:
-                        nomeclone = "Una massa informe"
-                        attaccon = 0
-                        difesan = 0
-                        agin = 0
-                
-                elif difesa == "Sedimento del cucciolo" and setting["Sedimento del cucciolo"] == "Affamato":
-                    agin += 55
-                    text += "__Si sente un gorgoglio...__\n"
-                    attaccon = attaccon//1.5
-                
-                elif setting["Spuntone malefico"] == "Sotterraneo" and difesa == "Spuntone malefico":
-                    text += "Stranamente lo spuntone non è qui!\n"
-                    agin -= 25
-
-                elif setting["Stazione laser di sicurezza"] == "Difesa laser" and difesa == "Stazione laser di sicurezza":
-                    old = attaccon
-                    attaccon = difesan * 2
-                    difesan = old//2
-                    text += "La difesa laser si alza sotto la stazione!\n"
-                    
-                elif setting["Stazione laser di sicurezza"] == "Suicidio laser" and difesa == "Stazione laser di sicurezza":
-                    nemico[difesa]["hp"] -= 55
-                    attaccon = round(attaccon * 2.5)
-                    agin -= 26
-                    
-                    text += "La torre laser si sovraccarica!\n"
-                
-                colpito = round(agi - (agin / 2) + 1)
-                
-                if colpito > random.randint(0, 102):
-                    if setting["Sedimento del cucciolo"] == "Affamato" and difesa == "Sedimento del cucciolo":
-                        text += "Il cucciolo di drago sta mangiando altro..\n"
-                    elif setting["Spuntone malefico"] == "Sotterraneo" and difesa == "Spuntone malefico":
-                        text += "No, nessuno spuntone!\n"
-                    elif setting["Chiesa"] == "Orribile" and difesa == "Chiesa":
-                        if 0.1 > num:
-                                    num = random.random()
-                                    bonus["atk"] += 250
-                                    bonus["def"] += 250
-                                    bonus["agi"] += 25
-                                    text += f"Una creatura orribile esce dalla chiesa, pronta seminare il chaos!\n"
-                        else:
-                            text += "Un antica creatura riposa nella chiesa\n"
-                    else:
-                        text += frasi["miss"][difesa]
-                    if difesa == "Muraglione extra":
-                        bonus["def"] += 5 * (nemico[difesa]["lv"] + (len(nemico)/4))
-                    elif difesa == "Spuntone malefico":
-                        text += "\n**Si apre al volo una botola sotto i tuoi piedi!**\n"
-                        for x in range(nemico[difesa]["lv"]):
-                            num = random.random()
-                            if setting["Spuntone malefico"] == "Sotterraneo":
-                                num += .2
-                            if 0.6 > num:
-                                break
-                            else:
-                                if defense < 0:
-                                    attaccon -= defense
-                                    defense = 0
-                                dannissimi = round(float(attaccon)* (100 / (50 + float(defense))* random.uniform(0.7, 1.5)))
-                                player["hp"] -= dannissimi
-                                nos = player["hp"]
-                                text += f"Cade così sul {x+1}° spuntone! ({nos})\n"                            
-                            if set == "Cavaliere delle spine" and proc_ok(num, set, "assalto", "spuntone_schivato"):
-                                text += f"\n{nome} prende spuntoni extra per la sua armatura e prosegue!\n"
-                                player["def"] += proc_val(set, "assalto", "spuntone_schivato", "def")
-                                player["atk"] += proc_val(set, "assalto", "spuntone_schivato", "atk")
-                                player["hp"] += dannissimi
-                    elif difesa == "Clone":
-                        text += f"{nomeclone} non riesce a farti nulla, ma direziona le difese verso di te!\n"
-                        bonus["atk"] += 20
-                    elif difesa == "Centrale di cura centralizzata":
-                        if set == "Ombra silenziosa" and proc_ok(num, set, "assalto", "centrale"):
-                            text += "__Arrivi giusto in tempo alla centrale prima che emetta il suo impulso e la (silenzi)!__\n"
-                            player["atk"] += proc_val(set, "assalto", "centrale", "atk")
-
-                        else:
-                            if setting["Centrale di cura centralizzata"] == "Sparsa":
-                                if set == "Assassino delle ombre" and proc_ok(num, set, "assalto", "centrale"):
-                                    text += (
-                                        f"La centrale di cura danneggia tutte le strutture!\n"
-                                    )
-                                    for dife in nemico:
-                                        if dife == "inguerra":
-                                            pass
-                                        else:
-                                            player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                            if nemico[dife]["hp"] > 50:
-                                                nemico[dife]["hp"] += -3 * int(nemico[difesa]["lv"])
-                                else:
-                                    text += (
-                                        f"La centrale cura tutte le difese!\n"
-                                    )
-                                    for dife in nemico:
-                                        if dife == "inguerra":
-                                            pass
-                                        else:
-                                            nemico[dife]["hp"] += 3 * int(nemico[difesa]["lv"])
-                            else:
-                                news = random.choice(list(nemico))
-                                if set == "Assassino delle ombre" and proc_ok(num, set, "assalto", "centrale"):
-                                    text += (
-                                        f"La centrale di cura danneggia {news}!\n"
-                                    )
-                                    for dife in nemico:
-                                        if dife == "inguerra":
-                                            pass
-                                        else:
-                                            player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                            if nemico[news]["hp"] > 50:
-                                                nemico[news]["hp"] += -3 * int(nemico[difesa]["lv"])
-                                else:
-                                    text += (
-                                        f"La centrale cura {news}!\n"
-                                    )
-                                    for dife in nemico:
-                                        if dife == "inguerra":
-                                            pass
-                                        else:
-                                            nemico[news]["hp"] += 3 * int(nemico[difesa]["lv"])
-                    
-                else:
-                    num = random.random()
-                    if "animale" in player and 0.05 > num:
-                        nima = player["animale"]
-                        player["def"] += 20
-                        text += f"{nima} si schiera con {nome} contro la difesa!\n"
-                    serve = False
-                    if set != None:
-                        if difesa == "Clone" and set == "Regina golgari" and proc_ok(num, set, "assalto", "clone"):
-                            text += "Il clone è pietrificato!\n"
-                        elif difesa == "Accampamento" and set == "Cercatore" and proc_ok(num, set, "assalto", "accampamento"):
-                            text += "__L'accampamento è pieno di cose utili!__\n\n"
-                            player["atk"] += proc_val(set, "assalto", "accampamento", "atk")
-                        
-                        elif difesa == "Spaventapasseri ornamentale" and set == "Scudiero del boschetto":
-                            text += (f"Lo spaventapasseri inizia a muoversi e aiutare {nome}!\n")
-                            player["atk"] += proc_val(set, "assalto", "spaventapasseri", "atk")
-                            player["def"] += proc_val(set, "assalto", "spaventapasseri", "def")
-                        
-                        elif set == "Anima oscura" and proc_ok(num, set, "assalto", "fabbro") and difesa == "Fabbro incantaspade":
-                            text += f"__Il fabbro riconosce {nome} e visto che suo fido alievo evita di menarlo fortissimo!__\n"
-                        
-                        elif set == "Campione del sole" and proc_ok(num, set, "assalto", "fabbro") and difesa == "Fabbro incantaspade":
-                            text += f"__Il fabbro nota {nome}, non si può colpire un amico! Lo si può solo armare!__\n"
-                            player["atk"] += proc_val(set, "assalto", "fabbro", "atk")
-                            player["def"] += proc_val(set, "assalto", "fabbro", "def")
-                        
-                        elif difesa == "Stazione laser di sicurezza" and set == "Contrabbandiere" and proc_ok(num, set, "assalto", "laser"):
-                            text += f"{nome} conosce benissimo questo laser, non avrà problemi!\n"
-                        
-                        elif difesa == "Cane da guardia" and set == "Juggernaut" and proc_ok(num, set, "assalto", "cane"):
-                            text += f"__Il cane non riesce a morderti a causa della tua spessa armatura!__\n"
-                        
-                        elif difesa == "Spuntone malefico" and set == "Cavaliere delle spine" and proc_ok(num, set, "assalto", "spuntone_colpito"):
-                            text += f"\n{nome} prende spuntoni extra per la sua armatura e prosegue!\n"
-                            player["def"] += proc_val(set, "assalto", "spuntone_colpito", "def")
-                        
-                        elif difesa == "Cannoncino" and set == "IppoFan" and proc_ok(num, set, "assalto", "cannoncino"):
-                            text += "__Confondi il cannone e fuggi velocissimo!__"
-                        
-                        elif difesa == "Sedimento del cucciolo" and set == "Drago" and proc_ok(num, set, "assalto", "cucciolo"):
-                            player["atk"] += proc_val(set, "assalto", "cucciolo", "atk")
-                            text += f"__Il cucciolo di drago si sveglia e amicizza con {nome}!__\n"
-                        
-                        elif difesa == "Sedimento del cucciolo" and set == "Guerriero 3D" and proc_ok(num, set, "assalto", "cucciolo"):
-                            text += f"__Il cucciolo di drago si sveglia, e spaventato da {nome} lo infiamma, ma prontamente si spegne con un secchio d'acqua!__\n"
-    
-                        elif difesa == "Sedimento del cucciolo" and set == "PiroIncantatore" and proc_ok(num, set, "assalto", "cucciolo_drago"):
-                            player["atk"] += proc_val(set, "assalto", "cucciolo_drago", "atk")
-                            text += f"__Il cucciolo di drago si sveglia ma non può usare le fiamme contro di te!__\n"
-
-                        elif difesa == "Centrale di cura centralizzata" and set == "Ombra silenziosa" and proc_ok(num, set, "assalto", "centrale"):
-                            text += "__Arrivi giusto in tempo alla centrale prima che emetta il suo impulso e la (silenzi)!__\n"
-                            player["atk"] += proc_val(set, "assalto", "centrale", "atk")
-                        elif difesa == "Centrale di cura centralizzata" and set == "Assassino delle ombre" and proc_ok(num, set, "assalto", "centrale"):
-                            if setting["Centrale di cura centralizzata"] == "Sparsa":
-                                text += f"La centrale di cura danneggia tutte le strutture!\n"
-                                for dife in nemico:
-                                    if dife == "inguerra":
-                                        pass
-                                    else:
-                                        
-                                        player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                        if nemico[dife]["hp"] > 50:
-                                            nemico[dife]["hp"] += -3 * int(nemico[difesa]["lv"])      
-                            else:
-                                
-                                news = random.choice(list(nemico))
-                                text += (
-                                        f"La centrale di cura danneggia {news}!\n"
-                                    )
-                                for dife in nemico:
-                                        if dife == "inguerra":
-                                            pass
-                                        else:
-                                            player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                            if nemico[news]["hp"] > 50:
-                                                nemico[news]["hp"] += -3 * int(nemico[difesa]["lv"])                  
-                        else:
-                            serve = True
-
-                    else:
-                        serve = True
-
-                    if player["hp"] <= 0:
-                        text += f"\n{nome} cade a terra, un granchio gigante di soccorso lo raccoglie al volo e fugge in mare velocissimo!\n"
-                        break
-                    
-                    if serve:
-                        num = random.random()
-                        if difesa != "Spaventapasseri ornamentale":
-                            if difesa == "Muraglione extra":
-                                defense *= 0.5
-                            
-                            if defense < 0:
-                                attaccon -= defense
-                                defense = 0
-                            
-                            dannissimi = round(float(attaccon)* (100 / (1 +float(defense)) * random.uniform(0.7, 1.5)))
-                            
-                            if setting["Accampamento"] == "Trappole demoralizzanti" and difesa == "Accampamento":
-                                dannissimi = dannissimi//1.3
-                            
-                            elif setting["Cane da guardia"] == "Cane rapido" and difesa == "Cane da guardia":
-                                dannissimi =round( dannissimi//1.3)
-                            elif setting["Cane da guardia"] == "Orso" and difesa == "Cane da guardia":
-                                dannissimi =round( dannissimi * 1.5)
-                            
-                            elif setting["Cannoncino"] == "Danneggiante" and difesa == "Cannoncino":
-                                dannissimi = dannissimi * 2
-                                text += "BOOM!\n"
-                            
-
-                            elif setting["Muraglione extra"] == "Infiammato" and difesa == "Muraglione extra":
-                                dannissimi += 250
-                                nemico[difesa]["hp"] -= 100
-                            
-                            if dannissimi <= 0:
-                                dannissimi = 5
-                                
-                            if setting["Fabbro incantaspade"] == "Curativo" and difesa == "Fabbro incantaspade":
-                                dannissimi = 0
-                            elif setting["Chiesa"] == "Orribile" and difesa == "Chiesa":
-                                dannissimi = 0
-                                text += "La chiesa pare contenere un antico male...\n"
-                            
-                            player["hp"] -= dannissimi
-                            nos = player["hp"]
-                        
-                        else:
-                            nos = 0
-                            dannissimi = 0
-                        try:
-                            if setting["Accampamento"] == "Trappole demoralizzanti" and difesa == "Accampamento":
-                                bonus["atk"] += 50
-                                text += f"Delle trappole escono a iosa dalle tende, infliggendo {dannissimi} danni ({nos})\n"
-                            elif setting["Chiesa"] == "Orribile" and difesa == "Chiesa":
-                                if 0.1 > num:
-                                    num = random.random()
-                                    bonus["atk"] += 250
-                                    bonus["def"] += 250
-                                    bonus["agi"] += 25
-                                    text += f"Una creatura orribile esce dalla chiesa, pronta seminare il chaos!\n"
-                            
-                            elif setting["Fabbro incantaspade"] == "Curativo" and difesa == "Fabbro incantaspade":
-                                news = random.choice(list(nemico))
-                                dannissimi = round(float(attaccon)* (100 / (1 +float(defense)) * random.uniform(0.7, 1.5)))
-                                nemico[news]["hp"] += dannissimi
-                                nos = nemico[news]["hp"]
-                                text += f"Il fabbro ripara un poco {news} per {dannissimi} hp, ne ha ora {nos}\n"
-                            
-                            elif setting["Spaventapasseri ornamentale"] == "Animato" and difesa == "Spaventapasseri ornamentale":
-                                
-                                dannissimi = round(float(attaccon)* (100 / (1 +float(defense)) * random.uniform(0.7, 1.5)))
-                                if dannissimi <= 0:
-                                    dannissimi = 5
-                                
-                                player["hp"] -= dannissimi
-                                nos = player["hp"]
-
-                                text += f"Lo spaventapasseri ti colpisce alle spalle per {dannissimi} danni!({nos})\n"
-                            
-                            else:
-                                text += frasi["preso"][difesa]%(dannissimi,nos)
-                                
-                        except:
-                            text += frasi["preso"][difesa]
-                        
-                        if difesa == "Muraglione extra":
-                            bonus["def"] += 5 * (nemico[difesa]["lv"] + (len(nemico)/4))
-                            if difesa == "Muraglione extra" and 0.1 > num:
-                                text += "__Il taglio ha fatto una brutta infezione...__\n"
-                                player["def"] -= 50
-                        elif difesa == "Spaventapasseri ornamentale" and 0.1 > num and setting["Spaventapasseri ornamentale"] != "Animato":
-                            text += "Sembra che lo spaventapasseri non sia così inutile, sta facendo cose?\n\nODDIO MA COSA SONO TUTTI QUI CORVI!"
-                            break
-                        elif difesa == "Stazione laser di sicurezza" and 0.1 > num:
-                            bonus["def"] += 10 * nemico[difesa]["lv"]
-                        elif difesa == "Cane da guardia" and 0.3 > num and setting["Cane da guardia"] != "Orso":
-                            text += f"{nome} non è abbastanza veloce ed il cane lo riinsegue,subendo così altri {dannissimi} danni!\n"
-                            player["hp"] -= dannissimi
-                            num = random.random()
-                            dannissimi = round(dannissimi//2)
-                            for g in range(4):
-                                if difesa == "Cane da guardia" and 0.5 > num and setting["Cane da guardia"] == "Cane rapido":
-                                    text += f"{nome} non è ancora abbastanza veloce ed il cane lo riinsegue,subendo così altri {dannissimi} danni!\n"
-                                    player["hp"] -= dannissimi
-                                else:
-                                    break
-
-                        elif difesa == "Cannoncino" and setting["Cannoncino"] != "Danneggiante":
-                            bonus["agi"] += 5
-                            if 0.1 > num:
-                                text += f"**Sbaglio o questo colpo ha svegliato un drago nelle circostanze?**\n"
-                                bonus["agi"] += 20
-                        
-                        elif difesa == "Spuntone malefico":
-                            bonus["def"] += 2 * nemico[difesa]["lv"]
-                        
-                        elif difesa == "Sedimento del cucciolo" and 0.1 > num:
-                            text += f"**Il drago ancora spaventato richiama la mamma, che altro che sparare fuoco, schiaccia {nome}!**\n"
-                            player["hp"] = random.randint(-2, 10)
-                        
-                        elif difesa == "Centrale di cura centralizzata":
-                            if set == "Assassino delle ombre" and num <= (proc_val(set, "assalto", "centrale", "proc_post") / 100):
-                                if setting["Centrale di cura centralizzata"] == "Sparsa":
-                                    text += (
-                                        f"La centrale di cura danneggia tutte le strutture!\n"
-                                    )
-                                    for dife in nemico:
-                                        if dife == "inguerra":
-                                            pass
-                                        else:
-                                            player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                            if nemico[dife]["hp"] > 50:
-                                                nemico[dife]["hp"] += -3 * int(nemico[difesa]["lv"])
-                                else:
-                                    news = random.choice(list(nemico))
-                                    text += (
-                                            f"La centrale di cura danneggia {news}!\n"
-                                        )
-                                    for dife in nemico:
-                                            if dife == "inguerra":
-                                                pass
-                                            else:
-                                                nemico[news]["hp"] += -3 * int(nemico[difesa]["lv"])
-                            else:
-                                if setting["Centrale di cura centralizzata"] == "Sparsa":
-                                    text += "Cure a non finire sgorgano per l'intero villaggio!\n"
-                                    for dife in nemico:
-                                        if dife == "inguerra":
-                                            pass
-                                        else:
-                                            
-                                            player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                            if nemico[dife]["hp"] > 50:
-                                                nemico[dife]["hp"] += 3 * int(nemico[difesa]["lv"])        
-                                else:
-                                    news = random.choice(list(nemico))
-                                    text += (
-                                            f"La centrale di cura cura {news}!\n"
-                                        )
-                                    for dife in nemico:
-                                            if dife == "inguerra":
-                                                pass
-                                            else:
-                                                nemico[news]["hp"] += 3 * int(nemico[difesa]["lv"])
-                    
-                    if set != None:
-                        if set == "Sopravvissuto" and proc_ok(num, set, "assalto", "sopravvive"):
-                            text += "Sopravvissuto ancora!\n"
-                            player["atk"] += dannissimi / proc_val(set, "assalto", "sopravvive", "atk_divisore")
-                        elif set == "Sanguinolento" and proc_ok(num, set, "assalto", "sangue"):
-                            player["atk"] += dannissimi / proc_val(set, "assalto", "sangue", "divisore_atk")
-                            player["def"] += dannissimi / proc_val(set, "assalto", "sangue", "divisore_def")
-                            text += f"**{nome} si potenzia con il sangue sul campo di battaglia!**\n"
-
-                        elif set == "Orrido" and proc_ok(num, set, "assalto", "sgignolo"):
-                            nemico[difesa]["hp"] -= proc_val(set, "assalto", "sgignolo", "danno")
-                            text += f"**{nome} non riesce a tenere sgignolo, infligge 33 danni alla difesa!**\n"
-                            player["fatto"] += proc_val(set, "assalto", "sgignolo", "danno")
-                    
-                    
-                if player["hp"] <= 0:
-                    text += f"\n{nome} cade a terra, un granchio gigante di soccorso lo raccoglie al volo e fugge in mare velocissimo!\n"                        
-                    break   
-                
-                if difesa == target:
-                        num = random.random()
-                        
-                        
-                        if set == "Bug Abuser" and proc_ok(num, set, "assalto", "target"):
-                            num = random.random()
-                            if num < (proc_val(set, "assalto", "target", "s1") / 100):
-                                text += f"__A me orripilante creatura!__\n"
-                                dps += proc_val(set, "assalto", "target", "dps1")
-                            elif num < (proc_val(set, "assalto", "target", "s2") / 100):
-                                text += f"__{nome} grazie al suo cannoncino copisce fortissimo il Cannoncino!__\n"
-                                dps += proc_val(set, "assalto", "target", "dps2")
-                            elif num < (proc_val(set, "assalto", "target", "s3") / 100):
-                                text += f"__La maledizione di {nome} si presenta!__\n"
-                                cura = round((player["hp"] * proc_val(set, "assalto", "target", "percento_hp")) / 100)
-                                dps += cura
-                            elif num < (proc_val(set, "assalto", "target", "s4") / 100):
-                                text += "__La spada beta si attiva!__\n"
-                                dps += proc_val(set, "assalto", "target", "dps4")
-                            else:
-                                text += f"__{nome} becca inoltre in pieno il draghetto!__\n"
-                                dps += proc_val(set, "assalto", "target", "dps5")
-
-                        elif set == "Betatester" and proc_ok(num, set, "assalto", "spada_beta"):
-                            text += "__La spada beta si attiva!__\n"
-                            dps += proc_val(set, "assalto", "spada_beta", "dps")
-
-                        elif set == "Maledetto" and proc_ok(num, set, "assalto", "maledizione"):
-                            text += f"__La maledizione di {nome} si presenta!__\n"
-                            cura = round((player["hp"] * proc_val(set, "assalto", "maledizione", "percento_hp")) / 100)
-                            dps += cura
-
-                        elif (set == "Crociato" and target == "Muraglione extra" and proc_ok(num, set, "assalto", "muraglione")):
-                            text += f"__{nome} grazie al potere della luce incendia questo blocco!__\n"
-                            dps += dps + dps + dps + dps
-
-                        elif (set == "Primo alla bandiera" and target == "Cannoncino" and proc_ok(num, set, "assalto", "cannoncino")):
-                            text += f"__{nome} grazie al suo cannoncino copisce fortissimo il Cannoncino!__\n"
-                            dps += proc_val(set, "assalto", "cannoncino", "dps")
-
-                        elif (
-                            set == "Ice and fire"
-                            and target == "Sedimento del cucciolo"
-                            and proc_ok(num, set, "assalto", "drago_scaccia_drago")
-                        ):
-                            text += f"__Drago scaccia drago!__\n"
-                            dps += proc_val(set, "assalto", "drago_scaccia_drago", "dps")
-
-                        elif (
-                            set == "Cacciatore"
-                            and target == "Sedimento del cucciolo"
-                            and proc_ok(num, set, "assalto", "draghetto")
-                        ):
-                            text += f"__{nome} becca inoltre in pieno il draghetto!__\n"
-                            dps += proc_val(set, "assalto", "draghetto", "dps")
-
-                        elif (
-                            set == "Spacca Mostri"
-                            and target == "Clone"
-                            and proc_ok(num, set, "assalto", "clone")
-                        ):
-                            text += f"__A me orripilante creatura!__\n"
-                            dps += proc_val(set, "assalto", "clone", "dps")
-                        if difesan < 0:
-                            dps -= difesan
-                            difesan = 0
-                        dannissimi = round(float(dps) * (100 / (float(1 + difesan)) * random.uniform(0.7, 1.3)))
-
-                        if set == "Cavaliere d'argento":
-                            dannissimi += 15
-
-                        elif set == "Orrido":
-                            dannissimi = proc_val(set, "assalto", "sgignolo", "danno")
-                        player["fatto"] += dannissimi
-                        
-                        if dannissimi <= 0:
-                            dannissimi *= -1
-                        num = random.random()
-                        if setting["Bersaglio enorme"] == "Movibile" and num >= 0.3 and target == "Bersaglio enorme":
-                            dannissimi = 0
-                            text += "**Il bersaglio si sposta all'ultimo!**\n"
-                        
-                        if setting["Bersaglio enorme"] == "Movibile" and target == "Bersaglio enorme":
-                            dannissimi *= 4
-                        
-                        try:
-                            nemico[difesa]["hp"] -= dannissimi
-                            nos = nemico[difesa]["hp"]
-
-                            text += f"\n**{nome} arriva al bersaglio, il {difesa}, infliggendo {dannissimi} ({nos}) danni alla struttura!**\n"
-                        
-                        except Exception as e:
-                            print(f"{e}, Assalto nel danno")
-                        if nemico[difesa]["hp"] <= 0:
-                            nemico.pop(difesa)
-                            text += "**E' andata!!**\n"
-                        if set == "Fire lord":
-                            cfg = proc_cfg(set, "assalto", "catena")
-                            for x in range(cfg["tentativi"]):
-                                num = random.random()
-                                if num < (cfg["stop_proc"] / 100):
-                                    break
-                                else:
-                                    try:
-                                        news = random.choice(list(nemico))
-                                        if nemico[news]["hp"] < cfg["hp_min"]:
-                                            break
-                                        nemico[news]["hp"] -= cfg["danno"]
-
-                                        nos = nemico[difesa]["hp"]
-                                        text += f"\n**{nome} impugna il suo maglio fiammeggiante e infligge {cfg['danno']} danni anche a {news}, che nulla blocchi la sua furia!**\n"
-                                        if nemico[news]["hp"] <= 0:
-                                            nemico.pop(news)
-                                            text += "**E' andata!!**\n"
-                                        
-                                        player["fatto"] += cfg["danno"]
-                                    except:
-                                        break
-
-                        elif set == "Shogun moderno" and proc_ok(num, set, "assalto", "doppio_colpo"):
-                            if difesan < 0:
-                                dps -= difesan
-                                difesan = 0
-                            dannissimi = round(
-                                float(dps)
-                                * (100 / (proc_val(set, "assalto", "doppio_colpo", "denominatore") + float(1 + difesan)) * random.uniform(proc_val(set, "assalto", "doppio_colpo", "random_min"), proc_val(set, "assalto", "doppio_colpo", "random_max")))
-                            )
-                            nemico[difesa]["hp"] -= dannissimi
-                            nos = nemico[difesa]["hp"]
-                            text += f"\n**DOPPIO COLPO!\nInfligge {dannissimi} ({nos}) danni alla struttura!**\n"
-                            player["fatto"] += dannissimi
-                        
-                        elif set == "Pazzoide glamour" and proc_ok(num, set, "assalto", "cura_target"):
-                            player["hp"] += dannissimi
-                            text += "Pazzesko!\n"
-
-                        elif set == "Combattente 2D" and proc_ok(num, set, "assalto", "raggio_lunare"):
-                            if difesan < 0:
-                                dps -= difesan
-                                difesan = 0
-                            dannissimi = round(
-                                float(dps)
-                                * (100 / (proc_val(set, "assalto", "raggio_lunare", "denominatore") + float(1 + difesan)) * random.uniform(proc_val(set, "assalto", "raggio_lunare", "random_min"), proc_val(set, "assalto", "raggio_lunare", "random_max")))
-                            )
-                            nemico[difesa]["hp"] -= dannissimi
-                            nos = nemico[difesa]["hp"]
-                            text += f"\n**Un raggio lunare colpisce {difesa}, infliggendo {dannissimi} ({nos}) danni alla struttura!**\n"
-                            player["fatto"] += dannissimi
-                        
-                        if anello == "Carica mobile" and anello_ok(num, anello, "assalto", "esplosione"):
-                            dannissimi = random.randint(
-                                anello_val(anello, "assalto", "esplosione", "danno_min"),
-                                anello_val(anello, "assalto", "esplosione", "danno_max"),
-                            )
-                            try:
-                                nemico[difesa]["hp"] -= dannissimi
-                            except:
-                                pass
-                            nos = nemico[difesa]["hp"]
-                            text += f"\n**BOOOOM({dannissimi})!**\n"
-                            player["fatto"] += dannissimi
-                
-                if set == "Cultista pazzo" and proc_ok(num, set, "assalto", "ultimo_colpo"):
-                        num = random.random()
-                        news = random.choice(list(nemico))
-                        if nemico[news]["hp"] > proc_val(set, "assalto", "ultimo_colpo", "hp_min"):
-                            danno_follia = proc_val(set, "assalto", "ultimo_colpo", "danno")
-                            nemico[news]["hp"] -= danno_follia
-                            text += f"\n__{nome} prima di terminare del tutto, con un colpo di follia, infligge {danno_follia} danni a {news}!__\n"
-                            
-                        player["fatto"] += proc_val(set, "assalto", "ultimo_colpo", "danno")
-    num = random.random()
-    if set == "Mariachi" and player["hp"] <= 0 and proc_ok(num, set, "assalto", "resurrezione"):
-        text += f"\n**Questa disfatta non basta per far desistere {nome}, che anzi si rialza pronto a combattere!\n"
-        player["hp"] = proc_val(set, "assalto", "resurrezione", "hp")
-
-    elif necron and player["hp"] <= 0:
-        text += "\n**Il nucleo necron sprigiona un aura oscura che riporta in vita il malcapitato, per ora...**"
-        player["hp"] = 1000
-
-    elif (set == "Guardiano del passaggio" and player["hp"] <= 0 and proc_ok(num, set, "assalto", "resurrezione")):
-        text += f"\n**{nome} ritorna dalla morte, pronto a combattere ancora!\n"
-        player["hp"] = 1000
-
-    elif set == "Fiamma pura" and player["hp"] <= 0 and proc_ok(num, set, "assalto", "esplosione_morte"):
-        text += f"\n{nome} esplode in un esplosione di fuoco dannegiando tutte le strutture!"
-        for dife in nemico:
-            if dife == "inguerra":
-                pass
-            else:
-                if nemico[dife]["hp"] > proc_val(set, "assalto", "esplosione_morte", "hp_min_struttura"):
-                    nemico[dife]["hp"] -= proc_val(set, "assalto", "esplosione_morte", "danno_struttura")
-            player["fatto"] += proc_val(set, "assalto", "esplosione_morte", "danno_struttura")
-
-    return text               
               
 
 async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dungeon,inabilitati,tuttov):
+    _snapshot_premi_weekend = _snapshot_premi_dungeon(player[username])
+    _supporter_nome_weekend = None
+    _snapshot_supporter_weekend = None
+    try:
+        _supporter_nome_weekend = player[username].get("supporto", {}).get("Nome")
+        if _supporter_nome_weekend and _supporter_nome_weekend != username and _supporter_nome_weekend in player:
+            _snapshot_supporter_weekend = _snapshot_premi_dungeon(player[_supporter_nome_weekend])
+    except Exception:
+        pass
     if ("Affronta" in scelta and "Boss" in player[username]["dungeon"]["mostri"]):
         other_time = last_dungeon.get(username,0)
         now = time.time() 
-        modificatore = 0
-        if evento["mod"] == "stop_dg":
-            modificatore -= 5               
-        if evento["mod"] == "più_dg":
-            modificatore += 5
+        modificatore = weekend_mod_val(evento.get("mod"), "mod_dungeon", 0)
         if username in nop:
             modificatore -= 60
         
@@ -3173,13 +2041,13 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
 
             nome2 = user2["Nome"]
             if user1["set"] == "Paladino":
-                user1["Scudo"] = 200
+                user1["Scudo"] = proc_val("Paladino", "dungeon", "scudo", "hp_scudo")
             if user2["set"] == "Paladino":
-                user2["Scudo"] = 200
+                user2["Scudo"] = proc_val("Paladino", "dungeon", "scudo", "hp_scudo")
             if user1["set"] == "Serial killer":
-                user2["hp"] = round(user2["hp"] * 0.75)
+                user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
             if user2["set"] == "Serial killer":
-                user1["hp"] = round(user1["hp"] * 0.75)
+                user1["hp"] = round(user1["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
             if "supporto" in player[username]:
                 if nome1 != player[username]["supporto"]["Nome"]:
                     user3 = copy.deepcopy(player[username]["supporto"])
@@ -3187,9 +2055,9 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
                     nome3 = user3["Nome"]
                     user3["fatto"] = 0
                     if user3["set"] == "Paladino":
-                        user3["Scudo"] = 200
+                        user3["Scudo"] = proc_val("Paladino", "dungeon", "scudo", "hp_scudo")
                     if user3["set"] == "Serial killer":
-                        user2["hp"] = round(user2["hp"] * 0.75)
+                        user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
                     classe(user3,user3["set"],bonus)
                 else:
                     player[username].pop("supporto")
@@ -3214,15 +2082,17 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
                     )
                 )
 
+            _applica_stat_dungeon_evento(user2, evento)
+
             if "supporto" in player[username]:
                 player[username].pop("supporto")
 
                 text = f"{nome1} incontri {nome2}, un enorme boss, nel dungeon!\nMa riesce ad evocare {nome3} di supporto!\n\n\n"
                 if 'Evocabilità' in user3["incantamenti"]:
                     text += "Evocazione bomba!\n"
-                    user1["atk"] += 40
-                    user1["def"] += 40
-                    user1["agi"] += 10
+                    user1["atk"] += incantesimo_val("Evocabilità", "dungeon", "supporto", "atk")
+                    user1["def"] += incantesimo_val("Evocabilità", "dungeon", "supporto", "def")
+                    user1["agi"] += incantesimo_val("Evocabilità", "dungeon", "supporto", "agi")
                 x = 0
                 while True:
                     x += 1
@@ -3423,15 +2293,16 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
 
 
 
+    _duplica_premi_dungeon_da_snapshot(player[username], _snapshot_premi_weekend, evento)
+    if _snapshot_supporter_weekend is not None and _supporter_nome_weekend in player:
+        _duplica_premi_dungeon_da_snapshot(player[_supporter_nome_weekend], _snapshot_supporter_weekend, evento)
+
 async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dungeon,nemici,inabilitati,trader):
+    _snapshot_premi_weekend = _snapshot_premi_dungeon(player[username])
     if scelta in nemici:
         other_time = last_dungeon.get(username,0)
         now = time.time() 
-        modificatore = 0
-        if evento["mod"] == "stop_dg":
-            modificatore -= 5                
-        if evento["mod"] == "più_dg":
-            modificatore += 5
+        modificatore = weekend_mod_val(evento.get("mod"), "mod_dungeon", 0)
         if username in nop:
             modificatore -= 60
         if player[username]["setta"]["benedizione"] == "Giaguaro":
@@ -3452,13 +2323,13 @@ async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dun
             user1 = copy.deepcopy(player[username]["scheda"])
             user2 = copy.deepcopy(nemici[scelta])
             if user1["set"] == "Paladino":
-                user1["Scudo"] = 200
+                user1["Scudo"] = proc_val("Paladino", "dungeon", "scudo", "hp_scudo")
             if user2["set"] == "Paladino":
-                user2["Scudo"] = 200
+                user2["Scudo"] = proc_val("Paladino", "dungeon", "scudo", "hp_scudo")
             if user1["set"] == "Serial killer":
-                user2["hp"] = round(user2["hp"] * 0.75)
+                user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
             if user2["set"] == "Serial killer":
-                user1["hp"] -= 150
+                user1["hp"] -= proc_val("Serial killer", "dungeon", "contro_serial", "danno")
             controllo_effetti_sfida(username,player)
             inizio = user1["hp"]
             user1["hp"] -= player[username]["dungeon"]["danno"]
@@ -3477,6 +2348,7 @@ async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dun
             * (player[username]["dungeon"]["piano"] / 8)
                     )
                 )
+            _applica_stat_dungeon_evento(user2, evento)
             user1["incantamenti"] = get_ench(player[username])
             user2["incantamenti"] = []
             text = f"{nome1} incontri {nome2} nel dungeon!\n\n"
@@ -3570,14 +2442,288 @@ async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dun
 
 
 
+    _duplica_premi_dungeon_da_snapshot(player[username], _snapshot_premi_weekend, evento)
+
+ARENA_MATCH_TIMEOUT = 600
+ARENA_BOT_NAME = "Ermenegildo"
+
+def _arena_round(scheda):
+    return int(scheda.get("W", 0)) + int(scheda.get("L", 0))
+
+def _arena_coda(trader):
+    coda = trader.get("arena_matchmaking")
+    if not isinstance(coda, dict):
+        coda = {}
+        trader["arena_matchmaking"] = coda
+    return coda
+
+def _arena_base_item(item):
+    if item is None:
+        return None
+    return str(item).split(" LV")[0]
+
+def _arena_incrementa_livello_scelta(item):
+    try:
+        base, livello = item.rsplit(" LV", 1)
+        return f"{base} LV{int(livello) + 1}"
+    except Exception:
+        return item
+
+def _arena_aggiorna_set_bot(scheda, classi):
+    arma = scheda.get("arma")
+    protezione = scheda.get("protezione")
+    if arma is None or protezione is None:
+        return
+
+    to_c = [_arena_base_item(arma), _arena_base_item(protezione)]
+    for tipo, need in classi.items():
+        if to_c == need:
+            scheda["set"] = tipo
+
+    megaset = ['Neo blaster', 'Spada a protoni', 'Z-Saber', 'Chip terra', 'Chip fuoco', 'Chip elettro', 'Chip lunare']
+    if is_in(to_c, megaset):
+        chip = to_c[1]
+        forme = {
+            'Chip terra': "Forma terra",
+            'Chip fuoco': "Forma fuoco",
+            'Chip lunare': "Forma lunare",
+            'Chip elettro': "Forma elettro",
+        }
+        if chip in forme:
+            scheda["set"] = forme[chip]
+
+def _arena_applica_pick_bot(scheda, scelta, armi, protezioni, Approcci, classi, trader):
+    if scelta in armi:
+        scheda["set"] = None
+        scelta_effettiva = scelta
+        arma_attuale = scheda.get("arma")
+        if arma_attuale is not None:
+            if _arena_base_item(arma_attuale) == _arena_base_item(scelta):
+                scelta_effettiva = _arena_incrementa_livello_scelta(scelta)
+            unequiA(scheda, arma_attuale, armi)
+        equiA(scheda, scelta_effettiva, armi)
+
+    elif scelta in libri:
+        scheda["set"] = None
+        scheda.setdefault("incantamenti", []).append(libri[scelta]["ef"])
+        if len(scheda["incantamenti"]) > 2:
+            scheda["incantamenti"].pop(0)
+
+    elif scelta in protezioni:
+        scheda["set"] = None
+        scelta_effettiva = scelta
+        protezione_attuale = scheda.get("protezione")
+        if protezione_attuale is not None:
+            if _arena_base_item(protezione_attuale) == _arena_base_item(scelta):
+                scelta_effettiva = _arena_incrementa_livello_scelta(scelta)
+            unequiP1(scheda, protezione_attuale, protezioni)
+        equiP1(scheda, scelta_effettiva, protezioni)
+
+    elif scelta in anelli:
+        scheda["set"] = None
+        scheda["anello"] = scelta
+
+    elif scelta in Approcci:
+        scheda["set"] = None
+        scheda["Ap"] = scelta
+
+    elif scelta == "Nulla":
+        scheda["set"] = None
+        if trader.get("stagione") == "nulla per tutto":
+            scheda["set"] = random.choice(list(classi))
+
+    _arena_aggiorna_set_bot(scheda, classi)
+
+    if trader.get("stagione") == "la classe è acqua":
+        scheda["set"] = random.choice(list(classi))
+
+def _arena_opzioni_pick_bot(arenaitem, trader):
+    opzioni = take_boss(arenaitem, 3) + ["Nulla"]
+    if trader.get("stagione") == "scelta variagate":
+        opzioni += take_boss(arenaitem, 3)
+    return opzioni
+
+def _arena_genera_ermenegildo(scheda_player, arenaitem, armi, protezioni, Approcci, classi, trader):
+    partite = _arena_round(scheda_player)
+    pick_umani_teorici = 4 + partite
+    pick_bot = max(1, ((pick_umani_teorici * 120) + 99) // 100)
+
+    bot = {
+        "Nome": ARENA_BOT_NAME,
+        "hp": 1000,
+        "def": 100,
+        "atk": 100,
+        "agi": 20,
+        "int": 0,
+        "Ap": "Base",
+        "schivato": False,
+        "anello": None,
+        "protezione": None,
+        "arma": None,
+        "boost": {"sfida": {}, "assalto": {}},
+        "set": None,
+        "draw": 0,
+        "W": 0,
+        "L": 0,
+        "incantamenti": [],
+    }
+
+    for _ in range(pick_bot):
+        scelta = random.choice(_arena_opzioni_pick_bot(arenaitem, trader))
+        _arena_applica_pick_bot(bot, scelta, armi, protezioni, Approcci, classi, trader)
+
+    return bot, pick_bot
+
+def _arena_prepara_combattente(user, armi, Approcci):
+    if user.get("protezione") == "armatura sakuretsu LV0":
+        arma = user.get("arma")
+        if arma in armi:
+            for stat in ["hp", "def", "atk", "agi"]:
+                user[stat] += armi[arma][stat]
+
+    if user.get("set") == "Paladino":
+        user["Scudo"] = proc_val("Paladino", "arena", "scudo", "hp_scudo")
+
+    boost(user, Approcci)
+    user["fatto"] = 0
+    if user.get("set") in bonus:
+        classe(user, user["set"], bonus)
+    user.setdefault("incantamenti", [])
+
+async def _arena_scontro_bot(app, player, username, armi, protezioni, Approcci, classi, trader):
+    if username not in player or "arena" not in player[username]:
+        return False
+
+    scheda = player[username]["arena"]
+    if scheda.get("W", 0) >= 10 or scheda.get("L", 0) >= 3:
+        return False
+
+    arenaitem = arenamod[trader["stagione"].lower()]
+    user1 = copy.deepcopy(scheda)
+    user2, pick_bot = _arena_genera_ermenegildo(
+        scheda, arenaitem, armi, protezioni, Approcci, classi, trader
+    )
+
+    nome1 = username
+    nome2 = ARENA_BOT_NAME
+    text = (
+        f"Sfida tra {nome1} e {nome2}!\n"
+        f"{nome2} arriva con {pick_bot} pick completamente casuali.\n"
+        f"{nome1} sceglie: {user1['Ap']}, mentre {nome2} usa {user2['Ap']}!\n\n"
+    )
+
+    if user1.get("set") == "Serial killer":
+        user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
+    if user2.get("set") == "Serial killer":
+        user1["hp"] = round(user1["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
+
+    _arena_prepara_combattente(user1, armi, Approcci)
+    _arena_prepara_combattente(user2, armi, Approcci)
+
+    if user1.get("anello") == "Pegno di amicizia":
+        text += f"\nPartendo dal presupposto che {nome1} è un grande amico di {nome2}...\n"
+    if user2.get("anello") == "Pegno di amicizia":
+        text += f"\nConsiderando che {nome2} è un grande amico di {nome1}...\n"
+    if user1.get("anello") == "Fascette luminose":
+        text += f"\nEntra sul ring {nome1}!\n\n"
+    if user2.get("anello") == "Fascette luminose":
+        text += f"\nE si presenta a noi {nome2}!\n\n"
+
+    vittoria = False
+    for rip in range(1, 151):
+        text += turno(user2, user1, "eventzo")
+        if is_dead(user1):
+            vittoria = False
+            break
+        if is_dead(user2):
+            vittoria = True
+            break
+
+        text += turno(user1, user2, "eventzo")
+        if is_dead(user2):
+            vittoria = True
+            break
+        if is_dead(user1):
+            vittoria = False
+            break
+
+        if rip == 150:
+            text += f"\nLa battaglia ha stremato {nome1}, che cade a terra sfinito!\n"
+            vittoria = False
+
+    scheda = player[username]["arena"]
+    if vittoria:
+        scheda["W"] += 1
+        esito = f"\nHai così vinto un draft contro {nome2}!\nSei a {scheda['W']} win!"
+    else:
+        scheda["L"] += 1
+        esito = f"\nHai perso contro {nome2}, migliorati però con questo draft!\nSei a {scheda['L']} perse!"
+    scheda["draw"] += 1
+
+    if len(text) >= 3500:
+        text = text[:1500] + "\n...\n" + text[-2000:]
+
+    reply_markup = InlineKeyboardMarkup([
+        [InlineKeyboardButton("Avanti", callback_data="arena_Avanti")]
+    ])
+    chat_id = player[username].get("id", username)
+    pin = scheda.get("pin")
+    try:
+        await app.edit_message_text(chat_id, pin, text + esito, reply_markup=reply_markup)
+    except Exception:
+        await app.send_message(chat_id, text + esito, reply_markup=reply_markup)
+    return True
+
+async def _arena_risolvi_scaduti(app, player, armi, protezioni, Approcci, classi, trader, escludi=None):
+    coda = _arena_coda(trader)
+    ora = time.time()
+
+    for chiave, voce in list(coda.items()):
+        if not isinstance(voce, dict):
+            coda.pop(chiave, None)
+            continue
+
+        nome = voce.get("username")
+        if not nome or nome == escludi:
+            continue
+        if nome not in player or "arena" not in player[nome]:
+            coda.pop(chiave, None)
+            continue
+
+        scheda = player[nome]["arena"]
+        if str(_arena_round(scheda)) != str(chiave) or scheda.get("draw") != 0:
+            coda.pop(chiave, None)
+            continue
+        if scheda.get("W", 0) >= 10 or scheda.get("L", 0) >= 3:
+            coda.pop(chiave, None)
+            continue
+
+        try:
+            attesa = ora - float(voce.get("time", ora))
+        except Exception:
+            attesa = 0
+
+        if attesa >= ARENA_MATCH_TIMEOUT:
+            coda.pop(chiave, None)
+            await _arena_scontro_bot(app, player, nome, armi, protezioni, Approcci, classi, trader)
+
 async def arena(client, app, message, player, scelta, armi, protezioni, armieprot, Approcci, classi, trader, username):
     arenaitem = arenamod[trader["stagione"].lower()]
     megaset = ['Neo blaster', 'Spada a protoni', 'Z-Saber', 'Chip terra', 'Chip fuoco', 'Chip elettro', 'Chip lunare']
     scheda = player[username]["arena"]
     
     if scelta == "...":
-        if username == trader["arena"]:
-            await message.answer("No, tutto ok")
+        coda = _arena_coda(trader)
+        chiave = str(_arena_round(scheda))
+        voce = coda.get(chiave)
+        if isinstance(voce, dict) and voce.get("username") == username:
+            elapsed = time.time() - float(voce.get("time", time.time()))
+            if elapsed >= ARENA_MATCH_TIMEOUT:
+                coda.pop(chiave, None)
+                await _arena_scontro_bot(app, player, username, armi, protezioni, Approcci, classi, trader)
+                return
+            manca = max(0, int(ARENA_MATCH_TIMEOUT - elapsed))
+            await message.answer(f"Attendiamo ancora un avversario reale. Ermenegildo sarà disponibile tra {manca} secondi.")
         else:
             bottoni = list()
             for appz in ["Avanti"]:
@@ -3823,10 +2969,31 @@ Protezione: {prot}
 Anello: {anello}
 {inca}"""
 
-        if trader["arena"] != None and trader["arena"] != username:
+        await _arena_risolvi_scaduti(
+            app, player, armi, protezioni, Approcci, classi, trader, escludi=username
+        )
+        coda = _arena_coda(trader)
+        chiave = str(_arena_round(scheda))
+        attesa = coda.get(chiave)
+        avversario_reale = None
+        if isinstance(attesa, dict):
+            candidato = attesa.get("username")
+            if (
+                candidato
+                and candidato != username
+                and candidato in player
+                and "arena" in player[candidato]
+                and player[candidato]["arena"].get("draw") == 0
+                and str(_arena_round(player[candidato]["arena"])) == chiave
+            ):
+                avversario_reale = candidato
+            elif candidato != username:
+                coda.pop(chiave, None)
+
+        if avversario_reale is not None:
             nome1 = username
-            nome2 = trader["arena"]
-            trader["arena"] = None
+            nome2 = avversario_reale
+            coda.pop(chiave, None)
             user1 = copy.deepcopy(player[username]["arena"])
             user2 = copy.deepcopy(player[nome2]["arena"])
             approccio1 = user1["Ap"]
@@ -3854,14 +3021,14 @@ Anello: {anello}
                     pass
 
             if user1["set"] == "Paladino":
-                user1["Scudo"] = 800
+                user1["Scudo"] = proc_val("Paladino", "arena", "scudo", "hp_scudo")
 
             if user2["set"] == "Paladino":
-                    user2["Scudo"] = 800
+                    user2["Scudo"] = proc_val("Paladino", "arena", "scudo", "hp_scudo")
             if user1["set"] == "Serial killer":
-                    user2["hp"] = round(user2["hp"] * 0.75)
+                    user2["hp"] = round(user2["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
             if user2["set"] == "Serial killer":
-                    user1["hp"] = round(user1["hp"] * 0.75)
+                    user1["hp"] = round(user1["hp"] * (proc_val("Serial killer", "generale", "inizio", "hp_target_percento") / 100))
             boost(user1, Approcci)
             boost(user2, Approcci)
             user1["fatto"] = 0
@@ -3943,13 +3110,19 @@ Anello: {anello}
             
         else:
             bottoni = list()
-            trader["arena"] = username
+            voce_attuale = coda.get(chiave)
+            if not (isinstance(voce_attuale, dict) and voce_attuale.get("username") == username):
+                coda[chiave] = {"username": username, "time": time.time()}
             for appz in ["..."]:
                 bottoni.append(
                         [InlineKeyboardButton(f"{appz}", callback_data=f"arena_{appz}")]
                     )
             reply_markup = InlineKeyboardMarkup(bottoni)
-            await message.message.edit("Attendiamo un avversario!",reply_markup=reply_markup)
+            await message.message.edit(
+                f"Attendiamo un avversario con {_arena_round(scheda)} partite giocate!\n"
+                "Dopo 10 minuti potrà intervenire Ermenegildo.",
+                reply_markup=reply_markup,
+            )
 
     if scheda["W"] < 10 and scheda["L"] < 3:
 
@@ -4466,1249 +3639,35 @@ def possi(quantio):
         return False
 
 
-def turno(main, oppo,cond=None):
-    text = str()
-    nome1 = main["Nome"]
-    nome2 = oppo["Nome"]
+# turno() spostato in turno_assalto.py
 
-    anello = main["anello"]
-    anellon = oppo["anello"]
 
-    dps = main["atk"]
-    difesan = oppo["def"]
 
-    agi = main["agi"]
-    agin = oppo["agi"]
 
-    if anello == "Anello perfezionista" or anellon == "Anello perfezionista":
-            random.seed(PROC_ANELLI["Anello perfezionista"]["generale"]["seed"])
-    set = main.get("set",None)
-    setN = oppo.get("set",None)
-    
-    inte = main.get("int",0)
-    bonus = (inte * 0.02) + 0.75   
-    
-    inten = oppo.get("int",0)
-    bonusn = (inten * 0.02) + 0.75   
+def _componenti_set_faro(nome_set):
+    """Componenti regalabili dal Faro per set normali e Forme Mega."""
+    if nome_set in classi:
+        return list(classi[nome_set])
+    forme = {
+        "Forma terra": ["Neo blaster", "Spada a protoni", "Z-Saber", "Chip terra"],
+        "Forma fuoco": ["Neo blaster", "Spada a protoni", "Z-Saber", "Chip fuoco"],
+        "Forma lunare": ["Neo blaster", "Spada a protoni", "Z-Saber", "Chip lunare"],
+        "Forma elettro": ["Neo blaster", "Spada a protoni", "Z-Saber", "Chip elettro"],
+    }
+    return forme.get(nome_set, [])
 
-    dogebonus = 0
 
-    if set != None:
-        num = random.random()
-        if set == 'Cecchino modulare':
-            main["powa"] = main.get("powa", 0) + PROC_CLASSI[set]["turno"]["powa_per_turno"]
-
-            cfg = proc_cfg(set, "turno", "colpo_caricato")
-            if main["powa"] >= cfg["powa_min"] and proc_ok(num, set, "turno", "colpo_caricato"):
-                text += "Colpo caricato!\n"
-                dps += cfg["dps"]
-
-            cfg = proc_cfg(set, "turno", "colpo_preciso")
-            if main["powa"] >= cfg["powa_min"] and proc_ok(num, set, "turno", "colpo_preciso"):
-                text += "Colpo preciso!\n"
-                agi += cfg["agi"]
-
-            cfg = proc_cfg(set, "turno", "colpo_possente")
-            if main["powa"] >= cfg["powa_min"] and proc_ok(num, set, "turno", "colpo_possente"):
-                text += "Colpo possente!\n"
-                dps += cfg["dps"]
-
-            cfg = proc_cfg(set, "turno", "cura_rapida")
-            if main["powa"] >= cfg["powa_min"] and proc_ok(num, set, "turno", "cura_rapida"):
-                text += "Cura rapida!\n"
-                main["hp"] += cfg["cura"]
-
-            cfg = proc_cfg(set, "turno", "colpo_perforante")
-            if main["powa"] >= cfg["powa_min"] and proc_ok(num, set, "turno", "colpo_perforante"):
-                text += "Colpo perforante!\n"
-                difesan = cfg["difesa_target"]
-        elif set == "Inferno risvegliato":
-            main["atk"] += 200
-            oppo["atk"] += 200
-        elif set == "MusicoSciamano":
-            setN = "MusicoSciamano"
-        elif set == "Uomo di un tempo":
-            main["hp"] += 22
-        elif set == "Juggernaut":
-            agin *= 0.3
-        elif set == "Corvo":
-            dogebonus -= 10
-        elif set == "Scudiero del boschett" and main["fatto"] <= 300:
-            main["hp"] += 30
-            main["atk"] += 10
-            main["def"] += 10
-            main["agi"] += 3
-        elif set == "Uomo di classe" and proc_ok(num, set, "turno", "spumeggiante_attacco"):
-            if setN == "Ombra silenziosa" and proc_ok(num, setN, "turno", "silenzio_spumeggiante"):
-                text += "(Silenziato)\n"
-            else:
-                text += "**Spumeggiante!**\n"
-                dps = oppo["atk"]
-        elif set == "Chierico" and proc_ok(num, set, "turno", "cura") and main["hp"] <= proc_val(set, "turno", "cura", "hp_max"):
-            cura = round((main["hp"] * proc_val(set, "turno", "cura", "cura_percento_hp")) / 100) + proc_val(set, "turno", "cura", "cura_base")
-            main["hp"] += cura
-            text += f"__Cura automatica di {nome1}, {cura} hp presi ✝️__\n"
-        elif set == "Vigilante" and proc_ok(num, set, "turno", "cambio_proiettili_attacco"):
-            old = main["atk"]
-            main["atk"] = main["def"] + proc_val(set, "turno", "cambio_proiettili_attacco", "bonus_difesa")
-            main["def"] = old
-            text += f"__{nome1} cambia proiettili__\n"
-        elif set == "Maestro delle tartarughe" and proc_ok(num, set, "turno", "insegnamenti"):
-            difesan -= proc_val(set, "turno", "insegnamenti", "riduzione_difesa_target")
-            text += f"__{nome1} ricorda gli insegnamenti del vecchio saggio!__\n"
-        elif set == "Druido della selva" and proc_ok(num, set, "turno", "inselvatichisce"):
-            if setN == "Ombra silenziosa" and proc_ok(num, setN, "turno", "silenzio_druido"):
-                    text += "(Silenziato)\n"
-            else:
-                    main["atk"] += proc_val(set, "turno", "inselvatichisce", "atk")
-                    main["def"] += proc_val(set, "turno", "inselvatichisce", "def")
-                    main["agi"] += proc_val(set, "turno", "inselvatichisce", "agi")
-                    text += f"__{nome1} si inselvatichisce!__\n"
-        elif set == "Incantatore di controparte" and proc_ok(num, set, "turno", "potere_cosmico"):
-            if nome2 == "Franco est" or nome2 == "Fantasma del rimorso":
-                pass
-            else:
-                oppo["anello"] = random.choice(list(anellic))
-                text += f"__Mistici poteri cosmici partono da {nome1}!__\n"
-        elif set == "PiroIncantatore" and proc_ok(num, set, "turno", "golem_fuoco"):
-            agi += proc_val(set, "turno", "golem_fuoco", "agi")
-            text += f"**{nome1} evoca un golem di fuoco di supporto!**\n"
-            dps += round(main["def"] / proc_val(set, "turno", "golem_fuoco", "dps_da_def_divisore"))
-        elif set == "Arciere di prima linea" and proc_ok(num, set, "turno", "sfinimento"):
-            text += "__Il nemico è sfinito dai colpi subiti!__\n"
-            oppo["def"] += proc_val(set, "turno", "sfinimento", "def_target")
-            if difesan <= 0:
-                difesan = 1
-        elif set == "Forma elettro" and proc_ok(num, set, "turno", "chip"):
-            text += "__Chip elettro, attivazione!__\n "
-            agi += proc_val(set, "turno", "chip", "agi")
-            dps += proc_val(set, "turno", "chip", "dps")
-        elif set == "Bug Abuser" and proc_ok(num, set, "turno", "bug"):
-            if proc_ok(random.random(), set, "turno", "golem_fuoco"):
-                agi += proc_val(set, "turno", "golem_fuoco", "agi")
-                text += f"**{nome1} evoca un golem di fuoco di supporto!**\n"
-                dps += round(main["def"] / proc_val(set, "turno", "golem_fuoco", "dps_da_def_divisore"))
-            elif proc_ok(random.random(), set, "turno", "druido"):
-                main["atk"] += proc_val(set, "turno", "druido", "atk")
-                main["def"] += proc_val(set, "turno", "druido", "def")
-                main["agi"] += proc_val(set, "turno", "druido", "agi")
-                text += f"__{nome1} si inselvatichisce!__\n"
-            elif proc_ok(random.random(), set, "turno", "tartaruga"):
-                difesan -= proc_val(set, "turno", "tartaruga", "riduzione_difesa")
-                text += f"__{nome1} ricorda gli insegnamenti del vecchio saggio!__\n"
-            elif proc_ok(random.random(), set, "turno", "vigilante"):
-                old = main["atk"]
-                main["atk"] = main["def"]
-                main["def"] = old
-                text += f"__{nome1} cambia proiettili__\n"
-            elif proc_ok(random.random(), set, "turno", "chip_fuoco"):
-                text += "__Chip fuoco, attivazione!__\n "
-                dps += proc_val(set, "turno", "chip_fuoco", "dps")
-        elif set == "Ghoul" and proc_ok(num, set, "turno", "pressione"):
-            main["agi"] = oppo["agi"]
-            oppo["atk"] += proc_val(set, "turno", "pressione", "atk_target")
-            oppo["def"] += proc_val(set, "turno", "pressione", "def_target")
-            text += f"__{nome2} si sente sotto pressione, non capisce...__\n"
-        elif set == "Forma fuoco" and proc_ok(num, set, "turno", "chip"):
-            text += "__Chip fuoco, attivazione!__\n "
-            dps += proc_val(set, "turno", "chip", "dps")
-        elif set == "Portatore di morte" and proc_ok(num, set, "turno", "crescita"):
-            if setN == "Ombra silenziosa" and proc_ok(num, setN, "turno", "silenzio_crescita"):
-                    text += "(Silenziato)\n"
-            else:
-                main["atk"] += proc_val(set, "turno", "crescita", "atk")
-                main["def"] += proc_val(set, "turno", "crescita", "def")
-                main["agi"] += proc_val(set, "turno", "crescita", "agi")
-                text += f"__{nome1} cresce!__\n"      
-        elif set == "Contrabbandiere" and "carica" in oppo:
-            if proc_ok(num, set, "turno", "detonazione") or main["hp"] <= proc_val(set, "turno", "detonazione", "hp_trigger") or oppo["carica"] > proc_val(set, "turno", "detonazione", "cariche_trigger"):
-                if oppo["carica"] > 0:
-                    danno = oppo["carica"] * proc_val(set, "turno", "detonazione", "danno_per_carica")
-                    oppo["hp"] -= danno
-                    oppo["carica"] = 0
-                    text += f"\n**Le cariche pazzate sopra {nome2} esplodono!** ({danno} hp persi)\n"
-        elif set in ["Terrore delle ombre","Oracolo del buio","Ufficiale dell'oltretomba","Sciamano della verità","Dannato", "Dipper"]:
-            if "marchio" in oppo:
-                
-                cfg = proc_cfg(set, "turno", "marchio")
-                if num < (cfg.get("proc_aggiungi", 0) / 100):
-                    oppo["marchio"] += 1
-                    text += "🧿"
-                elif set == "Terrore delle ombre" and num < (cfg.get("proc_effetto", 0) / 100):
-                    text += f"I marchi di {nome2} potenziano {nome1}\n"
-                    main["atk"] += oppo["marchio"] * cfg["atk_per_marchio"]
-                    main["def"] += oppo["marchio"] * cfg["def_per_marchio"]
-                    main["agi"] += oppo["marchio"] * cfg["agi_per_marchio"]
-                    
-                elif set == "Oracolo del buio" and num < (cfg.get("proc_effetto", 0) / 100):
-                    text += f"La fine è vicina {nome2}\n"
-                    oppo["atk"] += oppo["marchio"] * cfg["atk_per_marchio"]
-                    oppo["def"] += oppo["marchio"] * cfg["def_per_marchio"]
-                    oppo["agi"] += oppo["marchio"] * cfg["agi_per_marchio"]
-                elif set == "Sciamano della verità" and num < (cfg.get("proc_effetto", 0) / 100):
-                    text += f"I marchi di {nome2} nutrono {nome1}\n"
-                    main["hp"] += oppo["marchio"] * cfg["cura_per_marchio"]
-                
-                elif set == "Dannato" and num < (cfg.get("proc_effetto", 0) / 100):
-                    text += f"{nome2} brucia sotto i marchi\n"
-                    oppo["hp"] -= oppo["marchio"] * cfg["danno_per_marchio"]
-                    
-                elif set == "Dipper" and num < (cfg.get("proc_effetto", 0) / 100) and oppo["marchio"] >= cfg["marchi_min"]:
-                    text += f"{nome2} è troppo marchiato, {nome1} riesce a sfruttare tutti i marchi\n"
-                    oppo["hp"] = round(oppo["hp"] / cfg["divisore_hp"])
-                    main["hp"] = round(main["hp"] / cfg["divisore_hp"])
-                else:
-                    pass
-            else:
-                oppo["marchio"] = 1
-        elif set == "Cacciatore di bestie" and proc_ok(num, set, "turno", "previsione_attacco"):
-            text += f"__{nome1} prevede l'azione del suo avversario!__\n"
-            agi += proc_val(set, "turno", "previsione_attacco", "agi")
-        elif set == "Ice and fire" and proc_ok(num, set, "turno", "calore"):
-            text += f"__{nome1} scalda l'ambiente circostante!__\n"
-            main["atk"] += proc_val(set, "turno", "calore", "atk")
-        elif set == "Cacciatore di uomini" and proc_ok(num, set, "turno", "trappola"):
-            text += f"__{nome2} cade in una trappola per orsi, non è un buon momento per lui__\n"
-            oppo["agi"] += proc_val(set, "turno", "trappola", "agi_target")
-    
-    if anello != None:
-        num = random.random()
-        if anello == "Un frammento del potere" and anello_ok(num, anello, "turno", "attacco"):
-            anello = anello_val(anello, "turno", "attacco", "trasforma_in")
-            text += f"**POTERE ILLIMITAAAAATO**\n"
-        elif anello == "Aura pessima":
-            difesan *= anello_val(anello, "turno", "aura", "moltiplicatore_difesa_target")
-        elif (
-            (
-                (anello == "Effige della tribe" or anello in anello_val("Effige della tribe", "turno", "cura_spettrale", "equivalenti", []))
-                and anello_ok(num, "Effige della tribe", "turno", "cura_spettrale")
-                and main["hp"] <= anello_val("Effige della tribe", "turno", "cura_spettrale", "hp_max")
-            )
-            or (
-                main["Nome"] in anello_val("Effige della tribe", "turno", "cura_spettrale", "speciali", {})
-                and num < (anello_val("Effige della tribe", "turno", "cura_spettrale", "speciali")[main["Nome"]]["proc"] / 100)
-                and main["hp"] <= anello_val("Effige della tribe", "turno", "cura_spettrale", "speciali")[main["Nome"]]["hp_max"]
-            )
-        ):
-            cura = round(round((main["hp"] * anello_val("Effige della tribe", "turno", "cura_spettrale", "cura_percento_hp")) / 100) * bonus )
-            main["hp"] += cura
-            text += f"__Antichi fantasmi aiutano {nome1} a rimettersi di {cura} punti vita ⚜️__\n"
-        elif anello == "Fanghiglia della palude" and main["hp"] >= anello_val(anello, "turno", "fango", "hp_min") and anello_ok(num, anello, "turno", "fango"):
-            if setN == "Ombra silenziosa" and proc_ok(num, setN, "turno", "silenzio_fanghiglia"):
-
-                        text += "(Silenziato)\n"
-            else:
-                        main["atk"] += round(anello_val(anello, "turno", "fango", "atk") * bonus) 
-                        main["def"] += round(anello_val(anello, "turno", "fango", "def") * bonus) 
-
-                        main["hp"] += anello_val(anello, "turno", "fango", "hp")
-
-                        text += f"**{nome1} viene ricoperto di fango e diventa mostruoso!**\n"
-        elif anello == "Elsa vitale" and anello_ok(num, anello, "turno", "crescita"):
-            if setN == "Ombra silenziosa" and proc_ok(num, setN, "turno", "silenzio_elsa"):
-
-                        text += "(Silenziato)\n"
-            else:
-                vita = main["hp"]
-                dis = round(round((vita / anello_val(anello, "turno", "crescita", "hp_divisore"))) * bonus)
-                dps += dis
-                agi += dis / anello_val(anello, "turno", "crescita", "agi_divisore")
-                text += f"**{nome1} diventa ancora più grosso!**\n"
-        
-        elif anello == "Veleno del folle" or set == "Cultista pazzo":            
-            if set == "Cultista pazzo":
-                cfg_cultista = proc_cfg(set, "turno", "veleno_folle")
-                proc_positivo = proc_ok(num, set, "turno", "veleno_folle")
-                bonus_dps = cfg_cultista["bonus_dps"]
-                malus_dps = cfg_cultista["malus_dps"]
-            else:
-                cfg_veleno = anello_cfg("Veleno del folle", "turno", "veleno")
-                proc_positivo = anello_ok(num, "Veleno del folle", "turno", "veleno")
-                bonus_dps = cfg_veleno["bonus_dps"]
-                malus_dps = cfg_veleno["malus_dps"]
-
-            if proc_positivo:
-                dps += round(bonus_dps * bonus)
-                text += f"**OgGi {nome1} eSpLoDe dI ViTa!**\n"
-            else:
-                dps -= round(malus_dps * bonus)
-                text += f"**OgGi {nome1} sI SeNtE UnO ScHiFo aSsUrDo!**\n"
-        
-        elif anello == "Guanto del falco" and anello_ok(num, anello, "turno", "falcon_punch"):
-            text += "**Falcon punch!**\n"
-            difesan = anello_val(anello, "turno", "falcon_punch", "difesa_base") - inte     
-        elif (anello == "Campanellina concentrante" or main["Nome"] in anello_val("Campanellina concentrante", "turno", "concentrazione", "nomi_equivalenti", [])) and anello_ok(num, "Campanellina concentrante", "turno", "concentrazione"):
-            text += "🎯 "
-            agi += anello_val("Campanellina concentrante", "turno", "concentrazione", "agi")
-        elif  anello == "Roccia viva" and anello_ok(num, anello, "turno", "golem"):
-            text += f"**{nome1} col potere dell'anello genera un golem di sabbia...**\n"
-            dps =round((main["def"] + anello_val(anello, "turno", "golem", "bonus_def")) * bonus)
-        elif  anello == "Vincastro" and anello_ok(num, anello, "turno", "attacco"):
-            if setN == "Ombra silenziosa" and proc_ok(num, setN, "turno", "silenzio_vincastro"):
-
-                        text += "(Silenziato)\n"
-            else:
-                difesan = anello_val(anello, "turno", "attacco", "difesa_base") - inte
-                text += f"**{nome2} grazie ad un potere mistico inizia a beeeeeelare...**\n"
-        elif anello == "Proteina brullicanti" and anello_ok(num, anello, "turno", "massa"):
-            text += f"**{nome1} raddoppia la sua massa pronto a colpire l'avversario!**\n"
-            dps += dps * anello_val(anello, "turno", "massa", "moltiplicatore_extra_dps")
-        elif (anellon == "Corna da toro" or oppo["Nome"] in anello_val("Corna da toro", "turno", "terrore", "nomi_equivalenti", [])) and anello_ok(num, "Corna da toro", "turno", "terrore"):
-            vitan = oppo["hp"]
-            rid = round(vitan / anello_val("Corna da toro", "turno", "terrore", "hp_divisore"))
-            if set == "Ombra silenziosa" and proc_ok(num, set, "turno", "silenzio_corna"):
-                text += "(Silenziato)\n"
-            else:
-                dps -= round(rid * bonusn)
-                agi -= rid / anello_val("Corna da toro", "turno", "terrore", "agi_divisore")
-                text += f"__{nome1} è terrorizzato da {nome2}!__\n"
-        elif anello == "Corteccia naturale" and anello_ok(num, anello, "turno", "crescita"):
-            main["atk"] += anello_val(anello, "turno", "crescita", "atk_base") + inte
-            main["def"] += anello_val(anello, "turno", "crescita", "def_base") + inte
-            main["agi"] += anello_val(anello, "turno", "crescita", "agi")
-            text += f"__{nome1} cresce!__\n"
-        elif anello == "Muschio Selvaggio" and anello_ok(num, anello, "turno", "selvaggio") and not any(
-            main[stat] > limite for stat, limite in anello_val(anello, "turno", "selvaggio", "limiti_stat").items()
-        ):
-            boost(main, Approcci)
-            text += f"**{nome1} diventa selvaggio!**\n"
-        elif anello == "Pozione di furia" and anello_ok(num, anello, "turno", "furia"):
-            text += f"**L'attacco di {nome1} sale in maniera esponenziale!**\n"
-            main["atk"] += (anello_val(anello, "turno", "furia", "atk_base") + inte)
-        elif anello == "Cinta del comandante" and anello_ok(num, anello, "turno", "comando"):
-            text += f"__L'attacco di {nome2} cala!__\n"
-            oppo["atk"] -= (anello_val(anello, "turno", "comando", "atk_target_base") + inte)
-        elif anellon == "Vincastro" and anello_ok(num, anellon, "turno", "difesa"):
-            text += f"__{nome1} grazie ad un potere mistico inizia a beeeeeelare...__\n"
-            dps = anello_val(anellon, "turno", "difesa", "dps")
-        elif (anellon == "Fantasmino luminoso" or nome2 in anello_val("Fantasmino luminoso", "turno", "debuff", "nomi_equivalenti", [])) and anello_ok(num, "Fantasmino luminoso", "turno", "debuff"):
-            main["agi"] += anello_val("Fantasmino luminoso", "turno", "debuff", "agi")
-            main["def"] += anello_val("Fantasmino luminoso", "turno", "debuff", "def_base") - inten
-            main["atk"] += anello_val("Fantasmino luminoso", "turno", "debuff", "atk_base") - inten
-            text += f"__{nome1} si sente stanco ed inconcludente...__\n"
-        elif anellon == "Ali di luminite" and anello_ok(num, anellon, "turno", "volo"):
-            if set == "Ombra silenziosa" and proc_ok(num, set, "turno", "silenzio_ali"):
-                    text += "(Silenziato)\n"
-            else:
-
-                    agin += anello_val(anellon, "turno", "volo", "agi_difesa")
-                    text += f"__{nome2} grazie al potere dell'anello riesce a spiccare il volo!__\n"
-
-
-
-    if setN != None:
-        num = random.random()
-        if setN == "MusicoSciamano":
-            set = "MusicoSciamano"
-        elif setN == "Cacciatore della feccia" and  oppo["fatto"] <= 300:
-            agin += 45
-            difesan += 375
-        elif setN == "Elfo silvano":
-            dogebonus += 40
-        elif setN == "Uomo di classe" and proc_ok(num, setN, "turno", "spumeggiante_difesa"):
-            text += "**Spumeggiante!**\n"
-            difesan = main["def"]
-        elif setN == "Contrabbandiere" and proc_ok(num, setN, "turno", "piazza_carica"):
-            text += "**Carica piazzzata!**\n"
-            try:
-                main["carica"] += proc_val(setN, "turno", "piazza_carica", "cariche")
-            except:
-                main["carica"] = proc_val(setN, "turno", "piazza_carica", "cariche")
-        elif setN == "Portatore di morte" and proc_ok(num, setN, "turno", "debuff_difesa"):
-            if set == "Ombra silenziosa" and proc_ok(num, set, "turno", "silenzio_portatore"):
-                text += "(Silenziato)\n"   
-            else:
-                main["agi"] += proc_val(setN, "turno", "debuff_difesa", "agi")
-                main["def"] += proc_val(setN, "turno", "debuff_difesa", "def")
-                main["atk"] += proc_val(setN, "turno", "debuff_difesa", "atk")
-                text += f"__{nome1} si sente stanco ed inconcludente...__\n"
-        elif setN == "Forma terra" and proc_ok(num, setN, "turno", "chip_difesa"):
-            text += "__Chip terra, attivazione!__\n"
-            dps += proc_val(setN, "turno", "chip_difesa", "dps")
-        elif setN == "Forma lunare" and proc_ok(num, setN, "turno", "chip_difesa"):
-            text += "__Chip lunare, attivazione!__\n"
-            main["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_main")
-            oppo["agi"] += proc_val(setN, "turno", "chip_difesa", "agi_oppo")
-        elif setN == "Regina golgari" and proc_ok(num, setN, "turno", "pietrifica"):
-            text += f"{nome2} pietrifica un poco {nome1}\n"
-            main["def"] += proc_val(setN, "turno", "pietrifica", "def_main")
-            main["atk"] += proc_val(setN, "turno", "pietrifica", "atk_main")
-            main["agi"] += proc_val(setN, "turno", "pietrifica", "agi_main")
-        elif setN == "Vigilante" and proc_ok(num, setN, "turno", "cambio_proiettili_difesa"):
-            old = main["atk"]
-            main["atk"] = main["def"]
-            main["def"] = old
-            text += f"__{nome1} cambia proiettili__\n"
-        elif setN == "Cacciatore di bestie" and proc_ok(num, setN, "turno", "previsione_difesa"):
-            text += f"__{nome2} prevede l'azione del suo avversario!__\n"
-            agin += proc_val(setN, "turno", "previsione_difesa", "agi")
-        elif setN == "Ice and fire" and proc_ok(num, setN, "turno", "gelo"):
-            text += f"__{nome2} congela l'ambiente circostante!__\n"
-            oppo["def"] += proc_val(setN, "turno", "gelo", "def")
-        
-    if anellon != None:
-        num = random.random()
-        if anellon == "Un frammento del potere" and anello_ok(num, anellon, "turno", "difesa"):
-            anello = anello_val(anellon, "turno", "difesa", "trasforma_in")
-            text += f"**POTERE ILLIMITAAAAATO**\n"
-        elif anellon == "Amuleto del protettore" and anello_ok(num, anellon, "turno", "protezione"):
-            text += f"**{nome2} raddoppia la sua massa pronto a difendere!**\n"
-            difesan += round(difesan * bonusn * anello_val(anellon, "turno", "protezione", "moltiplicatore_bonus"))
-        elif anellon == "Guanto titanico" and anello_ok(num, anellon, "turno", "difesa"):
-            text += "**Ottima difesa!**\n"
-            dps = anello_val(anellon, "turno", "difesa", "dps_base") - inten
-        elif anellon == "Stemma della rocca" and anello_ok(num, anellon, "turno", "rocca"):
-            text += f"__La difesa di {nome2} aumenta!__\n"
-            oppo["def"] += (anello_val(anellon, "turno", "rocca", "def_base") + inten)
-    
-    if main["incantamenti"] != []:
-        num = random.random()
-        if 'Urlo di drago' in main["incantamenti"] and 0.05 > num:
-            text += "ROAAR!\n"
-            oppo["terrore"] = True      
-            num = random.random()  
-        if "Mimico" in main["incantamenti"]:
-            main["incantamenti"] = oppo["incantamenti"]
-            text += f"\n**{nome1} copia gli incantamenti di {nome2}!**\n"
-            num = random.random()
-        if 'Legaccio' in main["incantamenti"] and 0.05 > num:
-            oppo["agi"] = oppo["agi"] * 0.75
-            text += f"🎋"
-            num = random.random()
-        if "Affilatezza" in main["incantamenti"] and 0.1 > num:
-            text += "⚔\n"
-            main["atk"] = main["atk"] * 1.2
-            num = random.random()
-        if "Legione" in main["incantamenti"] and "Legione" in oppo["incantamenti"]:
-            dps = dps * 10
-        
-        if "Ingrossamento" in main["incantamenti"] and 0.02 > num:
-                main["atk"] += random.randint(20,100)
-                main["agi"] += random.randint(-20,-2)
-                text += f"**L'arma di {nome1} diventa enorme**\n"  
-                num = random.random()
-                          
-        if "Icore" in main["incantamenti"] and 0.05 > num:
-            difesan = difesan * 0.6
-            text += "🟡"
-
-    if oppo["incantamenti"] != []:
-        num = random.random()
-        if "Predominio" in oppo["incantamenti"] and main["hp"] <= oppo["hp"]:
-            dps = dps * 0.8
-            agi += 30  
-               
-        if "Duraturo" in oppo["incantamenti"] and 0.1 > num:
-            difesan = difesan * 1.7
-            text += "🛡"
-            num = random.random()
-        if "Multiplo" in oppo["incantamenti"] and 0.1 > num:
-            agin += 8
-            text += f"💪"
-    
-    if setN == "Esperto di animali" and oppo["Ap"] == "Fantamsa del ritorno" and proc_ok(num, setN, "turno", "fantasma_ritorno"):
-            text += f"Il Fantamsa del ritorno spaventa {nome1}"
-            dps *= proc_val(setN, "turno", "fantasma_ritorno", "dps_mul")
-    if set == "Esperto di animali" and main["Ap"] == "Dragone delle stelle" and proc_ok(num, set, "turno", "dragone_stelle"):
-            text += f"Il Dragone delle stelle colpisce con {nome1}"
-            dps *= proc_val(set, "turno", "dragone_stelle", "dps_mul")
-    
-    possibile = possibiles(agin, agi)
-    possibile += dogebonus
-
-
-    if possibile > random.randint(0, 100):
-        text += f"{nome2} schiva il colpo di {nome1}\n"
-        oppo["schivato"] = True
-        if anello == "Coda demoniaca":
-            oppo["lastD"] = anello_val(anello, "turno", "schivata", "lastD_reset")
-        mod = 0
-        danno = 0
-    
-    else:
-        oppo["schivato"] = False
-        num = random.random()
-        mod = random.uniform(0.8, 1.2)
-        if main["schivato"] == True:
-            mod *= 1.3
-            if anellon == "Testuggine del vecchio saggio":
-                mod *= anello_val(anellon, "turno", "atterraggio", "moltiplicatore_mod")
-            if set == "Ricercatore del pericolo" and proc_ok(num, set, "turno", "contrattacco_schivata"):
-                mod += proc_val(set, "turno", "contrattacco_schivata", "mod")
-                text += "🩸 "
-                num = random.random()
-            if setN == "Guerriero 3D":
-                mod -= 0.55
-                text += "💧 "
-            if anello == "Fascette luminose" and anello_ok(num, anello, "turno", "atterraggio"):
-                mod += anello_val(anello, "turno", "atterraggio", "mod")
-                text += "✨ "               
-                
-            text += "Riatterrando dalla schivata infligge danno extra!\n"
-        
-        if (
-            (anello == "Compasso" and anello_ok(num, anello, "turno", "bilanciamento"))
-            or (anellon == "Bilanciere" and anello_ok(num, anellon, "turno", "bilanciamento"))
-            or (anello == "Bilanciere" and anello_ok(num, anello, "turno", "bilanciamento"))
-        ):
-            text += "⚖️ "
-            ring_bilanciamento = anello if anello in ("Compasso", "Bilanciere") else anellon
-            mod = anello_val(ring_bilanciamento, "turno", "bilanciamento", "mod")
-
-    if set != None:
-        num = random.random()
-        if set == "Cavaliere d'argento" and mod <= 0.8:
-            mod += 0.2
-        elif set == "Spacca Mostri":
-            dps += oppo["hp"] / 4
-        elif set == "IppoFan" and proc_ok(num, set, "turno", "copia_attacco"):
-            dps = oppo["atk"]
-            text += f"__{nome1} copia l'attacco nemico per attaccare!__\n" 
-        elif set == "Maledetto" and proc_ok(num, set, "turno", "maledizione"):
-            cura = round((proc_val(set, "turno", "maledizione", "hp_riferimento") - main["hp"]))
-            if cura <= 0:
-                cura = proc_val(set, "turno", "maledizione", "danno_min")
-            dps += cura
-            text += f"**La maledizione di {nome1} si riperquote sull'avversario!**\n"
-
-        elif set == "Campione del sole":
-                if "mol" in main:
-                    main["mol"] += 1
-                else:
-                    main["mol"] = 1
-                
-                cfg = proc_cfg(set, "turno", "colpo_caricato")
-                if (main["hp"] <= cfg["hp_trigger"] and main["mol"] >= cfg["mol_min_hp"]) or (main["mol"] > cfg["mol_min_fallback"] and num > (1 - cfg["proc_fallback"] / 100)):
-                    
-                    dps = dps * (main["mol"] * cfg["moltiplicatore"])
-                    
-                    main["mol"] = 0
-                    
-                    text += "**Colpo caricato!**\n"
-    
-    if setN != None:
-        num = random.random()
-        if setN == "Proiettile":
-            mod -= 0.3
-        elif setN == "Macellaio":
-            difesan += oppo["hp"] // 10
-        elif setN == "Segna ombre" and proc_ok(num, setN, "turno", "mimica_difesa"):
-            difesan = main["def"]
-            text += f"__{nome2} mimica la difesa avversaria!__\n"
-        elif setN == "Drago" and proc_ok(num, setN, "turno", "scaglie"):
-                    mod -= proc_val(setN, "turno", "scaglie", "riduzione_mod")
-                    text += "__Danni ridotti dalle scaglie!__\n"
-                    if num < (proc_val(setN, "turno", "scaglie", "proc_rottura_arma") / 100):
-                        text += "__L'arma dell'avversario si rovina!__\n"
-                        main["atk"] += proc_val(setN, "turno", "scaglie", "atk_target")
-        
-        elif setN == "Anima oscura" and proc_ok(num, setN, "turno", "parry"):
-                    text += f"**{nome2} effettua un parry a {nome1}!**\n"
-                    mod = 0
-                    oppo["atk"] = oppo["atk"] * proc_val(setN, "turno", "parry", "moltiplicatore_atk")
-        elif setN == "Abitante" and proc_ok(num, setN, "turno", "radice"):
-                    text += f"**{nome2} pianta al volo la radice vitale, che crescendo blocca {nome1}!**\n"
-                    mod = 0
-                    oppo["def"] = oppo["def"] * proc_val(setN, "turno", "radice", "moltiplicatore_def")
-        elif setN == 'Gangster' and proc_ok(num, setN, "turno", "lega"):
-            text += f"{nome1} rimane legato a testa in giù!\n\n"
-            main["bloccato"] = True
-
-
-
-    if mod <= 0:
-        mod = 0
-    if difesan < 0:
-        dps -= difesan
-        difesan = 0
-    danno = random.uniform(
-                dps * (100 / ((100 + difesan * 1.5)+1)), dps * (100 / ((100 + difesan)+1))
-            )
-
-    if danno <= 20:
-        danno = 20
-    
-    if main["incantamenti"] != []:
-        if 'Primo impatto' in main["incantamenti"]:
-                main["incantamenti"].remove('Primo impatto')
-                danno = round(danno + (danno * 0.7))
-                text += "💥\n"
-                try:
-                    main["incantamenti"].remove('Primo impatto')
-                except:
-                    pass
-            
-        if 'Critico' in main["incantamenti"] and 0.08 > num:
-                text += "\n**Critico!**\n"
-                danno = round(danno + (danno * 0.5))
-
-        if "Velenoso" in main["incantamenti"] and 0.05 > num:
-            try:
-                oppo["veleno"] += 1
-            except:
-                oppo["veleno"] = 1
-            text += "🟢**Colpo velenoso!**\n"
-
-    if setN != None:
-        num = random.random()
-        if setN == "Marines" and proc_ok(num, setN, "turno", "armatura"):
-            text += (
-                        f"__La spessa armatura di {nome2} riduce il danno subito!__\n"
-                    )
-            danno = round(danno - ((danno * proc_val(setN, "turno", "armatura", "riduzione_danno_percento")) / 100))
-            if danno <= 0:
-                danno = 1   
-        elif setN == "Illusionista" and proc_ok(num, setN, "turno", "copie_difesa"):
-            num = random.random()
-            text += f"__{nome2} evoca delle copie di se stesso!__\n"
-            if num < (proc_val(setN, "turno", "copie_difesa", "proc_originale") / 100):
-                text += f"{nome1} colpisce però l'originale!\n"
-            else:
-                text += f"**{nome1} sbaglia bersaglio!**\n"
-                danno = 0
-                mod = 0
-    
-    if set != None:
-        num = random.random()
-        if set == "Betatester" and proc_ok(num, set, "turno", "spada_beta"):
-            danno += proc_val(set, "turno", "spada_beta", "danno")
-            text += f"**La Spada della beta si illumina di potere!**\n"
-
-    if anellon != None:
-        num = random.random()
-        if anellon == "Pegno di amicizia":
-            danno = danno * anello_val(anellon, "turno", "difesa", "moltiplicatore_danno")
-            if anello_val(anellon, "turno", "difesa", "sottrai_int"):
-                danno -= inten
-        elif anellon == "Tasto B" and anello_ok(num, anellon, "turno", "roll"):
-            text += f"__Roll...__\n"
-            mod = anello_val(anellon, "turno", "roll", "mod") 
-        elif anellon == "Tasto X" and anello_ok(num, anellon, "turno", "obliteratore"):
-            text += f"**{nome2} rilascia un obliteratore che blocca in parte {nome1}!**\n"
-            mod = mod / anello_val(anellon, "turno", "obliteratore", "divisore_mod")
-            bonus_tasto_x = anello_val(anellon, "turno", "obliteratore", "bonus_stat_base") + inten
-            oppo["atk"] += bonus_tasto_x
-            oppo["def"] += bonus_tasto_x
-        elif anellon == "Scudiero fidato" and anello_ok(num, anellon, "turno", "blocco"):
-            text += f"**L'anello di {nome2} blocca il danno!**\n"
-            danno = anello_val(anellon, "turno", "blocco", "danno")
-        elif anellon == "Aureola" and anello_ok(num, anellon, "turno", "salvezza"):
-            text += f"__Una luce dall'alto salva {nome2} da diversi danni!__\n"
-            danno = round(danno * anello_val(anellon, "turno", "salvezza", "moltiplicatore_danno")) - inten
-            if danno <= 0:
-                danno = anello_val(anellon, "turno", "salvezza", "danno_min")
-        elif anellon == "Coda demoniaca" and "lastD" in main:
-            percento = (main["lastD"] * bonus) / anello_val(anellon, "turno", "dolore", "divisore_chance")
-
-            if nome2 == anello_val(anellon, "turno", "dolore", "nome_speciale"):
-                        percento += anello_val(anellon, "turno", "dolore", "bonus_speciale")
-
-            if percento > num:
-                        danno = anello_val(anellon, "turno", "dolore", "danno")
-                        mod = anello_val(anellon, "turno", "dolore", "mod")
-                        text += f"__A causa del dolore {nome1} non riesce a colpire e si blocca a metà__\n"
-        elif (anellon == "Ricordo straziante" and anello_ok(num, anellon, "turno", "intangibile")) or nome2 in anello_val("Ricordo straziante", "turno", "intangibile", "nomi_equivalenti", []):
-            danno = anello_val("Ricordo straziante", "turno", "intangibile", "danno")
-            mod = anello_val("Ricordo straziante", "turno", "intangibile", "mod")
-            text += f"__{nome2} non è colpibile!__\n"
-            oppo["schivato"] = True
-
-
-    if anello != None:
-        num = random.random()
-        if anello == "Spuntoni" and anello_ok(num, anello, "turno", "danno_extra"):
-            text += "__Danni extra da spuntoni!__\n"
-            mod += anello_val(anello, "turno", "danno_extra", "mod")
-    
-    
-    if "Minimista" in main["incantamenti"] and mod <= 0:
-        mod = 0.1
-        text += "+"
-        if danno <= 0:
-            danno = 10
-            text += "+"
-    
-    
-    dannov = round(danno * mod)
-    main["fatto"] += dannov
-    if setN == 'Spadaccino Musashi':
-                danno = danno * .7
-    if anello == "Coda demoniaca":
-        oppo["lastD"] = dannov
-    
-    if "terrore"in main:
-                text += f"{nome1} è terrorizzato!\n"
-                main.pop("terrore")
-    elif "bloccato" in main:
-                text += f"{nome1} è bloccato, le corde lo danneggiano!\n"
-                main["hp"] -= 10
-                main.pop("bloccato")
-                danno = 0
-                mod = 0
-                dannov = 0
-    elif main["set"] == 'Avventuriero delle praterie' and proc_ok(1 - num, main["set"], "turno", "respira"):
-                text += f"Respira {nome1}, sta andando bene!\n"
-                main["atk"] += proc_val(main["set"], "turno", "respira", "atk")
-                main["def"] += proc_val(main["set"], "turno", "respira", "def")
-                main["agi"] += proc_val(main["set"], "turno", "respira", "agi")
-                danno = 0
-                mod = 0
-                dannov = 0
-    else:
-        if mod == 0 or danno == 0 or dannov == 0:
-            pass
-        else:
-            num = random.random()
-            if setN == "Paladino" and oppo["Scudo"] >= 0:
-
-                    oppo["Scudo"] -= round(float(danno) * (mod +0.5))
-                    vita = oppo["Scudo"]
-                    text += f"{nome1} infligge {dannov} danno allo scudo di {nome2} ({vita} scudo)!\n"
-                    if oppo["Scudo"] <= 0:
-                        text += "**Lo scudo si è rotto!**\n"
-            else:
-                    oppo["hp"] -= round(float(danno) * mod)
-                    vita = oppo["hp"]
-                    dannov = round(danno * mod)
-                    text += f"{nome1} infligge {dannov} danni a {nome2} ({vita})!\n"
-
-            if set == "Shogun moderno":
-
-                    if proc_ok(num, set, "turno", "doppio_colpo"):
-                        text += "**Doppio colpo**\n"
-                        if setN == "Paladino" and oppo["Scudo"] >= 0:
-
-                            oppo["Scudo"] -= round(float(danno) * random.uniform(proc_val(set, "turno", "doppio_colpo", "moltiplicatore_min"), proc_val(set, "turno", "doppio_colpo", "moltiplicatore_max")))
-                            vita = oppo["Scudo"]
-                            text += f"{nome1} infligge {dannov} danno allo scudo di {nome2} ({vita} scudo)!\n"
-                            if oppo["Scudo"] <= 0:
-                                text += "**Lo scudo si è rotto!**\n"
-                        else:
-                            new_m = random.uniform(proc_val(set, "turno", "doppio_colpo", "moltiplicatore_min"), proc_val(set, "turno", "doppio_colpo", "moltiplicatore_max"))
-                            oppo["hp"] -= round(float(danno) * new_m)
-                            vita = oppo["hp"]
-                            dannov = round(danno * new_m)
-                            text += f"{nome1} infligge {dannov} danni a {nome2} ({vita})!\n"
-
-            if set == "Manipolatore di morte" and proc_ok(num, set, "turno", "scheletri"):
-                    text += f"\n**{nome1} evoca una marea di scheletri ad attaccare!**\n"
-                    scheletri = cura = round((proc_val(set, "turno", "scheletri", "hp_riferimento") - main["hp"]) / proc_val(set, "turno", "scheletri", "hp_per_scheletro"))
-                    new_m = mod
-                    for x in range(scheletri):
-
-                        if setN == "Paladino" and oppo["Scudo"] >= 0:
-
-                            new_m = random.uniform(proc_val(set, "turno", "scheletri", "mod_min"), proc_val(set, "turno", "scheletri", "mod_max"))
-                            oppo["Scudo"] -= round(float(danno) * new_m)
-
-                            vita = oppo["Scudo"]
-                            text += f"Uno scheletrino infligge {dannov} danno allo scudo di {nome2} ({vita} scudo)!\n"
-                            if oppo["Scudo"] <= 0:
-                                text += "**Lo scudo si è rotto!**\n"
-                            danno += proc_val(set, "turno", "scheletri", "crescita_danno_scudo")
-                        else:
-                            new_m = random.uniform(proc_val(set, "turno", "scheletri", "mod_min"), proc_val(set, "turno", "scheletri", "mod_max"))
-                            oppo["hp"] -= round(float(danno) * new_m)
-
-                            vita = oppo["hp"]
-                            dannov = round(danno * new_m)
-                            text += f"Uno scheletrino infligge {dannov} danni a {nome2} ({vita})!\n"
-                            danno += proc_val(set, "turno", "scheletri", "crescita_danno_hp")
-
-                    danno = round(float(danno) * new_m)
-    
-    num = random.random()
-    if set == "Mago mentale" and proc_ok(num, set, "turno", "showtime"):
-                text += "**ShowTime!**\n\n"
-                for x in range(random.randint(proc_val(set, "turno", "showtime", "colpi_min"), proc_val(set, "turno", "showtime", "colpi_max"))):
-                    new_m = random.uniform(proc_val(set, "turno", "showtime", "mod_min"), proc_val(set, "turno", "showtime", "mod_max"))
-                    oppo["hp"] -= round(float(danno) * new_m)
-                    if num < (proc_val(set, "turno", "showtime", "autodanno_proc") / 100):
-                        meg = random.choice(
-                            [
-                                "Forse sbaglio",
-                                "Non ce la farò mai",
-                                "E' destino perdere",
-                            ]
-                        )
-                        text += f"__{meg}__\n"
-                        main["hp"] -= round((danno * new_m))
-                    vita = oppo["hp"]
-                    dannov = round(danno * new_m)
-                    frase = random.choice(
-                        [
-                            f"Non credo valga la pena neanche combatterti ({vita})!\n",
-                            f"Meglio arrendersi ({vita})!\n",
-                            f"Forse il peggiore qui sei tu? ({vita})!\n",
-                            f"Hai la minima idea di chi sono? ({vita})!\n",
-                            f"Forse il problema qui sei tu? ({vita})!\n",
-                            f"Che ne dici di arrenderti? ({vita})!\n",
-                            f"Mai visto tattica peggiore? ({vita})!\n",
-                        ]
-                    )
-                    text += f"**{frase}**"
-                    danno += proc_val(set, "turno", "showtime", "crescita_danno")
-    
-    if set != None:
-        num = random.random()
-        if set == 'Guardiano della bestie':
-                main["powe"] = main.get("powe", 0) + PROC_CLASSI[set]["turno"]["powe_per_turno"]
-
-                cfg = proc_cfg(set, "turno", "volpe")
-                if main["powe"] >= cfg["powe_min"] and proc_ok(num, set, "turno", "volpe"):
-                    text += "Una volpa difende la zona!\n"
-                    main["def"] += cfg["def"]
-
-                cfg = proc_cfg(set, "turno", "lupo")
-                if main["powe"] >= cfg["powe_min"] and proc_ok(num, set, "turno", "lupo"):
-                    text += "Una lupo si prepara a mordere!\n"
-                    main["atk"] += cfg["atk"]
-
-                cfg = proc_cfg(set, "turno", "ratti")
-                if main["powe"] >= cfg["powe_min"] and proc_ok(num, set, "turno", "ratti"):
-                    text += "I ratti si avvicinano!\n"
-                    main["agi"] += cfg["agi"]
-
-                cfg = proc_cfg(set, "turno", "orsi")
-                if main["powe"] >= cfg["powe_min"] and proc_ok(num, set, "turno", "orsi"):
-                    text += "Gli orsi si agitano!\n"
-                    main["atk"] += cfg["atk"]
-
-                cfg = proc_cfg(set, "turno", "serpenti")
-                if main["powe"] >= cfg["powe_min"] and proc_ok(num, set, "turno", "serpenti"):
-                    text += "I serpenti iniziano a sbucare!\n"
-                    oppo["agi"] += cfg["agi_target"]
-
-                cfg = proc_cfg(set, "turno", "presenza_lunare")
-                if main["powe"] >= cfg["powe_min"] and proc_ok(num, set, "turno", "presenza_lunare"):
-                    text += "La presenza lunare ti osserva!\n"
-                    main["def"] = main["def"] * cfg["def_mul"]
-        elif set == "Fiamma pura" and proc_ok(num, set, "turno", "arena_brucia"):
-            text += "L'arena brucia!\n"
-            main["hp"] -= proc_val(set, "turno", "arena_brucia", "danno_main")
-            oppo["hp"] -= proc_val(set, "turno", "arena_brucia", "danno_oppo")
-        
-        elif set == "Crociato" and proc_ok(num, set, "turno", "punizione_schivata"):
-                if "schiva il colpo" in text:
-                    danni = round(dps / proc_val(set, "turno", "punizione_schivata", "divisore_dps") * random.uniform(proc_val(set, "turno", "punizione_schivata", "random_min"), proc_val(set, "turno", "punizione_schivata", "random_max")))
-                    if danni <= proc_val(set, "turno", "punizione_schivata", "danno_min"):
-                        danni = proc_val(set, "turno", "punizione_schivata", "danno_min")
-                    oppo["hp"] -= danni
-                    text += f"**Lo spirito della luce punisce {nome2}, obbligandolo a subire {danni} danni!**"
-        
-        elif set == "Assassino delle ombre" or setN == "Assassino delle ombre":
-            danno = 0
-            dannov = 0
-        
-        elif set == "Medico improvvisato" and proc_ok(num, set, "turno", "cura_schivata"):
-                if "schiva il colpo" in text:
-                    danni = round(dps / proc_val(set, "turno", "cura_schivata", "divisore_dps") * random.uniform(proc_val(set, "turno", "cura_schivata", "random_min"), proc_val(set, "turno", "cura_schivata", "random_max")))
-
-                    main["hp"] += danni
-                    text += f"__Dato il mancato colpo il totem di {nome1} lo cura di {danni} hp!__\n"
-        
-        elif set == "Vampiro" and proc_ok(num, set, "turno", "morso"):
-                if "schiva il colpo" not in text:
-                    hp = round(((float(danno) + oppo["hp"]) * mod) / proc_val(set, "turno", "morso", "divisore"))
-                    if hp >= proc_val(set, "turno", "morso", "cap_trigger"):
-                        hp = proc_val(set, "turno", "morso", "cura_cap")
-                    main["hp"] += hp
-                    text += f"__{nome1} morde l'avversario durante il colpo per recuperare {hp} hp!!__\n"
-                    
-        elif set == "Guaritore da campo" and proc_ok(num, set, "turno", "rinsana"):
-                if "schiva il colpo" not in text:
-                    hp = round((float(danno) * mod) / proc_val(set, "turno", "rinsana", "divisore"))
-                    main["hp"] += hp
-                    text += f"__{nome1} rinsana di {hp} punti vita__\n"
-
-                
-        
-        elif set == "Cacciatore" and proc_ok(num, set, "turno", "junior"):
-                danni = round(float(dps) * (100 / (proc_val(set, "turno", "junior", "denominatore") + float(1 + difesan)) * proc_val(set, "turno", "junior", "moltiplicatore")))
-
-                text += f"**{nome2} viene morso da Junior, subendo {danni} danni!**\n"
-                oppo["hp"] -= danni
-        
-        elif set == "Orrido" and proc_ok(num, set, "turno", "sgignolo"):
-                danni = round(float(dps) * (100 / (proc_val(set, "turno", "sgignolo", "denominatore") + float(1 + difesan)) * proc_val(set, "turno", "sgignolo", "moltiplicatore")))
-
-                text += f"**{nome1} non riesce a tener fermo Sgignolo, infliggendo a {nome2} {danni} danni!**\n"
-                oppo["hp"] -= danni
-        
-        elif set == "Pazzoide glamour" and proc_ok(num, set, "turno", "pazzia"):
-            if setN == "Ombra silenziosa" and proc_ok(num, setN, "turno", "silenzio_pazzoide"):
-                    text += "(Silenziato)\n"
-            else:
-                    if "schiva il colpo" not in text:
-                        hp = round((float(danno) * mod))
-                        main["hp"] += hp
-                        testo = random.choice(
-                            [
-                                "__HAHAHAH__\n",
-                                "__ADOOOROH__\n",
-                                "__ANCORA__\n",
-                                "__DI PIU'__\n",
-                            ]
-                        )
-                        text += testo
-                    
-        
-        elif set == "Primo alla bandiera":
-
-            if proc_ok(num, set, "turno", "colpito"):
-                if "schiva il colpo" not in text:
-               
-                    hp = round((float(danno) * mod) / proc_val(set, "turno", "colpito", "divisore_bonus"))
-                    main["hp"] += round(danno / proc_val(set, "turno", "colpito", "cura_divisore"))
-                    main["atk"] += hp
-                    main["def"] += hp
-
-                    text += f"__HAHAHAHA COLPITO!!__\n"
-                
-        
-        elif set == "Difensore delle mareggiate" and proc_ok(num, set, "turno", "fauna"):
-                num = random.random()
-                cfg = proc_cfg(set, "turno", "fauna")
-                if num < (cfg["soglia_sogliola"] / 100):
-                    dannissimi = round(
-                        float(dps)
-                        * (100 / (50 + float(1 + difesan)) * random.uniform(cfg["sogliola_min"], cfg["sogliola_max"]))
-                    )
-                    oppo["hp"] -= dannissimi
-                    text += f"**Una sogliola colpisce {nome2} infliggendo {dannissimi} danni!**\n"
-                elif num < (cfg["soglia_scorpione"] / 100):
-                    dannissimi = round(
-                        float(dps)
-                        * (100 / (50 + float(1 + difesan)) * random.uniform(cfg["scorpione_min"], cfg["scorpione_max"]))
-                    )
-                    oppo["hp"] -= dannissimi
-                    text += f"**Un pesce scorpione colpisce {nome2} infliggendo {dannissimi} danni!**\n"
-                elif num < (cfg["soglia_spada"] / 100):
-                    dannissimi = round(
-                        float(dps)
-                        * (100 / (50 + float(1 + difesan)) * random.uniform(cfg["spada_min"], cfg["spada_max"]))
-                    )
-                    oppo["hp"] -= dannissimi
-                    text += f"**Un pesce spada colpisce {nome2} infliggendo {dannissimi} danni!**\n"
-                else:
-                    dannissimi = round(
-                        float(dps)
-                        * (100 / (50 + float(1 + difesan)) * random.uniform(cfg["balena_min"], cfg["balena_max"]))
-                    )
-                    oppo["hp"] -= dannissimi
-                    text += f"**Una balena tenta di colpire {nome2}, mandando comunque a segno parte del colpo con cui infligge {dannissimi} danni!**\n"
-        elif set == "Cercatore di reliquie" and proc_ok(num, set, "turno", "reliquia"):
-                num = random.random()
-                cfg = proc_cfg(set, "turno", "reliquia")
-                if num < (cfg["soglia1"] / 100):
-
-                    main["agi"] += cfg["agi"]
-                    text += f"**Una bellissimo Tereitoscopio a terra!**\n"
-                elif num < (cfg["soglia2"] / 100):
-
-                    main["hp"] += cfg["hp"]
-                    text += f"**Un incredibile nucleo rapido di cura a terra!**\n"
-                elif num < (cfg["soglia3"] / 100):
-
-                    main["def"] += cfg["def"]
-                    text += f"**Un pazzesco lamillo versak a terra!**\n"
-                else:
-
-                    main["atk"] += cfg["atk"]
-                    text += f"**Una possente ancora dimensionale a terra!**\n"
-        elif set == "Fire lord" and proc_ok(num, set, "turno", "muori_insetto"):
-
-                
-                text += f"**MUORI INSETTO!**"
-                if "Smateriabile" in oppo["incantamenti"] and num < (proc_val(set, "turno", "muori_insetto", "smateriabile_proc") / 100):
-                    text += "🚫"
-                else:
-                    oppo["hp"] -= proc_val(set, "turno", "muori_insetto", "danno")
-        elif set == "Combattente 2D" and proc_ok(num, set, "turno", "evocazione"):
-                num = random.random()
-                cfg = proc_cfg(set, "turno", "evocazione")
-                if num < (cfg["soglia_occhio"] / 100):
-                    text += (
-                        f"__Un occhietto di cthulhu si unisce a {nome1} nella lotta__"
-                    )
-                    main["atk"] += cfg["atk"]
-                    main["def"] += cfg["def"]
-                    main["agi"] += cfg["agi"]
-                elif num < (cfg["soglia_zombie"] / 100):
-                    oppo["hp"] -= cfg["danno_zombie"]
-                    text += f"**Uno zombie attacca {nome2} infliggendo {cfg['danno_zombie']} danni!**"
-                elif num < (cfg["soglia_raggio"] / 100):
-                    dannissimi = round(
-                        float(dps)
-                        * (100 / (50 + float(1 + difesan)) * random.uniform(cfg["raggio_min"], cfg["raggio_max"]))
-                    )
-                    oppo["hp"] -= dannissimi
-                    text += f"**Un raggio del distruttore di mondi colpisce {nome2} infliggendo {dannissimi} danni!**"
-                else:
-                    pass
-        elif set == "Accolito" and main["fatto"] >= proc_val(set, "turno", "potere", "danno_fatto_min"):
-                text += "**ECCOLO ECCOLO LUI E' QUI, LUI MI DA POTEEERE**\n"
-                main["atk"] += proc_val(set, "turno", "potere", "atk")
-                main["def"] += proc_val(set, "turno", "potere", "def")
-                main["hp"] += proc_val(set, "turno", "potere", "hp")
-                main["agi"] += proc_val(set, "turno", "potere", "agi")
-        elif set == "Esperto di animali" and main["Ap"] == "Ratto delle tombe" and oppo["hp"] <= proc_val(set, "turno", "ratto_tombe", "hp_target_max"):
-                oppo["hp"] = 0
-                text += "Il Ratto delle tombe finisce il lavoro"
-        elif set == "Esperto di animali" and main["Ap"] == "Balena territoriale" and proc_ok(num, set, "turno", "balena_territoriale"):
-            text += f"La Balena territoriale aumenta la difesa di {nome1}"
-            main["def"] += proc_val(set, "turno", "balena_territoriale", "def")
-        elif set == "Esperto di animali" and main["Ap"] == "Silvantropo" and proc_ok(num, set, "turno", "silvantropo"):
-            text += f"Il Silvantropo cura {nome1}"
-            main["hp"] += proc_val(set, "turno", "silvantropo", "cura")
-    
-    if setN != None:
-        num = random.random()
-        if setN == "Sanguinolento" and proc_ok(num, setN, "turno", "sangue_difesa"):
-            if "schiva il colpo" not in text:
-                if set == "Ombra silenziosa" and proc_ok(num, set, "turno", "silenzio_sanguinolento"):
-
-                    text += "(Silenziato)\n"
-                else:
-
-                    hp = round((float(danno) + 2) / proc_val(setN, "turno", "sangue_difesa", "divisore")) + 1
-                    oppo["atk"] += hp
-                    oppo["def"] += hp
-                    text += (
-                        f"__{nome2} unisce il proprio sangue a quello della spada!__\n"
-                    )
-    
-        elif setN == "Accolito" and proc_ok(num, setN, "turno", "difesa_cura"):
-            if "schiva il colpo" not in text:
-                    hp = round((float(danno) + proc_val(setN, "turno", "difesa_cura", "base")) / proc_val(setN, "turno", "difesa_cura", "divisore"))
-                    oppo["hp"] += hp
-                    text += f"__{nome2} non può morire per cause così futili, si cura di {hp} hp!__\n"
-
-            
-
-        elif setN == "Ufficiale dell'oltretomba" and proc_ok(num, setN, "turno", "demoni_difesa"):
-                if "schiva il colpo" not in text:
-
-                    danno2 = round(dannov * random.uniform(proc_val(setN, "turno", "demoni_difesa", "random_min"), proc_val(setN, "turno", "demoni_difesa", "random_max")) * bonusn)
-
-                    text += f"**A causa del danno inflitto {nome2} schiera demoni a colpire {nome1} anticipatamente, infliggendo {danno2} danni!**\n"
-                    main["hp"] -= danno2
-
-        elif setN == "Cercatore" and proc_ok(num, setN, "turno", "demoni_difesa"):
-                if "schiva il colpo" not in text:
-
-                    danno2 = round(dannov * random.uniform(proc_val(setN, "turno", "demoni_difesa", "random_min"), proc_val(setN, "turno", "demoni_difesa", "random_max")))
-
-                    text += f"**{nome2} viene difeso da oscuri demoni, che infliggono {danno2} a {nome1} danni!**\n"
-                    main["hp"] -= danno2
-
-        elif setN == "Cavaliere delle spine" and proc_ok(num, setN, "turno", "spine_difesa"):
-                 if "schiva il colpo" not in text:
-
-                    danno2 = round(dannov * random.uniform(proc_val(setN, "turno", "spine_difesa", "random_min"), proc_val(setN, "turno", "spine_difesa", "random_max")))
-
-                    text += f"**{nome1} subisce {danno2} danni da spine!**\n"
-                    main["hp"] -= danno2
-
-                
-        elif setN == "Mariachi" and proc_ok(num, setN, "turno", "resurrezione_difesa") and oppo["hp"] <= 0:
-                    oppo["hp"] = proc_val(setN, "turno", "resurrezione_difesa", "hp")
-                    oppo["atk"] += proc_val(setN, "turno", "resurrezione_difesa", "atk")
-                    oppo["def"] += proc_val(setN, "turno", "resurrezione_difesa", "def")
-                    text += f"**El Dios de la Muerte, fiero di {nome2}, decide di far continuare la sua avventura, almeno un altro pochettino!**\n"
-
-        elif setN == "Esperto di animali" and oppo["Ap"] == "OrsoDruido" and proc_ok(num, setN, "turno", "orsodruido"):
-                try:
-
-                    danno2 = round(dannov * random.uniform(proc_val(setN, "turno", "orsodruido", "random_min"), proc_val(setN, "turno", "orsodruido", "random_max")))
-
-                    text += f"**{nome1} viene attaccato dall'oOrsoDruido, subendo {danno2} danni!**\n"
-                    main["hp"] -= danno2
-                except:
-                    pass
-    
-
-
-
-
-    if anellon != None:
-            num = random.random()
-            
-            if anellon == "Scarica di adrenalina" and anello_ok(num, anellon, "turno", "adrenalina"):
-                try:
-                    if set == "Ombra silenziosa" and proc_ok(num, set, "turno", "silenzio_adrenalina"):
-
-                        text += "(Silenziato)\n"
-                    else:
-                        if "schiva il colpo" not in text:
-                            hp = round((float(danno) + anello_val(anellon, "turno", "adrenalina", "offset_danno")) / anello_val(anellon, "turno", "adrenalina", "divisore")) + anello_val(anellon, "turno", "adrenalina", "bonus_finale")
-                            oppo["atk"] += hp
-
-                            text += f"__{nome2} sente l'adrenalina salire!__\n"
-                except:
-                    pass
-            
-            elif (anellon == "Lapsus vitale" or oppo["Nome"] in anello_val("Lapsus vitale", "turno", "cura_danno", "nomi_equivalenti", [])) and anello_ok(num, "Lapsus vitale", "turno", "cura_danno"):
-                if "schiva il colpo" not in text:
-                    hp = round(round((float(dannov) + anello_val("Lapsus vitale", "turno", "cura_danno", "offset_danno")) / anello_val("Lapsus vitale", "turno", "cura_danno", "divisore")) * bonusn)
-                    oppo["hp"] += hp
-                    text += f"__{nome2} adora subire danni, si cura di {hp} hp!__\n"
-                
-            
-            elif anellon == "Vasetto all'orlo" and anello_ok(num, anellon, "turno", "contrattacco"):
-                if "schiva il colpo" not in text:
-
-                    danno2 = round(dannov * random.uniform(
-                        anello_val(anellon, "turno", "contrattacco", "random_min"),
-                        anello_val(anellon, "turno", "contrattacco", "random_max"),
-                    ) * bonusn)
-
-                    text += f"**Preso dalla rabbia {nome2} colpisce {nome1} anticipatamente, infliggendo {danno2} danni!**\n"
-                    main["hp"] -= danno2
-
-                
-            elif oppo["hp"] <= 0 and ((anellon == "Chiavi dell'aldilà" and anello_ok(num, anellon, "turno", "resurrezione")) or (setN == "Guardiano del passaggio" and proc_ok(num, setN, "turno", "resurrezione"))):
-                hp_base = (
-                    proc_val(setN, "turno", "resurrezione", "hp_base", anello_val("Chiavi dell'aldilà", "turno", "resurrezione", "hp_base"))
-                    if setN == "Guardiano del passaggio"
-                    else anello_val(anellon, "turno", "resurrezione", "hp_base")
-                )
-                oppo["hp"] = (hp_base * bonusn)
-                text += f"**La morte non vuole {nome2}, impedendogli di arrivare a lei!**\n"
-            
-
-    if anello != None:
-            num = random.random()
-            
-            if (anello == "Benedizione sanguinolenta" or main["Nome"] in anello_val("Benedizione sanguinolenta", "turno", "cura_danno", "nomi_equivalenti", [])) and anello_ok(num, "Benedizione sanguinolenta", "turno", "cura_danno"):
-                if "schiva il colpo" not in text:
-                    hp = round(((float(danno) * mod) / anello_val("Benedizione sanguinolenta", "turno", "cura_danno", "divisore")) * bonus)
-                    main["hp"] += hp
-                    text += f"__{nome1} apprezza il danno inflitto e si cura di {hp} con esso!!__\n"
-                
-            elif anello == "Anello dell'occulto" and anello_ok(num, anello, "turno", "trascinamento"):
-                if setN == "Ombra silenziosa" and proc_ok(num, setN, "turno", "silenzio_occulto"):
-                        danni = 0
-                        text += "(Silenziato)\n"
-                else:
-                    
-                    if "schiva il colpo" in text:
-                        
-                        danni = round(dps / anello_val(anello, "turno", "trascinamento", "dps_divisore") * random.uniform(
-                            anello_val(anello, "turno", "trascinamento", "random_min"),
-                            anello_val(anello, "turno", "trascinamento", "random_max"),
-                        )) + inte
-                        oppo["hp"] -= danni
-                        text += f"**{nome2} viene trascinato da un potere oscuro a terra ed obbligato a subire {danni} danni!**\n"
-            
-            elif anellon == "Anello di totano" and anello_ok(num, anellon, "turno", "cura"):
-                if "schiva il colpo" not in text:
-                    hp = round(anello_val(anellon, "turno", "cura", "cura_colpito") * mod)
-                    oppo["hp"] += hp
-                else:
-                    mod = random.uniform(
-                        anello_val(anellon, "turno", "cura", "random_min"),
-                        anello_val(anellon, "turno", "cura", "random_max"),
-                    ) * anello_val(anellon, "turno", "cura", "moltiplicatore_mod_schivato")
-                    hp = round(anello_val(anellon, "turno", "cura", "cura_schivato") * mod)
-                    oppo["hp"] += hp
-                text += f"__{nome2} mangia un pezzetto di anello di totano, moooolto buono ({hp} recuperati)!__\n"
-            
-            elif anello == "Cuffia da boia" and oppo["hp"] <= (anello_val(anello, "turno", "esecuzione", "hp_target_base") * bonus ):
-                oppo["hp"] = anello_val(anello, "turno", "esecuzione", "hp_finale")
-                text += "🪓"
-            
-            elif (anello == "Cuore delle sabbie" and anello_ok(num, anello, "turno", "insabbiato")) or nome1 in anello_val("Cuore delle sabbie", "turno", "insabbiato", "nomi_equivalenti", []):
-                text += "**La tempesta di sabbia avanza**\n"
-                try:
-                    oppo["boost"]["sfida"]["Insabbiato"]["lv"] += anello_val("Cuore delle sabbie", "turno", "insabbiato", "lv_incremento")
-                except:
-
-                    oppo["boost"]["sfida"]["Insabbiato"] = {
-                        "lv": anello_val("Cuore delle sabbie", "turno", "insabbiato", "lv"),
-                        "dur": anello_val("Cuore delle sabbie", "turno", "insabbiato", "dur"),
-                    }
-            elif anello == "Chiavi" and anello_ok(num, anello, "turno", "batmobile"):
-                danno_chiavi = anello_val(anello, "turno", "batmobile", "danno")
-                text += f"**{nome2} viene investito dalla batmobile, subendo così {danno_chiavi} danni!**\n"
-                oppo["hp"] -= danno_chiavi
-    
-    if oppo["incantamenti"] != []:
-        if "Iridescente" in oppo["incantamenti"] and 0.05 > num:
-            text += f"☀️ {nome2} prende forza dalla luce\n"
-            oppo["hp"] += 85
-        
-        if "Speranza" in oppo["incantamenti"] and oppo["hp"] <= 60 and oppo["hp"] >= 1:
-                oppo["hp"] = 100
-                text += "🕊"
-        
-        if "Smateriabile" in oppo["incantamenti"] and 0.1 > num:
-                try:
-                    danno = 0
-                    mod = 0
-                    text += "🚫"
-                except:
-                    
-                    pass
-    if main["incantamenti"] != []:
-        if "Tocco fantasma" in main["incantamenti"] and 0.02 > num:
-                if "schiva il colpo" in text:
-                    danni = round(dps / 10 * random.uniform(0.5, 1))
-                    if danni <= 30:
-                        danni = 30
-                    oppo["hp"] -= danni
-                    text += f"L'arma fantasma di {nome1} colpisce lo stesso, infliggendo {danni} danni!"
-        
-        
-        if "Leggiadra" in main["incantamenti"] and 0.1 > num:
-                if "schiva il colpo" not in text:
-                    danno = 0
-                    mod = 0
-                    text += "🎈"
-               
-    if "veleno" in oppo:
-        oppo["hp"] -= oppo["veleno"] * 5
-    
-    if "Insabbiato" in oppo["boost"]["sfida"]:
-        sabbia = round(4 * oppo["boost"]["sfida"]["Insabbiato"]["lv"])
-        if nome1 == "Leviatano delle sabbie":
-                    sabbia = round(sabbia / 3)
-                    text += f"La tempesta di sabbia infligge {sabbia} danni a {nome2}!\n"
-                    if "Smateriabile" in oppo["incantamenti"] and 0.3 > num:
-                        text += "🚫"
-
-                    else:
-                        
-                        oppo["hp"] -= sabbia
-        else:
-                    if 0.5 > num:
-                        sabbia = round(sabbia / 2)
-                        text += f"La tempesta di sabbia infligge {sabbia} danni a {nome2}!\n"
-                        if "Smateriabile" in oppo["incantamenti"] and 0.3 > num:
-                            text += "🚫"
-
-                        else:
-                            oppo["hp"] -= sabbia
-                    elif 0.05 > num:
-                        pass
-                    elif 0.2 > num:
-                        text += f"La tempesta di sabbia rovina l'armatura di {nome2}!\n"
-                    else:
-                        oppo["agi"] -= (sabbia/6)
-                        text += f"La tempesta di sabbia acceca {nome2}!\n"
-    text += "\n"
-    return text
+def _oggetto_set_faro(componente, livello=2):
+    base = str(componente).split(" LV", 1)[0]
+    return f"{base} LV{int(livello)}"
 
 
 async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dungeon,globali,inabilitati,scelte,tutto,tuttov,megaman,zombie,gungeon,magic,protezioni,armi,trader):
+    _snapshot_premi_weekend = _snapshot_premi_dungeon(player[username])
     if scelta not in nemici:
         other_time = last_dungeon.get(username,0)
         now = time.time() 
-        modificatore = 0
-        if evento["mod"] == "stop_dg":
-            modificatore += dungeon_global("generale", "mod_stop_dg", -5)
-        if evento["mod"] == "più_dg":
-            modificatore += dungeon_global("generale", "mod_piu_dg", 5)
+        modificatore = weekend_mod_val(evento.get("mod"), "mod_dungeon", 0)
         if username in nop:
             modificatore += dungeon_global("generale", "mod_nop", -60)
         if player[username]["setta"]["benedizione"] == "Avventuriero":
@@ -5721,6 +3680,29 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
             last_dungeon[username] = now
             if scelta in scelte:
                 text = f"Scegli {scelta}\n"
+                if scelta == "Vedere" and "Faro" in player[username]["dungeon"]["mostri"]:
+                    stanza = "Faro"
+                    locali_faro = list(casa_nemici[player[username]["location"]])
+                    nemico_faro = random.choice(locali_faro)
+                    set_faro = nemici[nemico_faro].get("set")
+                    componenti_faro = _componenti_set_faro(set_faro)
+                    if componenti_faro:
+                        livello_faro = dungeon_val("Faro", "Vedere", "livello_premio", 2)
+                        oggetto_faro = _oggetto_set_faro(random.choice(componenti_faro), livello_faro)
+                        gestione_zaino(player[username]["zaino"], "add", oggetto_faro, 1)
+                        text += f"{nemico_faro} ti vede, la luce ti dà una buona sagoma e decide di donarti **{oggetto_faro}** del set **{set_faro}**.\
+"
+                    else:
+                        text += f"{nemico_faro} ti vede, ma la luce non riesce a materializzare un oggetto del suo set **{set_faro}**.\
+"
+
+                if scelta == "Essere visto" and "Faro" in player[username]["dungeon"]["mostri"]:
+                    stanza = "Faro"
+                    text += "Una luce malevola ti illumina, altrove qualcosa ti vede....\
+"
+                    quanti_boss_faro = int(dungeon_val("Faro", "Essere visto", "boss_aggiunti", 2))
+                    player[username]["dungeon"]["mostri"].extend(["Boss"] * quanti_boss_faro)
+
                 if (scelta == "Tocchi la crepa"
                     and "Crepaccio"
                     in player[username]["dungeon"]["mostri"]):
@@ -6476,6 +4458,16 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
             else:
                 fines = False
                 text = f"Esplorando il dungeon raggiungi {scelta}!\n"
+                if scelta == "Faro":
+                    text += "Entri in una stanza inquietantemente grande, tanto da non vederne la fine...\
+Un faro si apre in lontananza e pone la domanda...\
+Vuoi vedere o essere visto?"
+                    bottoni = []
+                    for appz in ["Vedere", "Essere visto"]:
+                        bottoni.append([InlineKeyboardButton(appz, callback_data=f"dungi_{appz}")])
+                    reply_markup = InlineKeyboardMarkup(bottoni)
+                    await app.send_message(chat_id=username, text=text, reply_markup=reply_markup)
+
                 if scelta == "Stanza del sonno":
                     text += "Una strana nebbia si alza e l'intera stanza si riempe..."
                     bottoni = list()
@@ -6827,7 +4819,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                                     seet = None         
                     if seet == None or dungeon_under(num, "Armeria", "evento", "nessun_evento_pct"):
                         text += "Il tuo set non richiama nessun evento, vabbè succede"
-                    elif "Forma" in seet or "Pescatore" == seet:
+                    elif "Forma" in seet or ("Pescatore" == seet and not proc_val("Pescatore", "dungeon", "armeria", "compatibile")):
                         text += "Il tuo set è troppo recente, non può interagire con questi rottami..."
                     else:
                         cosa = random.choice(classi[seet]) + " LV0"
@@ -6962,4 +4954,19 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
 
         else:
             await message.answer(f"Mancano {manca} secondi!")
+    _duplica_premi_dungeon_da_snapshot(player[username], _snapshot_premi_weekend, evento)
 
+# --- SET EROI DELLA TEMPESTA: RUNTIME ---
+
+# --- TURNO E ASSALTO CARICATI DA MODULO DEDICATO ---
+# Esecuzione nello stesso namespace: evita import circolari e mantiene invariati
+# lookup globali, alias delle ondate e comportamento delle funzioni storiche.
+from pathlib import Path as _TurnoAssaltoPath
+_turno_assalto_file = _TurnoAssaltoPath(__file__).with_name("turno_assalto.py")
+with _turno_assalto_file.open("r", encoding="utf-8") as _turno_assalto_stream:
+    exec(
+        compile(_turno_assalto_stream.read(), str(_turno_assalto_file), "exec"),
+        globals(),
+        globals(),
+    )
+del _turno_assalto_stream, _turno_assalto_file, _TurnoAssaltoPath
