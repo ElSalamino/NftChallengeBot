@@ -2037,7 +2037,7 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
 
             bossino = listToString(scelta.split(" ")[1:])
             user2 = copy.deepcopy(nemici[bossino])
-            user2["incantamenti"] = []
+            user2["incantamenti"] = [random.choice(list(INCANTESIMI_CONFIG))]
 
             nome2 = user2["Nome"]
             if user1["set"] == "Paladino":
@@ -4799,6 +4799,15 @@ Vuoi vedere o essere visto?"
                     else:
                         nemicio = random.choice(list(nemici))
                         player[username]["dungeon"]["Boss"] = nemicio
+                    set_boss = nemici.get(nemicio, {}).get("set")
+                    if set_boss:
+                        frase_boss = render_frase_set_tecnica(
+                            set_boss, bonus.get(set_boss, {})
+                        )
+                        text += (
+                            f"\nL'emblema sulla porta mostra un campione {set_boss}.\n"
+                            f"Sai perfettamente che {set_boss} {frase_boss}"
+                        )
 
                     for appz in [f"Affronta {nemicio}"]:
                         bottoni.append([InlineKeyboardButton(appz, callback_data=f"dungi_{appz}")])
