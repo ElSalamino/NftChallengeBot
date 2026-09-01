@@ -1,0 +1,91 @@
+name: Add six sets
+
+on:
+  push:
+    branches:
+      - feature/set-eroi-tempesta
+    paths:
+      - .github/workflows/add_sei_set.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/set-eroi-tempesta
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Apply patch
+        run: python .github/apply_sei_set.py
+
+      - name: Validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile liste.py bilanciamento.py frasi_set.py nft.py
+          python - <<'PY'
+          import liste
+          from bilanciamento import PROC_CLASSI
+          from frasi_set import FRASI_SET_TECNICHE
+
+          attesi = {
+              "Primo alla torre": ("NotteSferza", "Un machete"),
+              "Pazzo temporale": ("Lama temporale", "Maschera del folle"),
+              "Evocatore del vero potere": ("Stocco magico", "Piuma vulcanica"),
+              "GunSlingher": ("Pistola del west", "Pessime idee"),
+              "Arcidemone": ("Zweihander", "Marchio del dannato"),
+              "Big Game Hunter": ("Arco pesante", "Un libro su tutte le creature"),
+          }
+          armi = set(liste.armi) | set(liste.armiextra)
+          protezioni = set(liste.protezioni) | set(liste.protezioniextra)
+          for nome, (arma, protezione) in attesi.items():
+              assert liste.classi[nome] == [arma, protezione], (nome, liste.classi[nome])
+              assert arma in armi, (nome, arma)
+              assert protezione in protezioni, (nome, protezione)
+              assert nome in liste.Approccini
+              assert nome in liste.bonus
+              assert nome in liste.frasi_set
+              assert nome in PROC_CLASSI
+              assert nome in FRASI_SET_TECNICHE
+
+          assert PROC_CLASSI["Primo alla torre"]["combattimento"]["primo_colpo"]["moltiplicatore_danno"] == 2
+          assert PROC_CLASSI["Primo alla torre"]["assalto"]["clone"]["atk_mul"] == 4
+          assert PROC_CLASSI["Pazzo temporale"]["combattimento"]["seed"] == {"proc": 90, "seed": "Anello perfezionista"}
+          assert PROC_CLASSI["Pazzo temporale"]["assalto"]["seed"] == {"proc": 90, "seed": "Anello perfezionista"}
+          assert PROC_CLASSI["Evocatore del vero potere"]["combattimento"]["canto"]["proc"] == 1
+          assert PROC_CLASSI["Evocatore del vero potere"]["combattimento"]["canto"]["anello"] == "Anello superfortissimo ma proprio rotto sgravatissimo"
+          assert PROC_CLASSI["GunSlingher"]["combattimento"]["raffica"] == {"colpi_min": 1, "colpi_max": 6, "danno_per_colpo": 20}
+          assert PROC_CLASSI["GunSlingher"]["assalto"]["raffica_clone"] == {"colpi_min": 1, "colpi_max": 6, "danno_per_colpo": 60}
+          assert PROC_CLASSI["Arcidemone"]["combattimento"]["cura_nemica"]["atk"] == 4000
+          assert PROC_CLASSI["Big Game Hunter"]["combattimento"]["copia_agilita"]["attivo"] is True
+
+          nft = open("nft.py", encoding="utf-8").read()
+          assert "_turno_quarta_ondata_base = turno" in nft
+          assert "_assedio_quarta_ondata_base = assedio" in nft
+          assert "_pazzo_temporale_rng_state" in nft
+          assert "_canto_vero_potere_quarta" in nft
+          assert "_primo_alla_torre_usato" in nft
+          assert 'target == "Clone"' in nft
+          print("Validazione sei set OK")
+          PY
+          git diff --check
+
+      - name: Commit final changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/apply_sei_set.py .github/workflows/add_sei_set.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add liste.py bilanciamento.py frasi_set.py nft.py .github
+          git diff --cached --check
+          git commit -m "Aggiunge sei nuovi set"
+          git push origin feature/set-eroi-tempesta
