@@ -1,0 +1,75 @@
+name: Wiki procedurale
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "liste.py"
+      - "bilanciamento.py"
+      - "frasi_*.py"
+      - "nft.py"
+      - "turno_assalto.py"
+      - "wiki/**"
+      - ".github/workflows/wiki-pages.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "liste.py"
+      - "bilanciamento.py"
+      - "frasi_*.py"
+      - "nft.py"
+      - "turno_assalto.py"
+      - "wiki/**"
+      - ".github/workflows/wiki-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Genera wiki dai dati del gioco
+        run: |
+          python -m py_compile wiki/genera_wiki.py liste.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
+          python wiki/genera_wiki.py --output _site
+          test -s _site/index.html
+          test -s _site/data.json
+
+      - name: Carica artifact Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Configura Pages
+        uses: actions/configure-pages@v5
+
+      - name: Pubblica wiki
+        id: deployment
+        uses: actions/deploy-pages@v4
