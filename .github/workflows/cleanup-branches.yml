@@ -1,0 +1,86 @@
+name: Cleanup merged branches
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cleanup-branches.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Delete verified merged branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          branches=(
+            "eroi"
+            "feature/wiki-assalto-usabili"
+            "feature/wiki-navigabile-v2"
+            "feature/wiki-procedurale"
+            "feature/wiki-rifiniture-v3"
+            "feature/wiki-strutture-usabili"
+            "fix/lvmax-quattro-scaglioni"
+            "refactor/strutture-config"
+          )
+
+          for branch in "${branches[@]}"; do
+            echo "Deleting $branch"
+            code=$(curl -sS -o /tmp/delete-response -w "%{http_code}" \
+              -X DELETE \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/refs/heads/${branch}")
+
+            if [[ "$code" != "204" && "$code" != "404" && "$code" != "422" ]]; then
+              echo "Failed deleting $branch (HTTP $code)"
+              cat /tmp/delete-response
+              exit 1
+            fi
+          done
+
+      - name: Verify only main remains
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/branches?per_page=100" \
+            -o /tmp/branches.json
+
+          echo "Branches rimaste:"
+          jq -r '.[].name' /tmp/branches.json
+
+          count=$(jq '[.[].name | select(. != "main")] | length' /tmp/branches.json)
+          if [[ "$count" != "0" ]]; then
+            echo "Sono rimaste branch diverse da main. Interrompo senza auto-rimuovere il workflow."
+            exit 1
+          fi
+
+      - name: Remove this temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/cleanup-branches.yml
+          git commit -m "Rimuove workflow temporaneo di pulizia branch"
+          git push origin main
