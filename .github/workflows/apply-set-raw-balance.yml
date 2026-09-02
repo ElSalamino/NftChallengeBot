@@ -1,0 +1,52 @@
+name: Apply set raw balance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/apply-set-raw-balance.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Applica normalizzazione a liste.py
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('liste.py')
+          text = p.read_text(encoding='utf-8')
+          marker = '# --- BILANCIAMENTO RAW SET 1200: INIZIO ---'
+          if marker not in text:
+              text += '''\n\n# --- BILANCIAMENTO RAW SET 1200: INIZIO ---\n# Tutti i set usano lo stesso budget raw del cap: HP=1, ATK/DEF=4, AGI=20.\n# I valori sotto target vengono aumentati mantenendo il tema del set; nessun\n# set già sopra target viene ridotto.\nfrom set_raw_balance import (\n    SET_RAW_TARGET,\n    SET_RAW_WEIGHTS,\n    normalize_set_bonuses,\n)\n\nbonus, bonus_punteggio, bonus_punteggio_originale, bonus_tema = normalize_set_bonuses(\n    classi,\n    bonus,\n    armi,\n    armiextra,\n    protezioni,\n    protezioniextra,\n    target=SET_RAW_TARGET,\n)\n# --- BILANCIAMENTO RAW SET 1200: FINE ---\n'''
+              p.write_text(text, encoding='utf-8')
+          PY
+          python - <<'PY'
+          import liste
+          scores = liste.bonus_punteggio
+          assert len(scores) >= len(liste.classi)
+          assert min(scores[name] for name in liste.classi) >= liste.SET_RAW_TARGET
+          assert max(liste.bonus_punteggio_originale.values()) == 1200
+          print('Set:', len(liste.classi))
+          print('Target:', liste.SET_RAW_TARGET)
+          print('Min finale:', min(scores[name] for name in liste.classi))
+          print('Max finale:', max(scores[name] for name in liste.classi))
+          print('Sopra target per ceil:', sum(scores[name] > liste.SET_RAW_TARGET for name in liste.classi))
+          PY
+      - name: Commit
+        run: |
+          git config user.name "ElSalamino"
+          git config user.email "86099774+ElSalamino@users.noreply.github.com"
+          git add liste.py
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica necessaria"
+          else
+            git commit -m "Uniforma le raw stats dei set al budget 1200"
+            git push origin main
+          fi
