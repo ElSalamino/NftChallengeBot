@@ -70,6 +70,7 @@ print(f"{len(items)} oggetti, {len(sets)} set, {len(data['bosses'])} boss, {len(
 
 # PROBE TEMPORANEO: verrà rimosso prima del merge.
 src = (wiki.ROOT / "nft.py").read_text(encoding="utf-8")
+src_init = (wiki.ROOT / "__init__.py").read_text(encoding="utf-8")
 for fn in ("equiA", "unequiA", "equiP1", "unequiP1"):
     m = re.search(rf"def {fn}\(.*?(?=\ndef |\nasync def |\Z)", src, re.S)
     print(f"\n--- {fn} ---\n{m.group(0)[:5000] if m else 'NON TROVATA'}")
@@ -86,22 +87,15 @@ print(getattr(wiki.bilanciamento, "WEEKEND_MOD_CONFIG", {}))
 print("POOL", getattr(wiki.bilanciamento, "WEEKEND_MOD_POOL", []))
 print("\n--- EVENTI ---")
 print(getattr(wiki.liste, "eventi", {}))
-print("\n--- SCAGLIONI NEI POOL LOCATION ---")
-for loc, pool in getattr(wiki.liste, "pool", {}).items():
-    normalized = [wiki.base_item(x) for x in pool]
-    c = Counter(normalized)
-    if c.get("Scaglioni pesanti"):
-        print(loc, c["Scaglioni pesanti"], "/", len(normalized), "=", round(c["Scaglioni pesanti"]*100/len(normalized), 4), "%")
-print("\n--- SCAGLIONI ALTRE FONTI ---")
+print("\n--- SCAGLIONI PESANTI ALTRE FONTI ---")
 for boss, pool in getattr(wiki.liste, "premi_boss", {}).items():
     c = Counter(wiki.base_item(x) for x in pool)
     if c.get("Scaglioni pesanti"):
         print("boss", boss, c["Scaglioni pesanti"], "/", len(pool), round(c["Scaglioni pesanti"]*100/len(pool), 4), "%")
-for arena_name, pool in getattr(wiki.liste, "arenamod", {}).items():
-    c = Counter(wiki.base_item(x) for x in pool)
-    if c.get("Scaglioni pesanti"):
-        print("arena", arena_name, c["Scaglioni pesanti"], "/", len(pool), round(c["Scaglioni pesanti"]*100/len(pool), 4), "%")
-print("\n--- BLOCCO LVX/LVMAX ---")
+print("\n--- BLOCCO LVX/LVMAX DUNGEON ---")
 pos = src.find('if "LVX" in x')
 if pos < 0: pos = src.find("if 'LVX' in x")
-print(src[max(0,pos-3500):pos+5000] if pos >= 0 else "NON TROVATO")
+print(src[max(0,pos-2500):pos+3000] if pos >= 0 else "NON TROVATO")
+print("\n--- BLOCCO FORGIA NORMALE ---")
+pos = src_init.find('"El forgiator"')
+print(src_init[max(0,pos-6500):pos+2500] if pos >= 0 else "NON TROVATO")
