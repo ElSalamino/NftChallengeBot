@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Audit aggiuntivo wiki v4: usabili e descrizioni leggibili dell'assalto."""
+"""Audit wiki: usabili e descrizioni leggibili dell'assalto."""
 import run_wiki
 from frasi_usabili import FRASI_USABILI_TECNICHE
 
 wiki = run_wiki.wiki
 
-# Compatibilità con l'audit v3 già esistente: prima lo facciamo girare
-# integralmente anche sulla v4, poi aggiungiamo i vincoli nuovi.
+# Compatibilità con l'audit v3 già esistente.
 wiki.bilanciamento = wiki.v3.bilanciamento
 wiki.liste = wiki.v3.liste
 wiki.v2 = wiki.v3.v2
@@ -16,6 +15,7 @@ import validate_wiki  # noqa: F401,E402  - esegue l'audit v3 all'import
 
 data = wiki.build_data()
 errors = []
+wiki_version = int(data.get("meta", {}).get("wiki_version", 4))
 
 # --- Usabili --------------------------------------------------------------
 expected_usables = set(wiki.v3.liste.usabili)
@@ -41,23 +41,27 @@ for name in sorted(expected_usables):
     if not (item.get("usable_technical") or "").strip():
         errors.append(f"usabile senza descrizione tecnica: {name}")
 
-# encodeURIComponent non codifica l'apostrofo: il fix %27 deve essere presente
-# per rendere navigabili Dell'ambrosia e tutti i nomi analoghi negli onclick.
 if ".replace(/'/g,'%27')" not in wiki.HTML:
     errors.append("router wiki senza escape %27 per apostrofi")
 if "Effetto tecnico dell’usabile" not in wiki.HTML:
     errors.append("pagina item senza sezione tecnica degli usabili")
 
 # --- Assalto --------------------------------------------------------------
-if "Funzionamento tecnico completo" not in wiki.HTML:
-    errors.append("pagina struttura senza testo tecnico completo")
 if "modeTechnical" not in wiki.HTML:
-    errors.append("cambio modalità non aggiorna il testo tecnico")
-
-# I parametri grezzi devono restare nel JSON per audit, ma non essere mostrati
-# nella pagina struttura.
+    errors.append("cambio modalità non aggiorna il testo dell'effetto")
 if 'id="modeConfig"' in wiki.HTML:
     errors.append("pagina assalto espone ancora la configurazione grezza")
+
+if wiki_version >= 5:
+    if "Effetto della modalità" not in wiki.HTML:
+        errors.append("pagina struttura senza sezione Effetto della modalità")
+    if 'id="modeDesc"' in wiki.HTML:
+        errors.append("pagina struttura mostra ancora la descrizione duplicata della modalità")
+    if "Funzionamento tecnico completo" in wiki.HTML:
+        errors.append("pagina struttura usa ancora il vecchio blocco tecnico ridondante")
+else:
+    if "Funzionamento tecnico completo" not in wiki.HTML:
+        errors.append("pagina struttura v4 senza testo tecnico completo")
 
 for structure in data["assault"]:
     for mode in structure["modes"]:
@@ -71,30 +75,37 @@ for structure in data["assault"]:
             errors.append(f"{structure['name']} / {mode['name']}: lista parametri incompleta")
 
         if actual_text != expected_text:
-            errors.append(f"{structure['name']} / {mode['name']}: testo tecnico non sincronizzato")
+            errors.append(f"{structure['name']} / {mode['name']}: testo effetto non sincronizzato")
 
-        # Vietiamo esplicitamente la resa da sviluppatore nel testo giocatore.
         lowered = actual_text.lower()
         if "true" in lowered or "false" in lowered:
             errors.append(f"{structure['name']} / {mode['name']}: contiene True/False nel testo")
         if "=" in actual_text:
             errors.append(f"{structure['name']} / {mode['name']}: contiene assegnazioni grezze nel testo")
 
-        # Ogni parametro configurato deve produrre una frase comprensibile.
-        for row in expected_rows:
-            phrase = wiki._human_param(row["path"], row["value"])
-            if phrase not in actual_text:
-                errors.append(
-                    f"{structure['name']} / {mode['name']}: manca la frase per {row['path']}"
-                )
+        if wiki_version >= 5:
+            # Lo scaling globale resta nel JSON e nelle tabelle, ma non deve
+            # essere ripetuto nelle frasi giocatore.
+            if "Le statistiche base della struttura aumentano" in actual_text:
+                errors.append(f"{structure['name']} / {mode['name']}: ripete lo scaling globale per livello")
+        else:
+            # Compatibilità v4: ogni parametro aveva la sua frase dedicata.
+            for row in expected_rows:
+                phrase = wiki._human_param(row["path"], row["value"])
+                if phrase not in actual_text:
+                    errors.append(f"{structure['name']} / {mode['name']}: manca la frase per {row['path']}")
 
-# Regressioni esplicite segnalate dall'utente.
+# Regressioni esplicite sulle frasi che devono essere comprensibili.
 bersaglio = next((x for x in data["assault"] if x["name"] == "Bersaglio enorme"), None)
 if not bersaglio:
     errors.append("Bersaglio enorme mancante")
 else:
     for mode in bersaglio["modes"]:
-        if "20%" not in mode.get("technical", "") or "distrarre l'attaccante" not in mode.get("technical", ""):
+        text = mode.get("technical", "")
+        if wiki_version >= 5:
+            if "20%" not in text or "forzare l'attaccante a colpire il Bersaglio enorme" not in text:
+                errors.append(f"Bersaglio enorme / {mode['name']}: distrazione non spiegata chiaramente")
+        elif "20%" not in text or "distrarre l'attaccante" not in text:
             errors.append(f"Bersaglio enorme / {mode['name']}: non spiega il 20% di distrazione")
 
 muraglione = next((x for x in data["assault"] if x["name"] == "Muraglione extra"), None)
@@ -114,12 +125,34 @@ else:
         if missing:
             errors.append(f"Muraglione extra / {mode['name']}: variabili generali mancanti {sorted(missing)}")
 
+if wiki_version >= 5:
+    sedimento = next((x for x in data["assault"] if x["name"] == "Sedimento del cucciolo"), None)
+    if not sedimento:
+        errors.append("Sedimento del cucciolo mancante")
+    else:
+        for mode in sedimento["modes"]:
+            text = mode.get("technical", "")
+            if not all(token in text for token in ("10%", "HP dell'attaccante", "tra -2 e 10")):
+                errors.append(f"Sedimento del cucciolo / {mode['name']}: intervento della madre non spiegato")
+
+    cannoncino = next((x for x in data["assault"] if x["name"] == "Cannoncino"), None)
+    if not cannoncino:
+        errors.append("Cannoncino mancante")
+    else:
+        for mode in cannoncino["modes"]:
+            text = mode.get("technical", "")
+            if "drago" not in text.lower() or "+20 AGI" not in text:
+                errors.append(f"Cannoncino / {mode['name']}: effetto del drago non spiegato")
+
 if errors:
-    print("ERRORI WIKI V4:")
+    print("ERRORI WIKI:")
     for error in errors:
         print("-", error)
     raise SystemExit(1)
 
-print("Integrità wiki v4 OK")
+print("Integrità wiki OK")
 print(f"{len(expected_usables)} usabili con descrizione tecnica completa")
-print("Tutte le modalità d'assalto mantengono i parametri per audit e mostrano solo frasi leggibili.")
+if wiki_version >= 5:
+    print("Assalto: un solo testo per modalità, effetti raggruppati e scaling globale non ripetuto.")
+else:
+    print("Assalto v4 compatibile: parametri completi e frasi leggibili.")
