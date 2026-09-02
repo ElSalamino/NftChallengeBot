@@ -1,4 +1,4 @@
-name: Apply set raw balance
+name: Verify set raw balance
 
 on:
   push:
@@ -10,43 +10,55 @@ permissions:
   contents: write
 
 jobs:
-  patch:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Applica normalizzazione a liste.py
+      - name: Allinea commento e verifica regole
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('liste.py')
           text = p.read_text(encoding='utf-8')
-          marker = '# --- BILANCIAMENTO RAW SET 1200: INIZIO ---'
-          if marker not in text:
-              text += '''\n\n# --- BILANCIAMENTO RAW SET 1200: INIZIO ---\n# Tutti i set usano lo stesso budget raw del cap: HP=1, ATK/DEF=4, AGI=20.\n# I valori sotto target vengono aumentati mantenendo il tema del set; nessun\n# set già sopra target viene ridotto.\nfrom set_raw_balance import (\n    SET_RAW_TARGET,\n    SET_RAW_WEIGHTS,\n    normalize_set_bonuses,\n)\n\nbonus, bonus_punteggio, bonus_punteggio_originale, bonus_tema = normalize_set_bonuses(\n    classi,\n    bonus,\n    armi,\n    armiextra,\n    protezioni,\n    protezioniextra,\n    target=SET_RAW_TARGET,\n)\n# --- BILANCIAMENTO RAW SET 1200: FINE ---\n'''
-              p.write_text(text, encoding='utf-8')
+          old = '''# Tutti i set usano lo stesso budget raw del cap: HP=1, ATK/DEF=4, AGI=20.\n# I valori sotto target vengono aumentati mantenendo il tema del set; nessun\n# set già sopra target viene ridotto.'''
+          new = '''# Solo i set che hanno già almeno una raw stat usano il budget 1200 del cap:\n# HP=1, ATK/DEF=4, AGI=20. I set a zero restano intenzionalmente a zero.\n# I valori sotto target vengono aumentati mantenendo il mix originale; nessun\n# set già sopra target viene ridotto.'''
+          if old not in text:
+              raise SystemExit('Commento di bilanciamento atteso non trovato')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
           PY
           python - <<'PY'
           import liste
-          scores = liste.bonus_punteggio
-          assert len(scores) >= len(liste.classi)
-          assert min(scores[name] for name in liste.classi) >= liste.SET_RAW_TARGET
-          assert max(liste.bonus_punteggio_originale.values()) == 1200
-          print('Set:', len(liste.classi))
+
+          original = liste.bonus_punteggio_originale
+          final = liste.bonus_punteggio
+          zero = [n for n in liste.classi if original.get(n, 0) == 0]
+          raw = [n for n in liste.classi if original.get(n, 0) > 0]
+
+          assert zero, 'Nessun set raw-zero trovato: audit sospetto'
+          assert raw, 'Nessun set con raw stats trovato: audit sospetto'
+          assert all(final[n] == 0 for n in zero), [n for n in zero if final[n] != 0]
+          assert all(all(int(liste.bonus[n].get(s, 0)) == 0 for s in ('hp','atk','def','agi')) for n in zero)
+          assert all(final[n] >= liste.SET_RAW_TARGET for n in raw), [(n, final[n]) for n in raw if final[n] < liste.SET_RAW_TARGET]
+          assert all(final[n] >= original[n] for n in raw)
+
+          print('Set totali:', len(liste.classi))
+          print('Set senza raw stats lasciati a zero:', len(zero))
+          print('Set con raw stats normalizzati:', len(raw))
           print('Target:', liste.SET_RAW_TARGET)
-          print('Min finale:', min(scores[name] for name in liste.classi))
-          print('Max finale:', max(scores[name] for name in liste.classi))
-          print('Sopra target per ceil:', sum(scores[name] > liste.SET_RAW_TARGET for name in liste.classi))
+          print('Min set normalizzato:', min(final[n] for n in raw))
+          print('Max set normalizzato:', max(final[n] for n in raw))
+          print('Set normalizzati sopra 1200 per ceil:', sum(final[n] > liste.SET_RAW_TARGET for n in raw))
           PY
-      - name: Commit
+      - name: Commit commento corretto
         run: |
           git config user.name "ElSalamino"
           git config user.email "86099774+ElSalamino@users.noreply.github.com"
           git add liste.py
           if git diff --cached --quiet; then
-            echo "Nessuna modifica necessaria"
+            echo "Nessuna modifica al commento"
           else
-            git commit -m "Uniforma le raw stats dei set al budget 1200"
+            git commit -m "Documenta esclusione dei set senza raw stats"
             git push origin main
           fi
