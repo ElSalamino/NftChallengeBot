@@ -48,8 +48,8 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/run_wiki.py wiki/validate_wiki.py liste.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
-          python wiki/validate_wiki.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
+          python wiki/validate_wiki_v4.py
           python wiki/run_wiki.py --output _site
           test -s _site/index.html
           test -s _site/data.json
@@ -61,6 +61,9 @@ jobs:
           grep -q "Weekend, eventi e modificatori" _site/index.html
           grep -q "Scaglioni per LVMAX" _site/index.html
           grep -q "Statistiche LV0 → LVMAX" _site/index.html
+          grep -q "Effetto tecnico dell’usabile" _site/index.html
+          grep -q "Funzionamento tecnico completo" _site/index.html
+          grep -q "generale.distrazione_proc=20%" _site/index.html
 
       - name: Carica artifact Pages
         if: github.event_name != 'pull_request'
