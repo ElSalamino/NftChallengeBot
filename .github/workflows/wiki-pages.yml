@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "liste.py"
+      - "set_raw_balance.py"
       - "bilanciamento.py"
       - "frasi_*.py"
       - "nft.py"
@@ -17,6 +18,7 @@ on:
       - main
     paths:
       - "liste.py"
+      - "set_raw_balance.py"
       - "bilanciamento.py"
       - "frasi_*.py"
       - "nft.py"
@@ -48,7 +50,21 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
+          python - <<'PY'
+          import liste
+
+          originali = liste.bonus_punteggio_originale
+          finali = liste.bonus_punteggio
+          set_zero = [nome for nome in liste.classi if originali.get(nome, 0) == 0]
+          set_raw = [nome for nome in liste.classi if originali.get(nome, 0) > 0]
+
+          assert all(finali[nome] == 0 for nome in set_zero), [nome for nome in set_zero if finali[nome] != 0]
+          assert all(all(int(liste.bonus[nome].get(stat, 0)) == 0 for stat in ('hp', 'atk', 'def', 'agi')) for nome in set_zero)
+          assert all(finali[nome] >= liste.SET_RAW_TARGET for nome in set_raw), [(nome, finali[nome]) for nome in set_raw if finali[nome] < liste.SET_RAW_TARGET]
+          assert all(finali[nome] >= originali[nome] for nome in set_raw)
+          print(f"Raw set: {len(set_raw)} normalizzati; {len(set_zero)} intenzionalmente a zero")
+          PY
           python wiki/validate_wiki_v4.py
           python wiki/run_wiki.py --output _site
           test -s _site/index.html
@@ -63,6 +79,8 @@ jobs:
           grep -q "Statistiche LV0 → LVMAX" _site/index.html
           grep -q "Effetto tecnico dell’usabile" _site/index.html
           grep -q "Funzionamento tecnico completo" _site/index.html
+          grep -q "Punteggio raw" _site/index.html
+          grep -q "HP ×1 · ATK ×4 · DEF ×4 · AGI ×20" _site/index.html
           grep -q "20% di probabilità di distrarre l'attaccante" _site/index.html
           ! grep -q "generale.distrazione_proc=" _site/index.html
           ! grep -q "sistema.scaling.divisore_livello=" _site/index.html
