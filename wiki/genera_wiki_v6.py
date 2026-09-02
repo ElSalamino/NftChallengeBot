@@ -3,6 +3,11 @@
 """Wiki v6: chiarisce esattamente la Centrale di cura centralizzata."""
 from __future__ import annotations
 
+import argparse
+import json
+import shutil
+from pathlib import Path
+
 import genera_wiki_v5 as v5
 
 ROOT = v5.ROOT
@@ -71,13 +76,25 @@ def build_data():
 
 
 def main():
-    # Riusa il writer v5 sostituendo temporaneamente i dati generati.
-    original = v5.build_data
-    try:
-        v5.build_data = build_data
-        v5.main()
-    finally:
-        v5.build_data = original
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", default="_site")
+    args = parser.parse_args()
+    out = Path(args.output)
+    if not out.is_absolute():
+        out = ROOT / out
+    out.mkdir(parents=True, exist_ok=True)
+
+    data = build_data()
+    payload = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    (out / "index.html").write_text(HTML.replace("__DATA__", payload), encoding="utf-8")
+    (out / "data.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out / ".nojekyll").write_text("", encoding="utf-8")
+    assets = ROOT / "wiki" / "assets"
+    if assets.exists():
+        shutil.copytree(assets, out / "assets", dirs_exist_ok=True)
+
+    print("Wiki v6 generata:", out)
+    print(json.dumps(data["meta"]["counts"], ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
