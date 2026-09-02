@@ -48,8 +48,8 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py liste.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
-          python wiki/genera_wiki_v2.py --output _site
+          python -m py_compile wiki/genera_wiki_v2.py wiki/run_wiki.py liste.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
+          python wiki/run_wiki.py --output _site
           test -s _site/index.html
           test -s _site/data.json
           grep -q "Boss giornaliero" _site/index.html
