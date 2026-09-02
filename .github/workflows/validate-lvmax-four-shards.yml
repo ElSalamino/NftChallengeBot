@@ -1,0 +1,40 @@
+name: Valida LVMAX quattro scaglioni
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "nft.py"
+      - "wiki/**"
+      - ".github/workflows/wiki-pages.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Controlli
+        run: |
+          python -m py_compile nft.py wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/run_wiki.py wiki/validate_wiki.py
+          python wiki/validate_wiki.py
+          python wiki/run_wiki.py --output _site
+          python - <<'PY'
+          from pathlib import Path
+          src = Path('nft.py').read_text(encoding='utf-8')
+          required = [
+              '"Uno scaglione blu"',
+              '"Uno scaglione verde"',
+              '"Uno scaglione giallo"',
+              '"Uno scaglione nero"',
+          ]
+          assert 'if all(' in src
+          assert all(x in src for x in required)
+          wiki = Path('wiki/genera_wiki_v3.py').read_text(encoding='utf-8')
+          assert 'tutti e quattro gli scaglioni' in wiki
+          assert 'non consumati' in wiki
+          PY
+          git diff --check
