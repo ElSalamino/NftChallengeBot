@@ -1,4 +1,4 @@
-name: Verify set raw balance
+name: Publish set raw score
 
 on:
   push:
@@ -10,55 +10,65 @@ permissions:
   contents: write
 
 jobs:
-  verify:
+  patch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Allinea commento e verifica regole
+      - name: Inserisce punteggio raw nella wiki
         run: |
           python - <<'PY'
           from pathlib import Path
-          p = Path('liste.py')
+          p = Path('wiki/genera_wiki_v3.py')
           text = p.read_text(encoding='utf-8')
-          old = '''# Tutti i set usano lo stesso budget raw del cap: HP=1, ATK/DEF=4, AGI=20.\n# I valori sotto target vengono aumentati mantenendo il tema del set; nessun\n# set già sopra target viene ridotto.'''
-          new = '''# Solo i set che hanno già almeno una raw stat usano il budget 1200 del cap:\n# HP=1, ATK/DEF=4, AGI=20. I set a zero restano intenzionalmente a zero.\n# I valori sotto target vengono aumentati mantenendo il mix originale; nessun\n# set già sopra target viene ridotto.'''
-          if old not in text:
-              raise SystemExit('Commento di bilanciamento atteso non trovato')
-          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          old1 = '''    human_all = getattr(liste, "frasi_set", {})\n    approaches_all = getattr(liste, "Approccini", {})\n    rows = []'''
+          new1 = '''    human_all = getattr(liste, "frasi_set", {})\n    approaches_all = getattr(liste, "Approccini", {})\n    score_all = getattr(liste, "bonus_punteggio", {})\n    original_score_all = getattr(liste, "bonus_punteggio_originale", {})\n    rows = []'''
+          if old1 not in text:
+              raise SystemExit('Blocco set_data iniziale non trovato')
+          text = text.replace(old1, new1, 1)
+
+          old2 = '''            "bonus": v2.stat_dict(bonus),\n            "human": v2.clean_human(human_all.get(name, "")),'''
+          new2 = '''            "bonus": v2.stat_dict(bonus),\n            "raw_score": int(score_all.get(name, 0)),\n            "raw_score_original": int(original_score_all.get(name, 0)),\n            "human": v2.clean_human(human_all.get(name, "")),'''
+          if old2 not in text:
+              raise SystemExit('Blocco bonus set_data non trovato')
+          text = text.replace(old2, new2, 1)
+
+          old3 = "SET_DETAIL_JS = r'''function setDetail(name){const s=find(D.sets,name);if(!s)return missing(name);return head(s.name,'Composizione, approcci ed effetti del set.','Set')+`<div class=\"detail\"><div>${sectionTitle('Come si compone')}${chipLinks('item',s.components)}${sectionTitle('Effetto')}<div class=\"effect human\">${esc(s.human||'Descrizione narrativa non presente.')}</div><div class=\"effect\">${esc(s.technical||'Descrizione tecnica non presente.')}</div>${Object.values(s.bonus||{}).some(Number)?sectionTitle('Bonus grezzi')+stats(s.bonus):''}${s.approaches?.length?sectionTitle('Approcci disponibili')+chipLinks('approach',s.approaches):''}</div><aside class=\"sidebox\">${img('sets',s.name,'🧩')}</aside></div>`}'''"
+          new3 = "SET_DETAIL_JS = r'''function setDetail(name){const s=find(D.sets,name);if(!s)return missing(name);const scoreNote=s.raw_score===0?'Questo set non usa statistiche grezze: il suo bilanciamento deriva dagli effetti speciali.':`Target 1200 · HP ×1 · ATK ×4 · DEF ×4 · AGI ×20${s.raw_score>1200?' · valore sopra target dovuto all’arrotondamento per eccesso':''}.`;return head(s.name,'Composizione, approcci ed effetti del set.','Set')+`<div class=\"detail\"><div>${sectionTitle('Come si compone')}${chipLinks('item',s.components)}${sectionTitle('Effetto')}<div class=\"effect human\">${esc(s.human||'Descrizione narrativa non presente.')}</div><div class=\"effect\">${esc(s.technical||'Descrizione tecnica non presente.')}</div>${sectionTitle('Punteggio raw')}<div class=\"card\"><div style=\"font-size:28px;font-weight:800\">${esc(s.raw_score)}</div><div class=\"muted\">${esc(scoreNote)}</div></div>${Object.values(s.bonus||{}).some(Number)?sectionTitle('Bonus grezzi')+stats(s.bonus):''}${s.approaches?.length?sectionTitle('Approcci disponibili')+chipLinks('approach',s.approaches):''}</div><aside class=\"sidebox\">${img('sets',s.name,'🧩')}</aside></div>`}'''"
+          if old3 not in text:
+              raise SystemExit('SET_DETAIL_JS non trovato nella forma attesa')
+          text = text.replace(old3, new3, 1)
+
+          p.write_text(text, encoding='utf-8')
           PY
+
+          python wiki/run_wiki.py --output _site
+
           python - <<'PY'
-          import liste
+          import json
+          from pathlib import Path
 
-          original = liste.bonus_punteggio_originale
-          final = liste.bonus_punteggio
-          zero = [n for n in liste.classi if original.get(n, 0) == 0]
-          raw = [n for n in liste.classi if original.get(n, 0) > 0]
-
-          assert zero, 'Nessun set raw-zero trovato: audit sospetto'
-          assert raw, 'Nessun set con raw stats trovato: audit sospetto'
-          assert all(final[n] == 0 for n in zero), [n for n in zero if final[n] != 0]
-          assert all(all(int(liste.bonus[n].get(s, 0)) == 0 for s in ('hp','atk','def','agi')) for n in zero)
-          assert all(final[n] >= liste.SET_RAW_TARGET for n in raw), [(n, final[n]) for n in raw if final[n] < liste.SET_RAW_TARGET]
-          assert all(final[n] >= original[n] for n in raw)
-
-          print('Set totali:', len(liste.classi))
-          print('Set senza raw stats lasciati a zero:', len(zero))
-          print('Set con raw stats normalizzati:', len(raw))
-          print('Target:', liste.SET_RAW_TARGET)
-          print('Min set normalizzato:', min(final[n] for n in raw))
-          print('Max set normalizzato:', max(final[n] for n in raw))
-          print('Set normalizzati sopra 1200 per ceil:', sum(final[n] > liste.SET_RAW_TARGET for n in raw))
+          d = json.loads(Path('_site/data.json').read_text(encoding='utf-8'))
+          rows = d['sets']
+          zero = [s for s in rows if s.get('raw_score_original', 0) == 0]
+          raw = [s for s in rows if s.get('raw_score_original', 0) > 0]
+          assert len(rows) == 161
+          assert len(zero) == 134
+          assert len(raw) == 27
+          assert all(s['raw_score'] == 0 for s in zero)
+          assert all(s['raw_score'] >= 1200 for s in raw)
+          html = Path('_site/index.html').read_text(encoding='utf-8')
+          assert 'Punteggio raw' in html
+          assert 'HP ×1 · ATK ×4 · DEF ×4 · AGI ×20' in html
+          print('Wiki set verificata: 134 a zero, 27 normalizzati.')
           PY
-      - name: Commit commento corretto
+
+      - name: Commit wiki
         run: |
           git config user.name "ElSalamino"
           git config user.email "86099774+ElSalamino@users.noreply.github.com"
-          git add liste.py
-          if git diff --cached --quiet; then
-            echo "Nessuna modifica al commento"
-          else
-            git commit -m "Documenta esclusione dei set senza raw stats"
-            git push origin main
-          fi
+          git add wiki/genera_wiki_v3.py
+          git commit -m "Mostra il punteggio raw dei set nella wiki"
+          git push origin main
