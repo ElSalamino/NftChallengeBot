@@ -50,7 +50,7 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
           python - <<'PY'
           import liste
 
@@ -78,10 +78,10 @@ jobs:
           grep -q "Scaglioni per LVMAX" _site/index.html
           grep -q "Statistiche LV0 → LVMAX" _site/index.html
           grep -q "Effetto tecnico dell’usabile" _site/index.html
-          grep -q "Funzionamento tecnico completo" _site/index.html
+          grep -Eq "Funzionamento tecnico completo|Effetto della modalità" _site/index.html
           grep -q "Punteggio raw" _site/index.html
           grep -q "HP ×1 · ATK ×4 · DEF ×4 · AGI ×20" _site/index.html
-          grep -q "20% di probabilità di distrarre l'attaccante" _site/index.html
+          grep -Eq "20% di probabilità di distrarre l'attaccante|20% di probabilità di forzare l'attaccante a colpire il Bersaglio enorme" _site/index.html
           ! grep -q "generale.distrazione_proc=" _site/index.html
           ! grep -q "sistema.scaling.divisore_livello=" _site/index.html
           ! grep -q "Variabili tecniche" _site/index.html
