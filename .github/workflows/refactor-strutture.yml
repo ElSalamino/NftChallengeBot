@@ -28,8 +28,10 @@ jobs:
           from pathlib import Path
           for nome in ("bilanciamento.py", "turno_assalto.py", "nft.py"):
               p = Path(nome)
-              righe = p.read_text(encoding="utf-8").splitlines()
-              p.write_text("\n".join(r.rstrip() for r in righe) + "\n", encoding="utf-8")
+              righe = [r.rstrip() for r in p.read_text(encoding="utf-8").splitlines()]
+              while righe and not righe[-1]:
+                  righe.pop()
+              p.write_text("\n".join(righe) + "\n", encoding="utf-8")
           PY
 
       - name: Valida sorgenti
