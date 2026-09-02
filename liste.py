@@ -2468,3 +2468,25 @@ Boss["Franco est"] = {
     "Ap": "Base",
     "set": None,
 }
+
+
+# --- BILANCIAMENTO RAW SET 1200: INIZIO ---
+# Tutti i set usano lo stesso budget raw del cap: HP=1, ATK/DEF=4, AGI=20.
+# I valori sotto target vengono aumentati mantenendo il tema del set; nessun
+# set già sopra target viene ridotto.
+from set_raw_balance import (
+    SET_RAW_TARGET,
+    SET_RAW_WEIGHTS,
+    normalize_set_bonuses,
+)
+
+bonus, bonus_punteggio, bonus_punteggio_originale, bonus_tema = normalize_set_bonuses(
+    classi,
+    bonus,
+    armi,
+    armiextra,
+    protezioni,
+    protezioniextra,
+    target=SET_RAW_TARGET,
+)
+# --- BILANCIAMENTO RAW SET 1200: FINE ---
