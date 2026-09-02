@@ -1,0 +1,48 @@
+name: Clean refactor strutture
+
+on:
+  push:
+    branches:
+      - refactor/strutture-config
+
+permissions:
+  contents: write
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/strutture-config
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Ricrea diff pulito dalla base main
+        run: python .github/clean_strutture_refactor.py
+
+      - name: Valida
+        run: |
+          python -m py_compile nft.py turno_assalto.py bilanciamento.py liste.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
+          python .github/audit_frasi_set.py
+          python wiki/genera_wiki.py --output /tmp/wiki-check
+          test -s /tmp/wiki-check/index.html
+          git diff --check
+
+      - name: Rimuovi pyc e strumenti temporanei
+        run: |
+          git checkout origin/main -- __pycache__ || true
+          rm -f .github/clean_strutture_refactor.py .github/workflows/clean-strutture-refactor.yml
+          rm -f .github/refactor_strutture.py .github/workflows/refactor-strutture.yml
+          git diff --check
+
+      - name: Salva diff pulito
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Pulisce refactor configurazione strutture"
+          git push origin HEAD:refactor/strutture-config
