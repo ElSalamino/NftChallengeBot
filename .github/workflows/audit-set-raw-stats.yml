@@ -1,0 +1,62 @@
+name: Audit set raw stats
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/audit-set-raw-stats.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Calcola punteggi set
+        run: |
+          python - <<'PY'
+          import json
+          import liste
+
+          W = {'hp': 1, 'atk': 4, 'def': 4, 'agi': 20}
+          def num(v):
+              try: return float(v)
+              except Exception: return 0.0
+          def score(b):
+              return sum(num(b.get(k,0))*w for k,w in W.items())
+
+          # Mappa componenti base -> stats LV0/base, usata per capire il tema dei set a bonus zero.
+          collections = []
+          for name in ('armi','armiextra','protezioni','protezioniextra'):
+              collections.append(getattr(liste, name, {}))
+          item_stats = {}
+          for coll in collections:
+              for n, st in coll.items():
+                  base = str(n).split(' LV',1)[0]
+                  tok = str(n).split(' LV',1)[1] if ' LV' in str(n) else 'base'
+                  if base not in item_stats or tok in ('0','base'):
+                      item_stats[base] = st
+
+          rows=[]
+          for name in sorted(getattr(liste,'classi',{}), key=str.lower):
+              b=dict(getattr(liste,'bonus',{}).get(name,{}))
+              comp = list(getattr(liste,'classi',{}).get(name,[]) or [])
+              theme={k:0.0 for k in W}
+              for c in comp:
+                  st=item_stats.get(str(c).split(' LV',1)[0],{})
+                  for k in W: theme[k]+=num(st.get(k,0))
+              rows.append({'name':name,'bonus':{k:num(b.get(k,0)) for k in W},'score':score(b),'components':comp,'theme':theme})
+          scores=[r['score'] for r in rows]
+          print('SET_COUNT',len(rows))
+          print('MAX_SCORE',max(scores) if scores else 0)
+          print('MIN_SCORE',min(scores) if scores else 0)
+          print('DISTINCT_SCORES',sorted(set(scores)))
+          print('ROWS_JSON_START')
+          print(json.dumps(rows, ensure_ascii=False, separators=(',',':')))
+          print('ROWS_JSON_END')
+          PY
