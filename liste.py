@@ -2471,8 +2471,9 @@ Boss["Franco est"] = {
 
 
 # --- BILANCIAMENTO RAW SET 1200: INIZIO ---
-# Tutti i set usano lo stesso budget raw del cap: HP=1, ATK/DEF=4, AGI=20.
-# I valori sotto target vengono aumentati mantenendo il tema del set; nessun
+# Solo i set che hanno già almeno una raw stat usano il budget 1200 del cap:
+# HP=1, ATK/DEF=4, AGI=20. I set a zero restano intenzionalmente a zero.
+# I valori sotto target vengono aumentati mantenendo il mix originale; nessun
 # set già sopra target viene ridotto.
 from set_raw_balance import (
     SET_RAW_TARGET,
