@@ -1,0 +1,40 @@
+name: Fix Piccolo kraken una tantum
+
+on:
+  push:
+    branches:
+      - feature/wiki-rifiniture-v3
+    paths:
+      - ".github/workflows/fix-kraken-once.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/wiki-rifiniture-v3
+      - name: Correggi approccio Piccolo kraken
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('liste.py')
+          text = p.read_text(encoding='utf-8')
+          old = '"Piccolo kraken":["Base +","Aggressivo +", "Agile +"]'
+          new = '"Piccolo kraken":["Base +","Aggressivo+", "Agile +"]'
+          if text.count(old) != 1:
+              raise SystemExit(f'Occorrenze attese 1, trovate {text.count(old)}')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- liste.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add liste.py
+          git commit -m "Corregge approccio Piccolo kraken"
+          git push origin HEAD:feature/wiki-rifiniture-v3
