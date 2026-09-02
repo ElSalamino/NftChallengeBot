@@ -22,7 +22,15 @@ jobs:
           python-version: '3.12'
 
       - name: Applica refactor
-        run: python .github/refactor_strutture.py
+        run: |
+          python .github/refactor_strutture.py
+          python - <<'PY'
+          from pathlib import Path
+          for nome in ("bilanciamento.py", "turno_assalto.py", "nft.py"):
+              p = Path(nome)
+              righe = p.read_text(encoding="utf-8").splitlines()
+              p.write_text("\n".join(r.rstrip() for r in righe) + "\n", encoding="utf-8")
+          PY
 
       - name: Valida sorgenti
         run: |
