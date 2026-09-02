@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Audit aggiuntivo wiki v4: usabili e completezza parametri d'assalto."""
+"""Audit aggiuntivo wiki v4: usabili e descrizioni leggibili dell'assalto."""
 import run_wiki
 from frasi_usabili import FRASI_USABILI_TECNICHE
 
@@ -54,6 +54,11 @@ if "Funzionamento tecnico completo" not in wiki.HTML:
 if "modeTechnical" not in wiki.HTML:
     errors.append("cambio modalità non aggiorna il testo tecnico")
 
+# I parametri grezzi devono restare nel JSON per audit, ma non essere mostrati
+# nella pagina struttura.
+if 'id="modeConfig"' in wiki.HTML:
+    errors.append("pagina assalto espone ancora la configurazione grezza")
+
 for structure in data["assault"]:
     for mode in structure["modes"]:
         expected_text, expected_rows = wiki._structure_technical(structure["name"], mode["name"])
@@ -68,11 +73,20 @@ for structure in data["assault"]:
         if actual_text != expected_text:
             errors.append(f"{structure['name']} / {mode['name']}: testo tecnico non sincronizzato")
 
-        # Ogni variabile deve comparire letteralmente nel testo mostrato.
+        # Vietiamo esplicitamente la resa da sviluppatore nel testo giocatore.
+        lowered = actual_text.lower()
+        if "true" in lowered or "false" in lowered:
+            errors.append(f"{structure['name']} / {mode['name']}: contiene True/False nel testo")
+        if "=" in actual_text:
+            errors.append(f"{structure['name']} / {mode['name']}: contiene assegnazioni grezze nel testo")
+
+        # Ogni parametro configurato deve produrre una frase comprensibile.
         for row in expected_rows:
-            token = f"{row['path']}={wiki._display_param(row['path'], row['value'])}"
-            if token not in actual_text:
-                errors.append(f"{structure['name']} / {mode['name']}: manca nel testo {token}")
+            phrase = wiki._human_param(row["path"], row["value"])
+            if phrase not in actual_text:
+                errors.append(
+                    f"{structure['name']} / {mode['name']}: manca la frase per {row['path']}"
+                )
 
 # Regressioni esplicite segnalate dall'utente.
 bersaglio = next((x for x in data["assault"] if x["name"] == "Bersaglio enorme"), None)
@@ -80,8 +94,8 @@ if not bersaglio:
     errors.append("Bersaglio enorme mancante")
 else:
     for mode in bersaglio["modes"]:
-        if "generale.distrazione_proc=20%" not in mode.get("technical", ""):
-            errors.append(f"Bersaglio enorme / {mode['name']}: non mostra il 20% di distrazione")
+        if "20%" not in mode.get("technical", "") or "distrarre l'attaccante" not in mode.get("technical", ""):
+            errors.append(f"Bersaglio enorme / {mode['name']}: non spiega il 20% di distrazione")
 
 muraglione = next((x for x in data["assault"] if x["name"] == "Muraglione extra"), None)
 if not muraglione:
@@ -108,4 +122,4 @@ if errors:
 
 print("Integrità wiki v4 OK")
 print(f"{len(expected_usables)} usabili con descrizione tecnica completa")
-print("Tutte le modalità d'assalto includono scaling + variabili generali + variabili specifiche nel testo.")
+print("Tutte le modalità d'assalto mantengono i parametri per audit e mostrano solo frasi leggibili.")
