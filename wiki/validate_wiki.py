@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Controlli di integrità sui collegamenti della wiki procedurale."""
 import re
+from collections import Counter
 import run_wiki
 
 wiki = run_wiki.wiki
@@ -85,3 +86,22 @@ print(getattr(wiki.bilanciamento, "WEEKEND_MOD_CONFIG", {}))
 print("POOL", getattr(wiki.bilanciamento, "WEEKEND_MOD_POOL", []))
 print("\n--- EVENTI ---")
 print(getattr(wiki.liste, "eventi", {}))
+print("\n--- SCAGLIONI NEI POOL LOCATION ---")
+for loc, pool in getattr(wiki.liste, "pool", {}).items():
+    normalized = [wiki.base_item(x) for x in pool]
+    c = Counter(normalized)
+    if c.get("Scaglioni pesanti"):
+        print(loc, c["Scaglioni pesanti"], "/", len(normalized), "=", round(c["Scaglioni pesanti"]*100/len(normalized), 4), "%")
+print("\n--- SCAGLIONI ALTRE FONTI ---")
+for boss, pool in getattr(wiki.liste, "premi_boss", {}).items():
+    c = Counter(wiki.base_item(x) for x in pool)
+    if c.get("Scaglioni pesanti"):
+        print("boss", boss, c["Scaglioni pesanti"], "/", len(pool), round(c["Scaglioni pesanti"]*100/len(pool), 4), "%")
+for arena_name, pool in getattr(wiki.liste, "arenamod", {}).items():
+    c = Counter(wiki.base_item(x) for x in pool)
+    if c.get("Scaglioni pesanti"):
+        print("arena", arena_name, c["Scaglioni pesanti"], "/", len(pool), round(c["Scaglioni pesanti"]*100/len(pool), 4), "%")
+print("\n--- BLOCCO LVX/LVMAX ---")
+pos = src.find('if "LVX" in x')
+if pos < 0: pos = src.find("if 'LVX' in x")
+print(src[max(0,pos-3500):pos+5000] if pos >= 0 else "NON TROVATO")
