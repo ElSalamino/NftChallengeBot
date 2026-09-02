@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Controlli di integrità sui collegamenti della wiki procedurale."""
+import re
 import run_wiki
 
 wiki = run_wiki.wiki
@@ -65,3 +66,22 @@ if errors:
 
 print("Integrità wiki OK")
 print(f"{len(items)} oggetti, {len(sets)} set, {len(data['bosses'])} boss, {len(enemies)} nemici, {len(locations)} location")
+
+# PROBE TEMPORANEO: verrà rimosso prima del merge.
+src = (wiki.ROOT / "nft.py").read_text(encoding="utf-8")
+for fn in ("equiA", "unequiA", "equiP1", "unequiP1"):
+    m = re.search(rf"def {fn}\(.*?(?=\ndef |\nasync def |\Z)", src, re.S)
+    print(f"\n--- {fn} ---\n{m.group(0)[:5000] if m else 'NON TROVATA'}")
+print("\n--- TAVOLO ---")
+for coll in ("armi", "armiextra", "protezioni", "protezioniextra"):
+    d = getattr(wiki.liste, coll, {})
+    print(coll, {k:v for k,v in d.items() if str(k).startswith("Un tavolo speziato")})
+print("\n--- APPROCCI ---")
+print(getattr(wiki.liste, "Approcci", {}))
+print("\n--- NUCLEI ---")
+print(getattr(wiki.bilanciamento, "NUCLEI_CONFIG", {}))
+print("\n--- WEEKEND ---")
+print(getattr(wiki.bilanciamento, "WEEKEND_MOD_CONFIG", {}))
+print("POOL", getattr(wiki.bilanciamento, "WEEKEND_MOD_POOL", []))
+print("\n--- EVENTI ---")
+print(getattr(wiki.liste, "eventi", {}))
