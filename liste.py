@@ -847,7 +847,7 @@ Approccini = {"Esperto di animali":["OrsoDruido","Dragone delle stelle","Ratto d
     "Dannato":["Aggressivo","Difensivo","Spinto"],
     "Dipper":["Spavaldo","Conservativo","Malevolo"],
 "Terrore delle ombre":["Vendicativo","Rabbioso","Spinto"],
-    "Oracolo del buio":["Ingannevole","Difensivo","Agile"],"Re del raaave":["Vendicativo","Spavaldo","Statico"],"Piccolo kraken":["Base +","Aggressivo +", "Agile +"],"Pescatore di balene":["Autorevole","Spinto","Rischioso"],
+    "Oracolo del buio":["Ingannevole","Difensivo","Agile"],"Re del raaave":["Vendicativo","Spavaldo","Statico"],"Piccolo kraken":["Base +","Aggressivo+", "Agile +"],"Pescatore di balene":["Autorevole","Spinto","Rischioso"],
               'Pescatore': ['Aggressivo', 'Rischioso', "Schivo"],
                'Campione del sole': ['Schivo', 'Conservativo','Spavaldo'],
                'Cercatore di reliquie': ['Agile', 'Conservativo', 'Spinto'],

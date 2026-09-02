@@ -1,20 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Entry point robusto per la wiki navigabile."""
-import genera_wiki_v2 as wiki
+"""Entry point della wiki procedurale pubblicata su GitHub Pages."""
+import genera_wiki_v3 as wiki
 
+# Il generatore v3 riusa alcune raccolte del v2: forza anche lì l'elenco
+# dei set già filtrato, così eventuali chiavi storiche None non entrano
+# nell'ordinamento del catalogo.
+wiki.v2.set_names = wiki._valid_set_names
 
-def set_names_validi():
-    nomi = (
-        set(getattr(wiki.liste, "classi", {}))
-        | set(getattr(wiki.liste, "bonus", {}))
-        | set(getattr(wiki.bilanciamento, "PROC_CLASSI", {}))
-        | set(wiki.FRASI_SET_TECNICHE)
-    )
-    return sorted((nome for nome in nomi if isinstance(nome, str) and nome.strip()), key=str.lower)
-
-
-wiki.set_names = set_names_validi
 
 if __name__ == "__main__":
     wiki.main()

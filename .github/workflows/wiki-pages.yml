@@ -48,7 +48,7 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/run_wiki.py wiki/validate_wiki.py liste.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/run_wiki.py wiki/validate_wiki.py liste.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
           python wiki/validate_wiki.py
           python wiki/run_wiki.py --output _site
           test -s _site/index.html
@@ -56,6 +56,11 @@ jobs:
           grep -q "Boss giornaliero" _site/index.html
           grep -q "Statistiche a ogni livello" _site/index.html
           grep -q "Casa nemici dungeon" _site/index.html
+          grep -q "Approcci" _site/index.html
+          grep -q "Nuclei" _site/index.html
+          grep -q "Weekend, eventi e modificatori" _site/index.html
+          grep -q "Scaglioni per LVMAX" _site/index.html
+          grep -q "Statistiche LV0 → LVMAX" _site/index.html
 
       - name: Carica artifact Pages
         if: github.event_name != 'pull_request'
