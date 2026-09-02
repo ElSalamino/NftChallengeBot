@@ -3921,7 +3921,15 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                     and "Fabbro"
                     in player[username]["dungeon"]["mostri"]):  
                     stanza = "Fabbro"
-                    if is_in(["Uno scaglione blu","Uno scaglione verde","Uno scaglione giallo","Uno scaglione nero"], list(player[username]["zaino"])):
+                    if all(
+                        player[username]["zaino"].get(scaglione, 0) > 0
+                        for scaglione in [
+                            "Uno scaglione blu",
+                            "Uno scaglione verde",
+                            "Uno scaglione giallo",
+                            "Uno scaglione nero",
+                        ]
+                    ):
                         text += "Il fabbro vede gli scaglioni del medaglione celeste intorno a te e capisce."
                         male = True
                         for x in player[username]["zaino"]:
