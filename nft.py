@@ -678,7 +678,7 @@ def rissa(picchiatori):
     scolte = ["","","","","","","","","",""," ma qui le risse non si fanno da sole!"," ma il potere di cose non lo permette"," oppure no",", ma non finisce qui per il disgraziat*!",", ma evita tutto",", ciò non lo tange!"]
     while True:
         if len(picchiatori) == 1:
-
+            
             break
         primo = random.choice(list(picchiatori))
         while True:
@@ -707,7 +707,7 @@ def pairwise(it):
     listone = []
     lista = []
     rep = 0
-
+    
     for x in it:
 
         lista.append(x)
@@ -782,7 +782,7 @@ def search(test_list, subs):
     rep = list()
     parts = subs.split(" ")
     for a in test_list:
-
+        
         check = len(parts)
         value = 0
         for part in parts:
@@ -837,17 +837,17 @@ def incarico_premi(scelte):
         v = list()
         n = list()
         for x in scelte:
-
+            
             recap[x] = scelte.count(x)
             if x not in v:
                 v.append(x)
             if scelte.count(x) not in n:
                 n.append(scelte.count(x))
-
+        
         for g in ["Cercare una caverna","Cercare cibo",'Cercare acqua',"Fare da palo","Andare in gruppo","Ignora","Curarlo da se","Accendere il fuoco","Foraggiare la legna","Trovare la via","Dividersi","Vedere la zona circostante","Creare le tende","Chiamare aiuti","Lasciarlo in pace","Soccombere nella neve"]:
             if g not in recap:
                 recap[g] = 0
-
+            
         if len(v) == 18:
             return 'Nucleo demoniaco instabile',"Genialità"
 
@@ -860,7 +860,7 @@ def incarico_premi(scelte):
         elif recap["Foraggiare la legna"] == 4 and recap["Creare le tende"] == 2:
             return 'Nucleo terrestre instabile',"Preparazione"
 
-
+        
         elif recap["Lasciarlo in pace"] >= 3 and recap["Soccombere nella neve"] >=3:
             return 'Nucleo demoniaco instabile',"Odio"
 
@@ -870,7 +870,7 @@ def incarico_premi(scelte):
         elif recap["Cercare una caverna"] >= 2 and recap["Ignora"] >= 2 and  recap["Curarlo da se"] >= 3:
             return 'Nucleo marittimo instabile',"Premura"
 
-        elif n == [1,2] or n == [2,1]:
+        elif n == [1,2] or n == [2,1]:        
             return 'Nucleo terrestre instabile',"Ricerca"
 
         elif "Accendere il fuoco" in v and recap["Accendere il fuoco"] >= 3 and recap["Cercare cibo"] >= 3:
@@ -882,7 +882,7 @@ def incarico_premi(scelte):
         elif recap["Andare in gruppo"] >= 2 and recap["Cercare acqua"] >= 2 and recap["Trovare la via"] >= 2:
             return "Nucleo di bacon instabile","Conoscenza"
 
-
+        
         elif 2 in n and 3 in n and 4 in n:
             return 'Nucleo elettrico instabile',"Schematicità"
 
@@ -897,13 +897,13 @@ def incarico_premi(scelte):
 
         elif recap["Curarlo da se"] >= 4:
             return 'Nucleo elettrico instabile',"Premura"
-
+        
         elif recap["Creare le tende"] <= 1 and recap["Trovare la via"] >= 3:
             return 'Nucleo elettrico instabile',"Sbrigatività"
-
+        
         elif recap["Vedere la zona circostante"] >= 1 and recap["Trovare la via"] >= 3:
             return 'Nucleo elettrico instabile',"Lungimiranza"
-
+        
         elif 4 in n:
             return 'Nucleo marittimo instabile',"Organizzazione"
 
@@ -922,12 +922,12 @@ def incarichiamo(cla,clan,player,app):
                     except:
                         pass
                 clan[cla].pop("incarico")
-
+                
             else:
-
+                
                 elapsed = time.time() - clan[cla]["incarico"]["ultima"]
                 timecc = round(elapsed//60)
-
+                
                 if timecc >= 35: #2100
                     if len(clan[cla]["incarico"]["mancano"]) >= len(clan[cla]["incarico"]["partecipanti"]) and int(clan[cla]["incarico"]["scelta"]) < 7:
                         scelta = int(clan[cla]["incarico"]["scelta"])
@@ -936,8 +936,8 @@ def incarichiamo(cla,clan,player,app):
                         for appz in esp[scelta]:
                             bottoni.append([InlineKeyboardButton(appz, callback_data=f"inca_{appz}")])
                         casuale = random.choice(clan[cla]["incarico"]["partecipanti"])
-
-
+                        
+                       
 
                         reply_markup = InlineKeyboardMarkup(bottoni)
                         testi = {1:"""Arrivati al monte iniziate la scalata, raggiunti i 9743 m di altitudine vi fate in un pochino stanchini...\nDecidete che è ora di fare un campo base ma non è che il tempo sia esattamente favorevole, potete provare a raccattare tutto il necessario ma anche concentrarsi in molti su qualcosa può avere i suoi lati positivi.""",
@@ -949,14 +949,14 @@ def incarichiamo(cla,clan,player,app):
 
                         testo = testi[scelta]
                         for g in clan[cla]["incarico"]["partecipanti"]:
-
+                            
                             try:
                                 app.send_message(g,testo,reply_markup=reply_markup)
                             except:
                                 pass
                         clan[cla]["incarico"]["ultima"] = time.time()
                         clan[cla]["incarico"]["scelta"] = int(clan[cla]["incarico"]["scelta"]) + 1
-
+                        
                     if len(clan[cla]["incarico"]["mancano"]) >= len(clan[cla]["incarico"]["partecipanti"]) and int(clan[cla]["incarico"]["scelta"]) == 7:
                         a = incarico_premi(clan[cla]["incarico"]["scelte"])
                         premio =  a[0]
@@ -978,25 +978,25 @@ def incarichiamo(cla,clan,player,app):
     "Tutto o niente":f"Gready quanto basta dove serve ma non ovunque, mi siete piaciuti.\nIl nucleo varia in {premio} per voi",
     "Schematicità":f"Ordine e rigore in un esplorazione assurda, davvero interessante, complimenti.\n{premio} è un onore per voi.",
     "Banalità":f"Una mossa un pò così, siete andati sul sicuro...\nPotevate puntare più in alto ma al nucleo non importa, che diventa così {premio}"}
-
-
+                        
+                        
                         if seme in frasi:
                             testo = frasi[seme]
                         else:
                             testo = seme
-
+                        
                         if premio in nuclei:
                             pino = random.choice(clan[cla]["incarico"]["partecipanti"])
                             player[pino]["zaino"][premio] = 1
                             testo += f"\n{pino} prende il nucleo felice e contento"
-
+                        
                         for g in clan[cla]["incarico"]["partecipanti"]:
-
+                            
                             try:
                                 app.send_message(g,testo)
                             except:
                                 pass
-
+                        
                         clan[cla].pop("incarico")
 
 
@@ -1023,8 +1023,8 @@ async def gestione_risse(message,app,trader,mediotourizzati,player,scelta,userna
                 except:
                     pass
             await message.answer("Fatta")
-
-
+    
+            
     else:
             if username in trader["rissa"]:
                 trader["rissa"].remove(username)
@@ -1061,14 +1061,14 @@ async def gestione_risse(message,app,trader,mediotourizzati,player,scelta,userna
                     except FloodWait as e:
                         pass
                 await message.answer("Unito")
-
+                
 async def make_party_inline(scelta,player,username,clan,message,app):
     cla = scelta.split("_")[1]
     if cla ==  player[username]["team"]:
             if "incarico" in clan[cla]:
                 await message.message.edit("Non puoi lasciare vuoto il villaggio!")
             else:
-
+                
                 if username in clan[cla]["pronti"]:
                     clan[cla]["pronti"].remove(username)
                 else:
@@ -1096,23 +1096,23 @@ async def incarico(scelta,player,username,clan,message,app):
             if username not in clan[cla]["incarico"]["mancano"]:
                 clan[cla]["incarico"]["scelte"].append(scelta)
                 clan[cla]["incarico"]["mancano"].append(username)
-                if len( clan[cla]["incarico"]["mancano"]) >= len( clan[cla]["incarico"]["partecipanti"]):
+                if len( clan[cla]["incarico"]["mancano"]) >= len( clan[cla]["incarico"]["partecipanti"]):                    
                     for h in clan[cla]["incarico"]["partecipanti"]:
                         try:
                             await app.send_message(h,"Vi siete organizzati, è ora di agire!")
                         except:
                             pass
                         clan[cla]["incarico"]["ultima"] = time.time()
-
-
+                    
+                    
                 await message.message.edit(message.message.text + f"\nDecidi {scelta}, attendiamo il resto del gruppo...")
             else:
                 await message.message.edit(message.message.text)
-
+        
     else:
             await message.message.delete()
     await message.answer(scelta)
-
+    
 
 
 async def suggerimenti_inline(scelta,username,message,trader,app):
@@ -1129,7 +1129,7 @@ async def suggerimenti_inline(scelta,username,message,trader,app):
         except:
                 plus = 0
         if 1 == 1:
-
+                
             if azione == "Chiudi" and username == "ElSalamino":
                     await message.message.edit(message.message.text + "\nChiuso!")
                     await app.send_message(trader["Suggerimenti"][idx]["Creatore"],f"Chiuso il suggerimento {idx}!")
@@ -1137,18 +1137,18 @@ async def suggerimenti_inline(scelta,username,message,trader,app):
                     if azione != "Chiudi":
                         trader["Suggerimenti"][idx]["Votanti"][username] = azione
                     bottoni = list()
-
+                    
                     bottoni.append([InlineKeyboardButton("1", callback_data=f"suggerisci*1_{idx}"),InlineKeyboardButton("2", callback_data=f"suggerisci*2_{idx}")])
                     bottoni.append([InlineKeyboardButton("3", callback_data=f"suggerisci*3_{idx}"),InlineKeyboardButton("4", callback_data=f"suggerisci*4_{idx}")])
                     bottoni.append([InlineKeyboardButton("5", callback_data=f"suggerisci*5_{idx}"),])
                     bottoni.append([InlineKeyboardButton("Chiudi", callback_data=f"suggerisci*Chiudi_{idx}")])
-
+                    
                     reply_markup = InlineKeyboardMarkup(bottoni)
                     valoremax= 5
                     SCORE = 0
                     for g in trader["Suggerimenti"][idx]["Votanti"]:
                         SCORE += int(trader["Suggerimenti"][idx]["Votanti"][g])
-                    inp = SCORE / len(trader["Suggerimenti"][idx]["Votanti"])
+                    inp = SCORE / len(trader["Suggerimenti"][idx]["Votanti"])                    
                     h = list()
                     for g in range(10):
                         if inp == 0:
@@ -1162,8 +1162,8 @@ async def suggerimenti_inline(scelta,username,message,trader,app):
                     voto = ""
                     valuelune = {1:"🌕",0.75:"🌖",0.5:"🌗",.25:"🌘",0.0:"🌑"}
                     for g in h:
-                        voto += valuelune[g]
-                    voto += "🌑" * (valoremax - len(voto))
+                        voto += valuelune[g]      
+                    voto += "🌑" * (valoremax - len(voto))                
 
                     try:
                         await message.message.edit(message.message.text.split("|")[0] + "| " + str(voto), reply_markup = reply_markup)
@@ -1174,14 +1174,14 @@ async def suggerimenti_inline(scelta,username,message,trader,app):
         except:
                 pass
 
-
+  
 async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,inabilitati):
     target = scelta
-    if 1 == 1:
+    if 1 == 1:   
         if player[message.from_user.username]["team"] != None:
             other_time = last_assalto.get(username,1)
             elapsed = time.time() - other_time
-
+            
             user = player[username]
             if player[username]["setta"]["benedizione"] == 'Gufo':
                 a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
@@ -1197,7 +1197,7 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                         nemico = clan[user["team"]]["nemico"]
                         if len(nemico) != 0 and g:
                             if 2 == 2:
-                                if 4 == 4:
+                                if 4 == 4:                                    
                                     ordine = clan[user["team"]]["orderN"]
                                     giocatore = copy.deepcopy(player[username]["scheda"])
                                     giocatore["incantamenti"] = get_ench(player[username])
@@ -1213,11 +1213,11 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                         serv *= proc_val("Anima della festa", "assalto", "last", "moltiplicatore")
                                     if matx < proc_val("Eroe caduto", "assalto", "supporto_clan", "compagni_soglia") and giocatore["set"] == 'Eroe caduto':
                                         serv += proc_val("Eroe caduto", "assalto", "supporto_clan", "serv_bonus_nft")
-
+                                        
                                     if giocatore["set"] == 'Eroe della rivolta':
                                         serv = serv * proc_val("Eroe della rivolta", "assalto", "supporto_clan", "serv_mul")
                                     if player[username]["setta"]["benedizione"] == 'Orso polare' and matx > 2:
-
+                                        
                                         a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"] /100))
                                         serv += (a/4)
                                     if player[username]["setta"]["benedizione"] == 'Kaimano' and matx <= 2:
@@ -1225,11 +1225,11 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                         serv += (a/4)
                                     bostabile = ["def", "atk", "agi"]
                                     for stat in bostabile:
-
+    
                                         giocatore[stat] = round(giocatore[stat] + (giocatore[stat] * (serv / 12)))
-
+                                        
                                     classe(giocatore,giocatore["set"],bonus)
-
+                                    
                                     output = messaggio_giallo + assedio(player,
                                         giocatore,
                                         nemico,
@@ -1239,7 +1239,7 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                         clan,
                                         trader["meteo"][player[username]["location"]],
                                         clan[clan[user["team"]]["inguerra"]]["setting"]
-
+                                        
                                     )
                                     output += f"\n{omini_reali} persone assaltano con te!"
                                     if giallini_attivi:
@@ -1250,13 +1250,13 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                             player[username]["zaino"]["Gettone arena"] += 1
                                         except:
                                             player[username]["zaino"]["Gettone arena"] = 1
-
+                                            
                                         player[username]["aigettoni"]["assalti"] = 0
                                         output += "\nA terra trovi un gettone arena!"
                                     controllo_effetti_assalto(username,player)
                                     clan[user["team"]]["last"][username] = time.time()
-
-
+                                    
+                                    
                                     if (
                                         "Ottima kill" not in player[username]["obbiettivi"]
                                         and "E' andata!!" in output
@@ -1302,7 +1302,7 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                         for appz in [target]:
                                             bottoni.append([InlineKeyboardButton("Ancora!", callback_data=f"ancora_{appz}")])
                                         reply_markup = InlineKeyboardMarkup(bottoni)
-
+                                        
                                         try:
                                             await message.message.edit(text = output,reply_markup=reply_markup)
                                         except:
@@ -1337,7 +1337,7 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                             )
                                         except:
                                             pass
-
+                                        
                                     if "fatto" in giocatore:
                                         try:
                                             clan[user["team"]]["danno"][
@@ -1361,15 +1361,15 @@ async def riassalto(scelta,username,message,trader,clan,app,player,last_assalto,
                                             except:
                                                 pass
                         else:
-                           await message.message.edit("Non è proprio il momento adatto per assaltare")
+                           await message.message.edit("Non è proprio il momento adatto per assaltare") 
                     else:
                         await message.message.edit("Sei ancora morto...")
                 else:
                     await message.message.edit("Non sei in guerra!")
             else:
-
+                
                 try:
-                    await message.answer("Aspetta un attimo!")
+                    await message.answer("Aspetta un attimo!") 
                 except:
                     pass
         else:
@@ -1382,7 +1382,7 @@ async def muoveeere(scelta,location,player,message,app, username,trader):
 
         elapsed = now - other_time
         ccc = tempo_movimento_corrente(player, username, trader)
-
+        
         if elapsed > ccc:
             if scelta in move[player[username]["location"]] or player[username]["location"] == "Hub":
                 player[username]["last"] = time.time()
@@ -1400,14 +1400,14 @@ async def muoveeere(scelta,location,player,message,app, username,trader):
                             text=f"Riprova!",
                     )
         else:
-
+            
             ty_res = time.gmtime(ccc - elapsed)
             tempo = time.strftime("%H:%M:%S", ty_res)
             await app.edit_message_text(
                             chat_id=message.message.chat.id,
                             message_id=message.message.message_id,
                             text=f"Devi aspettare ancora {tempo} per muoverti!",
-                    )
+                    ) 
 
 async def commerciante_inline(scelta,player,username,app,message):
     if 1 == 1:
@@ -1445,10 +1445,10 @@ async def commerciante_inline(scelta,player,username,app,message):
                                 player[username]["zaino"]["Gettone arena"] += 1
                             except:
                                 player[username]["zaino"]["Gettone arena"] = 1
-
+                                
                             player[username]["aigettoni"]["commerci"] = 0
                             tisto += "\nTieni ioltre questo gettone arena, a me non serve!"
-
+                        
                         await app.edit_message_text(
                             chat_id=message.message.chat.id,
                             message_id=message.message.message_id,
@@ -1514,7 +1514,7 @@ async def cambio_approccio(scelta,player,username,app,message):
             player[username]["scheda"]["Ap"] = scelta
             if "Approcci" not in player[username]:
                 player[username]["Approcci"] = dict()
-            player[username]["Approcci"][idx] = scelta
+            player[username]["Approcci"][idx] = scelta 
             esito = f"Hai scelto {scelta}!\n"
             try:
                 text =message.message.text + "\n" + esito
@@ -1544,7 +1544,7 @@ def split_list(lst, n):
     Split a list into n parts
     """
     return [lst[i::n] for i in range(n)]
-
+      
 async def cambio_not(scelta,player,username,app,message):
     if 1 == 1:
         if player[username]["notifiche"][scelta] == "no":
@@ -1552,7 +1552,7 @@ async def cambio_not(scelta,player,username,app,message):
         elif player[username]["notifiche"][scelta] == "si":
             player[username]["notifiche"][scelta] = "no"
 
-
+        
         testo = "Centro gestione notifche:\n"
         bottoni = list()
         notifichez = player[username]["notifiche"]
@@ -1580,8 +1580,8 @@ async def cambio_not(scelta,player,username,app,message):
                         sz = "🔇"
                 a = f"{x[0]} {sz}" + (((15 - len(f"{x[0]}{sz}")) * " "))
                 testo += f"{a}| Soon...\n"
-
-
+                    
+                    
 
         reply_markup = InlineKeyboardMarkup(bottoni)
         await app.edit_message_text(
@@ -1593,18 +1593,18 @@ async def cambio_not(scelta,player,username,app,message):
 
 
 def domandami(difficoltà, risposte,max):
-
+    
     calcolo = str()
     for g in range(difficoltà):
         calcolo += str(random.randint(0,max))
-        calcolo += random.choice(["+","-","*","+","-","*","/"])
-
+        calcolo += random.choice(["+","-","*","+","-","*","/"])      
+    
     risultato = float(round(eval(calcolo[:-1])))
     rispondo = [risultato]
     for g in range(risposte):
         rispondo.append(risultato//(random.random() + random.random() + random.random()))
     random.shuffle(rispondo)
-    return {"text": f"Calcola:\n{calcolo[:-1]}=","Risposte":rispondo,"corretta":risultato}
+    return {"text": f"Calcola:\n{calcolo[:-1]}=","Risposte":rispondo,"corretta":risultato}    
 
 
 async def shoping(scelta,player,username,app,message):
@@ -1622,7 +1622,7 @@ async def shoping(scelta,player,username,app,message):
                     )
                 except:
                     pass
-
+            
             else:
                 if "Prima compera" not in player[username]["obbiettivi"]:
                     player[username]["obbiettivi"].append("Prima compera")
@@ -1642,7 +1642,7 @@ async def shoping(scelta,player,username,app,message):
                 player[username]["gloria"] -= shop[scelta]
                 messaggio = f"Comprato {scelta}!"
                 await message.answer(scelta)
-
+    
 async def riordino(scelta,clan,username,app,message,player):
     user = player[username]
     if user["team"] != "nessuno":
@@ -1726,7 +1726,7 @@ async def bossata(scelta,player,username,app,message,last_boss,inabilitati,armi,
                         except:
                             pass
 
-
+                    
                     else:
 
                         nome1 = username
@@ -1749,25 +1749,25 @@ async def bossata(scelta,player,username,app,message,last_boss,inabilitati,armi,
                         text = f"Sfida tra {nome1} e {nome2} lv {forza}, uno dei terribili boss!!\n\n"
 
                         if player[username]["setta"]["benedizione"] == "Caprone":
-                            a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
+                            a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))                       
                             for stat in bostabile:
                                 print(user1[stat])
                                 user1[stat] = round(
                                     user1[stat] + (user1[stat] * (a / 100))
                                 )
-
+                                
                             text += "La setta ti potenzia!\n"
-
+                            
                         for stat in bostabile:
 
                             user2[stat] = round(
                                 user2[stat] + (user2[stat] * (forza / 12))
                             )
-
+                        
 
                         approccio1 = user1["Ap"]
                         approccio2 = user2["Ap"]
-
+                        
                         if user1["protezione"] == "armatura sakuretsu LV0":
                             stats = ["hp", "def", "atk", "agi"]
                             try:
@@ -1813,7 +1813,7 @@ async def bossata(scelta,player,username,app,message,last_boss,inabilitati,armi,
 
                                     break
 
-
+                            
                             if a == "Boss":
 
                                 text += f"\nIl Boss lancia a terra {nome1}, ci metterà un po a riprendersi!"
@@ -1984,17 +1984,17 @@ def genera_dungeon(player,username,c=None):
         mostri = take_boss((list(casa_nemici[player[username]["location"]])+ list(casa_nemici[player[username]["location"]])+ stanze), nemicii)
         dungeon =  {"piano": 0,"mostri": mostri,"danno": 0,
         "visibility": visibility}
-
+        
     else:
-
-
+        
+        
         nemicii = random.randint(dungeon_global("generazione", "stanze_min", 2), dungeon_global("generazione", "stanze_max", 8)) + (player[username]["dungeon"]["piano"] * dungeon_global("generazione", "stanze_extra_per_piano", 1))
         visibility = random.randint(dungeon_global("generazione", "visibilita_min", 1), dungeon_global("generazione", "visibilita_max", 9))
         mostri = take_boss((list(casa_nemici[player[username]["location"]])+ list(casa_nemici[player[username]["location"]])+ stanze), nemicii)
         dungeon =  {"piano": player[username]["dungeon"]["piano"] + 1,"mostri": mostri,"danno": player[username]["dungeon"]["danno"],
         "visibility": visibility
                     }
-
+    
     return dungeon
 
 
@@ -2031,7 +2031,7 @@ frasi = {"miss":{
 
 # assedio() spostato in turno_assalto.py
 
-
+              
 
 async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dungeon,inabilitati,tuttov):
     _snapshot_premi_weekend = _snapshot_premi_dungeon(player[username])
@@ -2045,13 +2045,13 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
         pass
     if ("Affronta" in scelta and "Boss" in player[username]["dungeon"]["mostri"]):
         other_time = last_dungeon.get(username,0)
-        now = time.time()
+        now = time.time() 
         modificatore = weekend_mod_val(evento.get("mod"), "mod_dungeon", 0)
         if username in nop:
             modificatore -= 60
-
-        elapsed = now - other_time + modificatore
-        manca = 3 - int(elapsed)
+        
+        elapsed = now - other_time + modificatore 
+        manca = 3 - int(elapsed) 
         if elapsed > 3:
             last_dungeon[username] = now
             nome1 = username
@@ -2091,7 +2091,7 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
                     classe(user3,user3["set"],bonus)
                 else:
                     player[username].pop("supporto")
-
+            
             controllo_effetti_sfida(username,player)
             bostabile = ["hp", "def", "atk", "agi"]
             inizio = user1["hp"]
@@ -2230,7 +2230,7 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
                 for mess in messaggini:
                         await app.send_message(username, mess)
                 await app.send_sticker(username,"CAACAgEAAxkBAAE2gwhg-Fa3ceNqyZc0HXkqxpXMZu2xtwACTQEAAj8RFRHiILNZLpFUfB4E",)
-
+                
                 try:
                     await app.send_message(nome3,f"Sei stato evocato da {username} contro {nome2}, ma è andata male!",)
                     await app.send_sticker(nome3,"CAACAgEAAxkBAAE2gwhg-Fa3ceNqyZc0HXkqxpXMZu2xtwACTQEAAj8RFRHiILNZLpFUfB4E",)
@@ -2251,7 +2251,7 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
                         player[username]["grado"] += dungeon_global("boss", "grado", 2)
                     except:
                         player[username]["grado"] = dungeon_global("boss", "grado", 2)
-
+                    
                     if manca == 0:
                         player[username]["dungeon"] = genera_dungeon(player,username)
                         text += "Hai finito questo piano, ti avventuri al successivo..."
@@ -2280,7 +2280,7 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
                     except:
                         player[username]["grado"] = 3
 
-                    try:
+                    try:                        
                         text += f"\nAnche {nome3} ottiene lo stesso premio!"
                         try:
                             player[nome3]["zaino"][contentino] += 1
@@ -2307,7 +2307,7 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
                                     )
                             except:
                                 pass
-
+                        
                     except:
                         pass
                     player[username]["exp"]["expattuale"] += 1
@@ -2315,7 +2315,7 @@ async def dungeon_boss(app, message,player,scelta,nop,username,evento,last_dunge
                     await message.message.delete()
                     for mess in messaggini:
                         await app.send_message(username, mess)
-
+                        
 
 
         else:
@@ -2331,21 +2331,21 @@ async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dun
     _snapshot_premi_weekend = _snapshot_premi_dungeon(player[username])
     if scelta in nemici:
         other_time = last_dungeon.get(username,0)
-        now = time.time()
+        now = time.time() 
         modificatore = weekend_mod_val(evento.get("mod"), "mod_dungeon", 0)
         if username in nop:
             modificatore -= 60
         if player[username]["setta"]["benedizione"] == "Giaguaro":
             a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
             modificatore += a
-        elapsed = now - other_time + modificatore
-
-        manca = 35 - int(elapsed)
-
+        elapsed = now - other_time + modificatore 
+        
+        manca = 35 - int(elapsed) 
+        
         if elapsed > 35:
             last_dungeon[username] = now
             await message.message.delete()
-
+            
             last_dungeon[username] = now
             nome1 = username
             nome2 = scelta
@@ -2367,7 +2367,7 @@ async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dun
             user2["fatto"] = 0
             classe(user1, user1["set"],bonus)
             classe(user2, user2["set"],bonus)
-
+                        
             user2["hp"] = user2["hp"] / 2
             stats = ["def", "atk", "agi"]
             for g in stats:
@@ -2451,7 +2451,7 @@ async def dungeon_mostro(app, message,player,scelta,nop,username,evento,last_dun
                         player[username]["grado"] += dungeon_global("mostro", "grado", 2)
                     except:
                         player[username]["grado"] = dungeon_global("mostro", "grado", 2)
-
+                    
                     if manca == 0:
                         player[username]["dungeon"] = genera_dungeon(player,username)
                         text += "Hai finito questo piano, ti avventuri al successivo..."
@@ -2741,7 +2741,7 @@ async def arena(client, app, message, player, scelta, armi, protezioni, armiepro
     arenaitem = arenamod[trader["stagione"].lower()]
     megaset = ['Neo blaster', 'Spada a protoni', 'Z-Saber', 'Chip terra', 'Chip fuoco', 'Chip elettro', 'Chip lunare']
     scheda = player[username]["arena"]
-
+    
     if scelta == "...":
         coda = _arena_coda(trader)
         chiave = str(_arena_round(scheda))
@@ -2814,7 +2814,7 @@ Anello: {anello}
 {inca}"""
         bottoni = list()
         for appz in take_boss(arenaitem, 3) + ["Nulla"]:
-
+              
             if appz in armi:
                 tip = "🗡"
             elif appz in libri:
@@ -2827,16 +2827,16 @@ Anello: {anello}
                 tip = ""
             elif appz in decoro:
                 tip = "✨🔄"
-
+            
             else:
                 tip = "⚙️"
             bottoni.append(
                 [InlineKeyboardButton(f"{appz} {tip}", callback_data=f"arena_{appz}")]
             )
-
+        
         if trader["stagione"] == "scelta variagate":
             for appz in take_boss(arenaitem, 3):
-
+                  
                 if appz in armi:
                     tip = "🗡"
                 elif appz in libri:
@@ -2849,17 +2849,17 @@ Anello: {anello}
                     tip = ""
                 elif appz in decoro:
                     tip = "✨🔄"
-
+                
                 else:
                     tip = "⚙️"
                 bottoni.append(
                     [InlineKeyboardButton(f"{appz} {tip}", callback_data=f"arena_{appz}")]
                 )
-
+        
         reply_markup = InlineKeyboardMarkup(bottoni)
         await message.message.edit(
             f"=====⚔️=====\nEccoci nell'arena, qui tutti sono obbligati a denudarsi e combattere con cosa trovano!\nSei davvero 1400 iq come credi?\nLe regole sono semplici, si esce solo a 10 vittorie o 3 sfide perse.\nPrenditi tutto il tempo necessario per effettuare le tue scelte armose!\n\n{schedas}", reply_markup=reply_markup)
-
+    
     ttesto = "=====⚔️=====\n"
 
     if scelta in armi:
@@ -2873,7 +2873,7 @@ Anello: {anello}
                     " LV")[1], str(int(scelta.split(" LV")[1])+1))
             unequiA(scheda, arma, armi)
         ttesto += equiA(scheda, scelta, armi)
-
+        
     elif scelta in libri:
         scheda["draw"] -= 1
         scheda["set"] = None
@@ -2881,12 +2881,12 @@ Anello: {anello}
             scheda["incantamenti"].append(libri[scelta]["ef"])
         except:
             scheda["incantamenti"] = [libri[scelta]["ef"]]
-
+        
         if len(scheda["incantamenti"]) > 2:
             scheda["incantamenti"].pop(0)
-
+        
         ttesto += f"Ora sei incantato con {scelta}\n"
-
+    
     elif scelta in protezioni:
         scheda["draw"] -= 1
         scheda["set"] = None
@@ -2897,19 +2897,19 @@ Anello: {anello}
                     " LV")[1], str(int(scelta.split(" LV")[1])+1))
             unequiP1(scheda, prot, protezioni)
         ttesto += equiP1(scheda, scelta, protezioni)
-
+    
     elif scelta in anelli:
         scheda["draw"] -= 1
         scheda["set"] = None
         ttesto += f"Il tuo anello è ora {scelta}"
         scheda["anello"] = scelta
-
+        
     elif scelta in Approcci:
         scheda["draw"] -= 1
         scheda["set"] = None
         ttesto += f"Il tuo apporccio è ora {scelta}"
         scheda["Ap"] = scelta
-
+        
     elif scelta == "Nulla":
         scheda["draw"] -= 1
         scheda["set"] = None
@@ -2922,7 +2922,7 @@ Anello: {anello}
         ttesto += "Non hai scelto niente!!\n"
     arma = scheda["arma"]
     protezione = scheda["protezione"]
-
+    
     if protezione != None and arma != None:
         listina = arma.split(" LV")
         coso = listina[0]
@@ -2944,12 +2944,12 @@ Anello: {anello}
             if ricercato == 'Chip elettro':
                                 scheda["set"] = "Forma elettro"
             ttesto += "\n" + "Set mega equipaggiato!\nAbilità chip attivate!"
-
+    
     if trader["stagione"] == "la classe è acqua":
         tipi = random.choice(list(classi))
         scheda["set"] = tipi
         ttesto += "\n" + frasi_set[tipi]
-
+    
     if scelta == "Andiamo!":
         a = scheda["atk"]
         if 1 == 1:
@@ -3069,13 +3069,13 @@ Anello: {anello}
                 user1["incantamenti"]
             except:
                 user1["incantamenti"] = []
-
+            
             try:
                 user2["incantamenti"]
             except:
                 user2["incantamenti"] = []
-
-
+            
+            
             if user1["anello"] == "Pegno di amicizia":
                     text += f"\nPartendo dal presupposto che {nome1} è un grande amico di {nome2}...\n"
 
@@ -3114,14 +3114,14 @@ Anello: {anello}
                     a = player[sfidante]
                     b = player[username]
                     break
-
+            
             a["arena"]["W"] += 1
             b["arena"]["L"] += 1
             a["arena"]["draw"] += 1
             b["arena"]["draw"] += 1
-
+            
             if len(text) >= 3500:
-                text = text[:1500] + "\n...\n" +  text[-2000:]
+                text = text[:1500] + "\n...\n" +  text[-2000:] 
             ww = a["arena"]["W"]
             wint = text + f"\nHai così vinto un draft!\nSei a {ww} win!"
             ll = b["arena"]["L"]
@@ -3135,9 +3135,9 @@ Anello: {anello}
             reply_markup = InlineKeyboardMarkup(bottoni)
             await app.edit_message_text(a["id"], a["arena"]["pin"], wint,reply_markup=reply_markup)
             await app.edit_message_text(b["id"], b["arena"]["pin"], lint,reply_markup=reply_markup)
-
-
-
+                
+                
+            
         else:
             bottoni = list()
             voce_attuale = coda.get(chiave)
@@ -3159,7 +3159,7 @@ Anello: {anello}
         if scheda["draw"] < 0:
             player[username].pop("arena")
             await message.message.edit("Arena chiusa!\nNon provare a barare!")
-
+            
         elif scheda["draw"] == 0 and scelta != "Andiamo!" and scelta != "...":
 
             bottoni = list()
@@ -3179,7 +3179,7 @@ Anello: {anello}
                 prot = scheda["protezione"]
                 anello = scheda["anello"]
                 classed = scheda["set"]
-
+                
                 inca = ""
                 try:
                     for g in scheda["incantamenti"]:
@@ -3229,10 +3229,10 @@ Anello: {anello}
                         )
                 except:
                     pass
-
+            
             await message.message.edit(ttesto, reply_markup=reply_markup)
         else:
-
+            
             if scelta != "Entra" and scelta != "Andiamo!" and scelta != "...":
                 a = scheda["atk"]
                 aa = scheda["def"]
@@ -3242,7 +3242,7 @@ Anello: {anello}
                 prot = scheda["protezione"]
                 anello = scheda["anello"]
                 classed = scheda["set"]
-
+                
                 inca = ""
                 try:
                     for g in scheda["incantamenti"]:
@@ -3303,7 +3303,7 @@ Anello: {anello}
                     )
                 if trader["stagione"] == "scelta variagate":
                     for appz in take_boss(arenaitem, 3):
-
+                    
                         if appz in armi:
                             tip = "🗡"
                         elif appz in libri:
@@ -3316,7 +3316,7 @@ Anello: {anello}
                             tip = ""
                         elif appz in decoro:
                             tip = "✨🔄"
-
+                        
                         else:
                             tip = "⚙️"
                         bottoni.append(
@@ -3364,8 +3364,8 @@ Anello: {anello}
                         )
                 except:
                     pass
-
-
+            
+             
             if lose == 3 and "Stessa storia" not in player[username]["obbiettivi"]:
                 player[username]["obbiettivi"].append("Stessa storia")
                 try:
@@ -3374,7 +3374,7 @@ Anello: {anello}
                         )
                 except:
                     pass
-
+            
             punti = int(win) - (int(lose)/2)
             glori = round(25 * punti)
             if glori <= 0:
@@ -3383,31 +3383,31 @@ Anello: {anello}
                 scheda["arenagratis"]
             except:
                 scheda["arenagratis"] = False
-
+                
             if scheda["arenagratis"] == True:
                 player[username]["gloria"] += glori//2
             else:
                 player[username]["gloria"] += glori
-
-            inc = 0
+             
+            inc = 0            
             if punti > -4:
                 inc += 2
-
+                
             if punti > 0:
                 inc += 2
             if punti > 1:
                 inc += 1
-
+            
             if punti > 3:
                 inc += 1
             if punti > 4:
                 inc += 1
             if punti > 5:
                 inc += 1
-
+            
             if punti > 7:
                 inc += 2
-
+            
             if scheda["arenagratis"] == True:
                 try:
                     player[username]["zaino"]["Un oggetto incartato"] += inc//2
@@ -3418,13 +3418,13 @@ Anello: {anello}
                     player[username]["zaino"]["Un oggetto incartato"] += inc
                 except:
                     player[username]["zaino"]["Un oggetto incartato"] = inc
-
+                    
             exp = int(win) + int(lose)
             if scheda["arenagratis"] == True:
                 player[username]["exp"]['expattuale'] += exp//2
             else:
                 player[username]["exp"]['expattuale'] += exp
-
+             
             altro = str()
             premi = [
             "Uno scudo d'oro LV0",
@@ -3442,7 +3442,7 @@ Anello: {anello}
                     player[username]["zaino"][mio] += 1
                 except:
                     player[username]["zaino"][mio] = 1
-
+                 
             if punti > 8.8:
                 mio = random.choice(premi)
                 altro += f"\n{mio}"
@@ -3450,7 +3450,7 @@ Anello: {anello}
                     player[username]["zaino"][mio] += 1
                 except:
                     player[username]["zaino"][mio] = 1
-
+                 
             if punti > 9.6:
                 mio = random.choice(premi)
                 altro += f"\n{mio}"
@@ -3458,8 +3458,8 @@ Anello: {anello}
                     player[username]["zaino"][mio] += 1
                 except:
                     player[username]["zaino"][mio] = 1
-
-
+                 
+            
             if 0.05 > random.random() and punti >= 5:
                 altro += "\nVinci anche un gettone arena!"
                 mio = "Gettone arena"
@@ -3467,11 +3467,11 @@ Anello: {anello}
                     player[username]["zaino"][mio] += 1
                 except:
                     player[username]["zaino"][mio] = 1
-
-
+                 
+            
             premio = f"Premi:\n{glori} gloria\n{inc} incartati\n{exp} exp\n{altro}"
-
-
+            
+            
             if scheda["arenagratis"] == True:
                 gratis = "\nI premi sono ridotti del 50% a causa della run gratuita"
             else:
@@ -3485,9 +3485,9 @@ Anello: {anello}
                 await app.send_sticker(username,"CAACAgIAAxkBAAEcXvlhe-1yrPdkJJZsWDPOIq2q0yazSgACIlYAAp7OCwABBSdJlvTSffIeBA")
             else:
                 await app.send_sticker(username,"CAACAgIAAxkBAAEcXvphe-3WXV6dPMTbAU7gl6tJpMaPlQACIVYAAp7OCwABK-we4CtFSPQeBA")
-
+            
             player[username].pop("arena")
-
+            
     await message.answer("")
 
 def boost(user,Approcci):
@@ -3531,26 +3531,26 @@ def correggiemoji(figura, emojiz,item_boss,item_pescatore):
         text = f"{eventoz}"
     try:
         if figura[:-4] in item_pescatore:
-
+            
             text = f"🎣"
     except:
         pass
-
+    
     try:
         if figura[:-4] in item_boss:
-
+            
             text = f"👺"
         if figura in item_boss:
-
+            
             text = f"👺"
     except:
         pass
-
-
+    
+    
     return text
 
 def equiA(user, arma, armi):
-
+    
     stats = ["hp", "def", "atk", "agi"]
     if user["arma"] == None:
         user["arma"] = arma
@@ -3564,7 +3564,7 @@ def equiA(user, arma, armi):
 
 
 def classe(user, setz,bonus):
-
+    
     stats = ["hp", "def", "atk", "agi"]
     for st in stats:
 
@@ -3572,7 +3572,7 @@ def classe(user, setz,bonus):
 
 
 def unequiA(user, arma, armi):
-
+    
     stats = ["hp", "def", "atk", "agi"]
     if user["arma"] == None:
         text = "Non hai armi equipaggiate!"
@@ -3584,7 +3584,7 @@ def unequiA(user, arma, armi):
     return text
 
 def equiP1(user, protezione, protezioni):
-
+    
     stats = ["hp", "def", "atk", "agi"]
     if user["protezione"] == None:
         user["protezione"] = protezione
@@ -3597,7 +3597,7 @@ def equiP1(user, protezione, protezioni):
 
 
 def unequiP1(user, protezione, protezioni):
-
+    
     stats = ["hp", "def", "atk", "agi"]
     if user["protezione"] == None:
         text = f"Non hai protezioni da togliere!"
@@ -3617,7 +3617,7 @@ def take_but_not(lista,non_v):
     for x in now:
         if x not in ash:
             ash.append(x)
-
+            
     if len(ash)>1:
         while True:
             chosen = random.choice(ash)
@@ -3644,7 +3644,7 @@ def get_ench(user):
         ench.append(user["incantamenti"][protezione])
     except:
         pass
-
+    
     return ench
 
 def possibiles(agin, agi):
@@ -3654,7 +3654,7 @@ def possibiles(agin, agi):
     hard = 1
 
     while possibile >= 0:
-        possibile -= hard * 10
+        possibile -= hard * 10        
         hard += 1
 
     finale = hard * 10 + (possibile / 10)
@@ -3696,14 +3696,14 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
     _snapshot_premi_weekend = _snapshot_premi_dungeon(player[username])
     if scelta not in nemici:
         other_time = last_dungeon.get(username,0)
-        now = time.time()
+        now = time.time() 
         modificatore = weekend_mod_val(evento.get("mod"), "mod_dungeon", 0)
         if username in nop:
             modificatore += dungeon_global("generale", "mod_nop", -60)
         if player[username]["setta"]["benedizione"] == "Avventuriero":
             a = round(trader["sette"][player[username]["setta"]["loc"]]["power"] * (trader["sette"][player[username]["setta"]["loc"]]["%"]/100))
             modificatore += a
-        elapsed = now - other_time + modificatore
+        elapsed = now - other_time + modificatore 
         manca = dungeon_global("generale", "cooldown_stanza", 35) - int(elapsed)
         if (elapsed > dungeon_global("generale", "cooldown_stanza", 35) and scelta in stanze) or (elapsed > dungeon_global("generale", "cooldown_scelta", 1.1) and scelta in scelte):
             num = random.random()
@@ -3768,7 +3768,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                     if dungeon_under(num, "Stanza", "Scendi", "click_inerte_pct"):
                         text += "\nClicci, beh figo si è cliccabile"
                     else:
-                        text += "Il piano parte in basso velocissimo, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n\nNonostante ciò ti senti orribilmente male!"
+                        text += "Il piano parte in basso velocissimo, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n\nNonostante ciò ti senti orribilmente male!"   
                         if player[username]["dungeon"]["danno"] > dungeon_val("Stanza", "Scendi", "danno", 500):
                             player[username]["dungeon"]["danno"] += dungeon_val("Stanza", "Scendi", "danno", 500)
                         else:
@@ -3816,7 +3816,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                                                 player[username]["zaino"][pt[x]] = dif
                     else:
                         text += "\nCosa?\nCome non è il momento?!\nERA IL MIO MOMENTO\nNOOOOOOOOOOOOOOOOOOO"
-
+                
                 if (scelta == "Metti monetina" and "Distributore" in player[username]["dungeon"]["mostri"]):
                     stanza = "Distributore"
 
@@ -3877,7 +3877,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                 if (scelta == "N'altra volta" and "Bisca" in player[username]["dungeon"]["mostri"]):
                     stanza = "Bisca"
                     text += "No grazie gentilissimo torna al tuo paese che qui non abbiamo abbastanza posti di lavoro neanche per noi sfidatori onesti, lascia sta guarda non me fa parlà de politica che davvero che ha in testa il dev?"
-
+                
                 if (scelta == "Ti allontani" and "Crepaccio" in player[username]["dungeon"]["mostri"]):
                     stanza = "Crepaccio"
                     text += "Ti allontani senza toccare nulla"
@@ -3889,7 +3889,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                     if dungeon_under(num, "Fabbro", "Avvicinati", "interazione_pct"):
                         cosette = ["Una spilla rossa","Un teschio antico","Un piccolo uccellino scheletrico","Una tempesta in barattolo",]
                         random.shuffle(cosette)
-
+                        
                         for x in cosette:
                             if x in list(player[username]["zaino"]):
                                 if player[username]["zaino"][x] > dungeon_val("Fabbro", "Avvicinati", "quantita_grande", 5):
@@ -3901,7 +3901,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                                 elif player[username]["zaino"][x] >= dungeon_val("Fabbro", "Avvicinati", "quantita_minima", 2):
                                     quanta = round(dungeon_val("Fabbro", "Avvicinati", "base_gloria", 150) / player[username]["zaino"][x])
                                     player[username]["gloria"] += quanta
-                                    player[username]["zaino"][x] -= 1
+                                    player[username]["zaino"][x] -= 1                                    
                                     text += f"\nIl fabbro nota il {x} che usi come portachiavi.\nAl volo lo ruba e in cambio ti cede **{quanta} gloria**."
                                     break
                                 else:
@@ -3910,7 +3910,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                                 text += "Meh...\n"
                     else:
                         text += "Il fabbro ti nota e non dice nulla"
-
+                
                 if (scelta == "Allontanati"
                     and "Fabbro"
                     in player[username]["dungeon"]["mostri"]):
@@ -3919,7 +3919,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
 
                 if (scelta == "Approcciala"
                     and "Fabbro"
-                    in player[username]["dungeon"]["mostri"]):
+                    in player[username]["dungeon"]["mostri"]):  
                     stanza = "Fabbro"
                     if is_in(["Uno scaglione blu","Uno scaglione verde","Uno scaglione giallo","Uno scaglione nero"], list(player[username]["zaino"])):
                         text += "Il fabbro vede gli scaglioni del medaglione celeste intorno a te e capisce."
@@ -3941,7 +3941,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                             text += "\nA lei...\nSpero la mia forgiatura sia di suo gradimento"
                     else:
                         text+= "Cosa guardi?\nFatti i fatti tuoi e torna quando avrai qualcosa di utile per me!"
-
+                
                 if (scelta == "Nah"
                     and "Piedistallo"
                     in player[username]["dungeon"]["mostri"]):
@@ -4068,7 +4068,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                         except:
                                         player[username]["zaino"]["Dell'acqua fresca"] = dungeon_val("Bar", "Gira per la locanda", "acqua", 5)
                     elif dungeon_under(num, "Bar", "Gira per la locanda", "latte_soglia_pct"):
-
+        
                         text += f"Girando per la locanda finisci nel magazzino, guaarda quanto latte!\nMica si offenderà per 2 mancanti!"
                         try:
                                         player[username]["zaino"]["Del latte in sacchetto"] += dungeon_val("Bar", "Gira per la locanda", "latte", 2)
@@ -4339,7 +4339,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                         player[username].pop("dungeon")
                         inabilitati[username] = time.time()
                         text += "Pessima idea, pessima idea, pessimaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-
+                
                 if (scelta == "Parlaci" and "Parco" in player[username]["dungeon"]["mostri"]):
                     stanza = "Parco"
                     text += "Che idea del cazzo."
@@ -4348,7 +4348,7 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                     if dungeon_under(num, "Parco", "Parlaci", "incapacita_pct"):
                         inabilitati[username] = time.time()
                         await app.send_sticker(username,"CAACAgEAAxkBAAE2gwhg-Fa3ceNqyZc0HXkqxpXMZu2xtwACTQEAAj8RFRHiILNZLpFUfB4E",)
-
+                        
                         if dungeon_under(num, "Parco", "Parlaci", "scaglione_soglia_pct"):
                             text += "\nOttieni uno scaglione della speranza...\nUsalo con cura."
                             player[username]["zaino"][                "Uno scaglione verde"
@@ -4855,7 +4855,7 @@ Vuoi vedere o essere visto?"
                     try:
                                     seet = player[username]["scheda"]["set"]
                     except:
-                                    seet = None
+                                    seet = None         
                     if seet == None or dungeon_under(num, "Armeria", "evento", "nessun_evento_pct"):
                         text += "Il tuo set non richiama nessun evento, vabbè succede"
                     elif "Forma" in seet or ("Pescatore" == seet and not proc_val("Pescatore", "dungeon", "armeria", "compatibile")):
@@ -4911,7 +4911,7 @@ Vuoi vedere o essere visto?"
                     if dungeon_under(num, "Biblioteca", "evento", "vuota_pct"):
                         text += "O forse no..."
                     else:
-                        cosa = random.choice(list(libri))
+                        cosa = random.choice(list(libri)) 
                         text += f"\nGirovagando senti un fondo vicino a te, è dal cielo caduto un **{cosa}** intatto!\n"
                         gestione_zaino(player[username]["zaino"],"add",cosa,1)
                     fines = True
@@ -4989,7 +4989,7 @@ Vuoi vedere o essere visto?"
                             pass
                 #here
                 pass
-
+            
 
         else:
             await message.answer(f"Mancano {manca} secondi!")
