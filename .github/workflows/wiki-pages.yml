@@ -48,10 +48,13 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki.py liste.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
-          python wiki/genera_wiki.py --output _site
+          python -m py_compile wiki/genera_wiki_v2.py liste.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py
+          python wiki/genera_wiki_v2.py --output _site
           test -s _site/index.html
           test -s _site/data.json
+          grep -q "Boss giornaliero" _site/index.html
+          grep -q "Statistiche a ogni livello" _site/index.html
+          grep -q "Casa nemici dungeon" _site/index.html
 
       - name: Carica artifact Pages
         if: github.event_name != 'pull_request'
