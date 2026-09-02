@@ -139,7 +139,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
 
     num = random.random()    
     
-    if "Bersaglio enorme" in list(nemico) and 0.2 > num:
+    if "Bersaglio enorme" in list(nemico) and struttura_ok(num, "Bersaglio enorme", "generale", "distrazione_proc"):
         if set == "Vigilante":
             text += "__Nessuna distrazione__"
         else:
@@ -218,8 +218,8 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
             text += "I gadget si raddoppiano!\n"
     
     if "Fabbro incantaspade" in clan[team]["villaggio"]:
-        player["atk"] += 25 * clan[team]["villaggio"]["Fabbro incantaspade"]["lv"]
-        player["def"] += 25 * clan[team]["villaggio"]["Fabbro incantaspade"]["lv"]
+        player["atk"] += struttura_val("Fabbro incantaspade", "generale", "bonus_atk_per_livello") * clan[team]["villaggio"]["Fabbro incantaspade"]["lv"]
+        player["def"] += struttura_val("Fabbro incantaspade", "generale", "bonus_def_per_livello") * clan[team]["villaggio"]["Fabbro incantaspade"]["lv"]
         if set == "Arciere di prima linea" and proc_ok(num, set, "assalto", "fabbro"):
             player["atk"] += proc_val(set, "assalto", "fabbro", "atk_per_livello") * clan[team]["villaggio"]["Fabbro incantaspade"]["lv"]
             player["def"] += proc_val(set, "assalto", "fabbro", "def_per_livello") * clan[team]["villaggio"]["Fabbro incantaspade"]["lv"]
@@ -254,9 +254,9 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                     dps += costo_amletico
                     text += f"🎭 {nome} sacrifica {costo_amletico} HP e li trasforma in attacco!\n"
                 agi = player["agi"]
-                attaccon = (starmi[difesa]["atk"] + starmi[difesa]["atk"] * (nemico[difesa]["lv"] / 10) + bonus["atk"])
-                difesan = (starmi[difesa]["def"] + starmi[difesa]["def"] * (nemico[difesa]["lv"] / 10) + bonus["def"])
-                agin = (starmi[difesa]["agi"] + starmi[difesa]["agi"] * (nemico[difesa]["lv"] / 10) + bonus["agi"])
+                attaccon = (starmi[difesa]["atk"] + starmi[difesa]["atk"] * (nemico[difesa]["lv"] / struttura_val("generale", "scaling", "divisore_livello")) + bonus["atk"])
+                difesan = (starmi[difesa]["def"] + starmi[difesa]["def"] * (nemico[difesa]["lv"] / struttura_val("generale", "scaling", "divisore_livello")) + bonus["def"])
+                agin = (starmi[difesa]["agi"] + starmi[difesa]["agi"] * (nemico[difesa]["lv"] / struttura_val("generale", "scaling", "divisore_livello")) + bonus["agi"])
                     
                 if set != None:
                     num = random.random()
@@ -327,9 +327,9 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                 
                 if len(nemico) == 1:
                     text += "Ormai resta poco da fare per le difese...\n\n"
-                    attaccon -= 100
-                    agin -= 10
-                    difesan -= 300
+                    attaccon += struttura_val("generale", "ultima_struttura", "atk_delta")
+                    agin += struttura_val("generale", "ultima_struttura", "agi_delta")
+                    difesan += struttura_val("generale", "ultima_struttura", "def_delta")
                     if difesan < 0:
                         difesan = 0
                 
@@ -345,7 +345,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                             difesan = nemico["Clone"]["def"]
                             agin = nemico["Clone"]["agi"]
                             if setting["Clone"] == "Difensivo":
-                                agin -= 40
+                                agin += struttura_val("Clone", "modalita", "Difensivo", "agi_delta")
                                 text += f"{nomeclone} cerca di correre alla pulsantiera!\n"
                         else:
                             nomeclone = "Una massa informe"
@@ -364,60 +364,60 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                         agin = 0
                 
                 elif difesa == "Sedimento del cucciolo" and setting["Sedimento del cucciolo"] == "Affamato":
-                    agin += 55
+                    agin += struttura_val("Sedimento del cucciolo", "modalita", "Affamato", "agi_delta")
                     text += "__Si sente un gorgoglio...__\n"
-                    attaccon = attaccon//1.5
+                    attaccon = attaccon // struttura_val("Sedimento del cucciolo", "modalita", "Affamato", "atk_divisore")
                 
                 elif setting["Spuntone malefico"] == "Sotterraneo" and difesa == "Spuntone malefico":
                     text += "Stranamente lo spuntone non è qui!\n"
-                    agin -= 25
+                    agin += struttura_val("Spuntone malefico", "modalita", "Sotterraneo", "agi_delta")
 
                 elif setting["Stazione laser di sicurezza"] == "Difesa laser" and difesa == "Stazione laser di sicurezza":
                     old = attaccon
-                    attaccon = difesan * 2
-                    difesan = old//2
+                    attaccon = difesan * struttura_val("Stazione laser di sicurezza", "modalita", "Difesa laser", "atk_da_def_mul")
+                    difesan = old // struttura_val("Stazione laser di sicurezza", "modalita", "Difesa laser", "def_da_atk_divisore")
                     text += "La difesa laser si alza sotto la stazione!\n"
                     
                 elif setting["Stazione laser di sicurezza"] == "Suicidio laser" and difesa == "Stazione laser di sicurezza":
-                    nemico[difesa]["hp"] -= 55
-                    attaccon = round(attaccon * 2.5)
-                    agin -= 26
+                    nemico[difesa]["hp"] -= struttura_val("Stazione laser di sicurezza", "modalita", "Suicidio laser", "autodanno")
+                    attaccon = round(attaccon * struttura_val("Stazione laser di sicurezza", "modalita", "Suicidio laser", "atk_mul"))
+                    agin += struttura_val("Stazione laser di sicurezza", "modalita", "Suicidio laser", "agi_delta")
                     
                     text += "La torre laser si sovraccarica!\n"
                 
-                colpito = round(agi - (agin / 2) + 1)
+                colpito = round(agi - (agin / struttura_val("generale", "tiro", "agi_difensore_divisore")) + struttura_val("generale", "tiro", "bonus"))
                 
-                if colpito > random.randint(0, 102):
+                if colpito > random.randint(0, struttura_val("generale", "tiro", "random_max")):
                     if setting["Sedimento del cucciolo"] == "Affamato" and difesa == "Sedimento del cucciolo":
                         text += "Il cucciolo di drago sta mangiando altro..\n"
                     elif setting["Spuntone malefico"] == "Sotterraneo" and difesa == "Spuntone malefico":
                         text += "No, nessuno spuntone!\n"
                     elif setting["Chiesa"] == "Orribile" and difesa == "Chiesa":
-                        if 0.1 > num:
+                        if struttura_ok(num, "Chiesa", "modalita", "Orribile", "creatura_proc"):
                                     num = random.random()
-                                    bonus["atk"] += 250
-                                    bonus["def"] += 250
-                                    bonus["agi"] += 25
+                                    bonus["atk"] += struttura_val("Chiesa", "modalita", "Orribile", "bonus_atk")
+                                    bonus["def"] += struttura_val("Chiesa", "modalita", "Orribile", "bonus_def")
+                                    bonus["agi"] += struttura_val("Chiesa", "modalita", "Orribile", "bonus_agi")
                                     text += f"Una creatura orribile esce dalla chiesa, pronta seminare il chaos!\n"
                         else:
                             text += "Un antica creatura riposa nella chiesa\n"
                     else:
                         text += frasi["miss"][difesa]
                     if difesa == "Muraglione extra":
-                        bonus["def"] += 5 * (nemico[difesa]["lv"] + (len(nemico)/4))
+                        bonus["def"] += struttura_val("Muraglione extra", "generale", "bonus_def_per_livello") * (nemico[difesa]["lv"] + (len(nemico) / struttura_val("Muraglione extra", "generale", "bonus_def_strutture_divisore")))
                     elif difesa == "Spuntone malefico":
                         text += "\n**Si apre al volo una botola sotto i tuoi piedi!**\n"
                         for x in range(nemico[difesa]["lv"]):
                             num = random.random()
                             if setting["Spuntone malefico"] == "Sotterraneo":
-                                num += .2
-                            if 0.6 > num:
+                                num += struttura_val("Spuntone malefico", "modalita", "Sotterraneo", "roll_bonus_pct") / 100
+                            if (struttura_val("Spuntone malefico", "generale", "stop_proc") / 100) > num:
                                 break
                             else:
                                 if defense < 0:
                                     attaccon -= defense
                                     defense = 0
-                                dannissimi = round(float(attaccon)* (100 / (50 + float(defense))* random.uniform(0.7, 1.5)))
+                                dannissimi = struttura_danno(attaccon, defense, "spuntone")
                                 player["hp"] -= dannissimi
                                 if set == "Oscurato" and difesa in nemico and isinstance(nemico.get(difesa), dict):
                                     riflesso_oscuro = round(max(0, dannissimi) * proc_val("Oscurato", "assalto", "riflesso", "percento") / 100)
@@ -434,7 +434,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                 player["hp"] += dannissimi
                     elif difesa == "Clone":
                         text += f"{nomeclone} non riesce a farti nulla, ma direziona le difese verso di te!\n"
-                        bonus["atk"] += 20
+                        bonus["atk"] += struttura_val("Clone", "generale", "bonus_atk_difese_su_mancato_colpo")
                     elif difesa == "Centrale di cura centralizzata":
                         if set == "Ombra silenziosa" and proc_ok(num, set, "assalto", "centrale"):
                             text += "__Arrivi giusto in tempo alla centrale prima che emetta il suo impulso e la (silenzi)!__\n"
@@ -450,9 +450,9 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                         if dife == "inguerra":
                                             pass
                                         else:
-                                            player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                            if nemico[dife]["hp"] > 50:
-                                                nemico[dife]["hp"] += -3 * int(nemico[difesa]["lv"])
+                                            player["fatto"] += struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
+                                            if nemico[dife]["hp"] > struttura_val("Centrale di cura centralizzata", "generale", "hp_minimo_modifica"):
+                                                nemico[dife]["hp"] += -struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
                                 else:
                                     text += (
                                         f"La centrale cura tutte le difese!\n"
@@ -461,7 +461,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                         if dife == "inguerra":
                                             pass
                                         else:
-                                            nemico[dife]["hp"] += 3 * int(nemico[difesa]["lv"])
+                                            nemico[dife]["hp"] += struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
                             else:
                                 news = random.choice(list(nemico))
                                 if set == "Assassino delle ombre" and proc_ok(num, set, "assalto", "centrale"):
@@ -472,9 +472,9 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                         if dife == "inguerra":
                                             pass
                                         else:
-                                            player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                            if nemico[news]["hp"] > 50:
-                                                nemico[news]["hp"] += -3 * int(nemico[difesa]["lv"])
+                                            player["fatto"] += struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
+                                            if nemico[news]["hp"] > struttura_val("Centrale di cura centralizzata", "generale", "hp_minimo_modifica"):
+                                                nemico[news]["hp"] += -struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
                                 else:
                                     text += (
                                         f"La centrale cura {news}!\n"
@@ -483,7 +483,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                         if dife == "inguerra":
                                             pass
                                         else:
-                                            nemico[news]["hp"] += 3 * int(nemico[difesa]["lv"])
+                                            nemico[news]["hp"] += struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
                     
                 else:
                     num = random.random()
@@ -547,9 +547,9 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                         pass
                                     else:
                                         
-                                        player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                        if nemico[dife]["hp"] > 50:
-                                            nemico[dife]["hp"] += -3 * int(nemico[difesa]["lv"])      
+                                        player["fatto"] += struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
+                                        if nemico[dife]["hp"] > struttura_val("Centrale di cura centralizzata", "generale", "hp_minimo_modifica"):
+                                            nemico[dife]["hp"] += -struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
                             else:
                                 
                                 news = random.choice(list(nemico))
@@ -560,9 +560,9 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                         if dife == "inguerra":
                                             pass
                                         else:
-                                            player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                            if nemico[news]["hp"] > 50:
-                                                nemico[news]["hp"] += -3 * int(nemico[difesa]["lv"])                  
+                                            player["fatto"] += struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
+                                            if nemico[news]["hp"] > struttura_val("Centrale di cura centralizzata", "generale", "hp_minimo_modifica"):
+                                                nemico[news]["hp"] += -struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
                         else:
                             serve = True
 
@@ -577,33 +577,33 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                         num = random.random()
                         if difesa != "Spaventapasseri ornamentale":
                             if difesa == "Muraglione extra":
-                                defense *= 0.5
+                                defense *= struttura_val("Muraglione extra", "generale", "def_attaccante_mul")
                             
                             if defense < 0:
                                 attaccon -= defense
                                 defense = 0
                             
-                            dannissimi = round(float(attaccon)* (100 / (1 +float(defense)) * random.uniform(0.7, 1.5)))
+                            dannissimi = struttura_danno(attaccon, defense, "difesa")
                             
                             if setting["Accampamento"] == "Trappole demoralizzanti" and difesa == "Accampamento":
-                                dannissimi = dannissimi//1.3
+                                dannissimi = dannissimi // struttura_val("Accampamento", "modalita", "Trappole demoralizzanti", "danno_divisore")
                             
                             elif setting["Cane da guardia"] == "Cane rapido" and difesa == "Cane da guardia":
-                                dannissimi =round( dannissimi//1.3)
+                                dannissimi = round(dannissimi // struttura_val("Cane da guardia", "modalita", "Cane rapido", "danno_divisore"))
                             elif setting["Cane da guardia"] == "Orso" and difesa == "Cane da guardia":
-                                dannissimi =round( dannissimi * 1.5)
+                                dannissimi = round(dannissimi * struttura_val("Cane da guardia", "modalita", "Orso", "danno_mul"))
                             
                             elif setting["Cannoncino"] == "Danneggiante" and difesa == "Cannoncino":
-                                dannissimi = dannissimi * 2
+                                dannissimi = dannissimi * struttura_val("Cannoncino", "modalita", "Danneggiante", "danno_mul")
                                 text += "BOOM!\n"
                             
 
                             elif setting["Muraglione extra"] == "Infiammato" and difesa == "Muraglione extra":
-                                dannissimi += 250
-                                nemico[difesa]["hp"] -= 100
+                                dannissimi += struttura_val("Muraglione extra", "modalita", "Infiammato", "danno_bonus")
+                                nemico[difesa]["hp"] -= struttura_val("Muraglione extra", "modalita", "Infiammato", "autodanno")
                             
                             if dannissimi <= 0:
-                                dannissimi = 5
+                                dannissimi = struttura_val("generale", "danno_minimo")
                                 
                             if setting["Fabbro incantaspade"] == "Curativo" and difesa == "Fabbro incantaspade":
                                 dannissimi = 0
@@ -625,28 +625,28 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                             dannissimi = 0
                         try:
                             if setting["Accampamento"] == "Trappole demoralizzanti" and difesa == "Accampamento":
-                                bonus["atk"] += 50
+                                bonus["atk"] += struttura_val("Accampamento", "modalita", "Trappole demoralizzanti", "bonus_atk_difese")
                                 text += f"Delle trappole escono a iosa dalle tende, infliggendo {dannissimi} danni ({nos})\n"
                             elif setting["Chiesa"] == "Orribile" and difesa == "Chiesa":
-                                if 0.1 > num:
+                                if struttura_ok(num, "Chiesa", "modalita", "Orribile", "creatura_proc"):
                                     num = random.random()
-                                    bonus["atk"] += 250
-                                    bonus["def"] += 250
-                                    bonus["agi"] += 25
+                                    bonus["atk"] += struttura_val("Chiesa", "modalita", "Orribile", "bonus_atk")
+                                    bonus["def"] += struttura_val("Chiesa", "modalita", "Orribile", "bonus_def")
+                                    bonus["agi"] += struttura_val("Chiesa", "modalita", "Orribile", "bonus_agi")
                                     text += f"Una creatura orribile esce dalla chiesa, pronta seminare il chaos!\n"
                             
                             elif setting["Fabbro incantaspade"] == "Curativo" and difesa == "Fabbro incantaspade":
                                 news = random.choice(list(nemico))
-                                dannissimi = round(float(attaccon)* (100 / (1 +float(defense)) * random.uniform(0.7, 1.5)))
+                                dannissimi = struttura_danno(attaccon, defense, "difesa")
                                 nemico[news]["hp"] += dannissimi
                                 nos = nemico[news]["hp"]
                                 text += f"Il fabbro ripara un poco {news} per {dannissimi} hp, ne ha ora {nos}\n"
                             
                             elif setting["Spaventapasseri ornamentale"] == "Animato" and difesa == "Spaventapasseri ornamentale":
                                 
-                                dannissimi = round(float(attaccon)* (100 / (1 +float(defense)) * random.uniform(0.7, 1.5)))
+                                dannissimi = struttura_danno(attaccon, defense, "difesa")
                                 if dannissimi <= 0:
-                                    dannissimi = 5
+                                    dannissimi = struttura_val("generale", "danno_minimo")
                                 
                                 player["hp"] -= dannissimi
                                 if set == "Oscurato" and difesa in nemico and isinstance(nemico.get(difesa), dict):
@@ -666,16 +666,16 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                             text += frasi["preso"][difesa]
                         
                         if difesa == "Muraglione extra":
-                            bonus["def"] += 5 * (nemico[difesa]["lv"] + (len(nemico)/4))
-                            if difesa == "Muraglione extra" and 0.1 > num:
+                            bonus["def"] += struttura_val("Muraglione extra", "generale", "bonus_def_per_livello") * (nemico[difesa]["lv"] + (len(nemico) / struttura_val("Muraglione extra", "generale", "bonus_def_strutture_divisore")))
+                            if difesa == "Muraglione extra" and struttura_ok(num, "Muraglione extra", "generale", "infezione_proc"):
                                 text += "__Il taglio ha fatto una brutta infezione...__\n"
-                                player["def"] -= 50
-                        elif difesa == "Spaventapasseri ornamentale" and 0.1 > num and setting["Spaventapasseri ornamentale"] != "Animato":
+                                player["def"] += struttura_val("Muraglione extra", "generale", "infezione_def_delta")
+                        elif difesa == "Spaventapasseri ornamentale" and struttura_ok(num, "Spaventapasseri ornamentale", "modalita", "Magico", "corvi_proc") and setting["Spaventapasseri ornamentale"] != "Animato":
                             text += "Sembra che lo spaventapasseri non sia così inutile, sta facendo cose?\n\nODDIO MA COSA SONO TUTTI QUI CORVI!"
                             break
-                        elif difesa == "Stazione laser di sicurezza" and 0.1 > num:
-                            bonus["def"] += 10 * nemico[difesa]["lv"]
-                        elif difesa == "Cane da guardia" and 0.3 > num and setting["Cane da guardia"] != "Orso":
+                        elif difesa == "Stazione laser di sicurezza" and struttura_ok(num, "Stazione laser di sicurezza", "generale", "bonus_def_proc"):
+                            bonus["def"] += struttura_val("Stazione laser di sicurezza", "generale", "bonus_def_per_livello") * nemico[difesa]["lv"]
+                        elif difesa == "Cane da guardia" and struttura_ok(num, "Cane da guardia", "generale", "rincorsa_proc") and setting["Cane da guardia"] != "Orso":
                             text += f"{nome} non è abbastanza veloce ed il cane lo riinsegue,subendo così altri {dannissimi} danni!\n"
                             player["hp"] -= dannissimi
                             if set == "Oscurato" and difesa in nemico and isinstance(nemico.get(difesa), dict):
@@ -685,9 +685,9 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                     player["fatto"] = player.get("fatto", 0) + riflesso_oscuro
                                     text += f"🌑 Il dolore torna indietro: {riflesso_oscuro} danni riflessi a {difesa}!\n"
                             num = random.random()
-                            dannissimi = round(dannissimi//2)
-                            for g in range(4):
-                                if difesa == "Cane da guardia" and 0.5 > num and setting["Cane da guardia"] == "Cane rapido":
+                            dannissimi = round(dannissimi // struttura_val("Cane da guardia", "generale", "rincorsa_danno_divisore"))
+                            for g in range(struttura_val("Cane da guardia", "modalita", "Cane rapido", "rincorse_extra_max")):
+                                if difesa == "Cane da guardia" and struttura_ok(num, "Cane da guardia", "modalita", "Cane rapido", "rincorsa_extra_proc") and setting["Cane da guardia"] == "Cane rapido":
                                     text += f"{nome} non è ancora abbastanza veloce ed il cane lo riinsegue,subendo così altri {dannissimi} danni!\n"
                                     player["hp"] -= dannissimi
                                     if set == "Oscurato" and difesa in nemico and isinstance(nemico.get(difesa), dict):
@@ -700,17 +700,17 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                     break
 
                         elif difesa == "Cannoncino" and setting["Cannoncino"] != "Danneggiante":
-                            bonus["agi"] += 5
-                            if 0.1 > num:
+                            bonus["agi"] += struttura_val("Cannoncino", "generale", "bonus_agi_difese")
+                            if struttura_ok(num, "Cannoncino", "generale", "drago_proc"):
                                 text += f"**Sbaglio o questo colpo ha svegliato un drago nelle circostanze?**\n"
-                                bonus["agi"] += 20
+                                bonus["agi"] += struttura_val("Cannoncino", "generale", "drago_bonus_agi")
                         
                         elif difesa == "Spuntone malefico":
-                            bonus["def"] += 2 * nemico[difesa]["lv"]
+                            bonus["def"] += struttura_val("Spuntone malefico", "generale", "bonus_def_per_livello") * nemico[difesa]["lv"]
                         
-                        elif difesa == "Sedimento del cucciolo" and 0.1 > num:
+                        elif difesa == "Sedimento del cucciolo" and struttura_ok(num, "Sedimento del cucciolo", "generale", "mamma_proc"):
                             text += f"**Il drago ancora spaventato richiama la mamma, che altro che sparare fuoco, schiaccia {nome}!**\n"
-                            player["hp"] = random.randint(-2, 10)
+                            player["hp"] = random.randint(struttura_val("Sedimento del cucciolo", "generale", "mamma_hp_min"), struttura_val("Sedimento del cucciolo", "generale", "mamma_hp_max"))
                         
                         elif difesa == "Centrale di cura centralizzata":
                             if set == "Assassino delle ombre" and num <= (proc_val(set, "assalto", "centrale", "proc_post") / 100):
@@ -722,9 +722,9 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                         if dife == "inguerra":
                                             pass
                                         else:
-                                            player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                            if nemico[dife]["hp"] > 50:
-                                                nemico[dife]["hp"] += -3 * int(nemico[difesa]["lv"])
+                                            player["fatto"] += struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
+                                            if nemico[dife]["hp"] > struttura_val("Centrale di cura centralizzata", "generale", "hp_minimo_modifica"):
+                                                nemico[dife]["hp"] += -struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
                                 else:
                                     news = random.choice(list(nemico))
                                     text += (
@@ -734,7 +734,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                             if dife == "inguerra":
                                                 pass
                                             else:
-                                                nemico[news]["hp"] += -3 * int(nemico[difesa]["lv"])
+                                                nemico[news]["hp"] += -struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
                             else:
                                 if setting["Centrale di cura centralizzata"] == "Sparsa":
                                     text += "Cure a non finire sgorgano per l'intero villaggio!\n"
@@ -743,9 +743,9 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                             pass
                                         else:
                                             
-                                            player["fatto"] += 3 * int(nemico[difesa]["lv"])
-                                            if nemico[dife]["hp"] > 50:
-                                                nemico[dife]["hp"] += 3 * int(nemico[difesa]["lv"])        
+                                            player["fatto"] += struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
+                                            if nemico[dife]["hp"] > struttura_val("Centrale di cura centralizzata", "generale", "hp_minimo_modifica"):
+                                                nemico[dife]["hp"] += struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
                                 else:
                                     news = random.choice(list(nemico))
                                     text += (
@@ -755,7 +755,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                                             if dife == "inguerra":
                                                 pass
                                             else:
-                                                nemico[news]["hp"] += 3 * int(nemico[difesa]["lv"])
+                                                nemico[news]["hp"] += struttura_val("Centrale di cura centralizzata", "generale", "valore_per_livello") * int(nemico[difesa]["lv"])
                     
                     if set != None:
                         if set == "Sopravvissuto" and proc_ok(num, set, "assalto", "sopravvive"):
@@ -846,7 +846,7 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                         if difesan < 0:
                             dps -= difesan
                             difesan = 0
-                        dannissimi = round(float(dps) * (100 / (float(1 + difesan)) * random.uniform(0.7, 1.3)))
+                        dannissimi = struttura_danno(dps, difesan, "attaccante")
 
                         if set == "Cavaliere d'argento":
                             cfg_argento = proc_cfg(set, "assalto", "danno_fisso")
@@ -863,12 +863,12 @@ def assedio(playerg,player, nemico, target, team, order, clan,meteo = None, sett
                         if dannissimi <= 0:
                             dannissimi *= -1
                         num = random.random()
-                        if setting["Bersaglio enorme"] == "Movibile" and num >= 0.3 and target == "Bersaglio enorme":
+                        if setting["Bersaglio enorme"] == "Movibile" and not struttura_ok(num, "Bersaglio enorme", "modalita", "Movibile", "colpito_proc") and target == "Bersaglio enorme":
                             dannissimi = 0
                             text += "**Il bersaglio si sposta all'ultimo!**\n"
                         
                         if setting["Bersaglio enorme"] == "Movibile" and target == "Bersaglio enorme":
-                            dannissimi *= 4
+                            dannissimi *= struttura_val("Bersaglio enorme", "modalita", "Movibile", "danno_mul")
                         
                         try:
                             nemico[difesa]["hp"] -= dannissimi

@@ -4,7 +4,7 @@ from pyrogram import Client, ContinuePropagation, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import date
 from liste import *
-from bilanciamento import PROC_CLASSI, PROC_ANELLI, NUCLEI_CONFIG, DUNGEON_CONFIG, INCANTESIMI_CONFIG, EFFETTI_CONFIG, WEEKEND_MOD_CONFIG, WEEKEND_MOD_POOL
+from bilanciamento import PROC_CLASSI, PROC_ANELLI, NUCLEI_CONFIG, DUNGEON_CONFIG, INCANTESIMI_CONFIG, EFFETTI_CONFIG, WEEKEND_MOD_CONFIG, WEEKEND_MOD_POOL, STRUTTURE_CONFIG
 from frasi_set import FRASI_SET_TECNICHE
 from frasi_anelli import FRASI_ANELLI_TECNICHE
 from frasi_incantesimi import FRASI_INCANTESIMI_TECNICHE
@@ -48,6 +48,36 @@ def anello_ok(numero_casuale, anello, contesto, nome, default=0):
 def anello_val(anello, contesto, nome, chiave, default=None):
     """Legge un valore di tuning dell'anello."""
     return anello_cfg(anello, contesto, nome).get(chiave, default)
+
+
+
+def struttura_val(nome, *percorso, default=None):
+    """Legge un valore della configurazione strutture d'assalto."""
+    valore = STRUTTURE_CONFIG.get(nome, {})
+    for parte in percorso:
+        if not isinstance(valore, dict) or parte not in valore:
+            return default
+        valore = valore[parte]
+    return valore
+
+
+def struttura_ok(numero_casuale, nome, *percorso, default=0):
+    """Confronta un random 0..1 con una probabilita' percentuale della struttura."""
+    valore = struttura_val(nome, *percorso, default=default)
+    return numero_casuale < (valore / 100)
+
+
+def struttura_danno(attacco, difesa, profilo="difesa"):
+    """Formula danno d'assalto data-driven; non estrae random extra rispetto al runtime storico."""
+    cfg = struttura_val("generale", "danno", profilo)
+    return round(
+        float(attacco)
+        * (
+            cfg["numeratore"]
+            / (cfg["difesa_base"] + float(difesa))
+            * random.uniform(cfg["random_min"], cfg["random_max"])
+        )
+    )
 
 
 _WEEKEND_MOD_ATTIVO = None

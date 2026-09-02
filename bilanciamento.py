@@ -1192,3 +1192,125 @@ DUNGEON_CONFIG.setdefault("stanze", {})["Faro"] = {
     "Vedere": {"livello_premio": 2},
     "Essere visto": {"boss_aggiunti": 2},
 }
+
+# ============================================================
+# CONFIGURAZIONE STRUTTURE D'ASSALTO
+# ============================================================
+# I valori base HP/statistiche e le modalita' disponibili restano in liste.py
+# (hps, starmi, spec, frasispec). Qui vive tutto il tuning numerico che prima
+# era hardcodato dentro assedio(), cosi' runtime e wiki leggono la stessa fonte.
+STRUTTURE_CONFIG = {
+    "generale": {
+        "scaling": {"divisore_livello": 10},
+        "ultima_struttura": {"atk_delta": -100, "agi_delta": -10, "def_delta": -300},
+        "tiro": {"agi_difensore_divisore": 2, "bonus": 1, "random_max": 102},
+        "danno": {
+            "difesa": {"numeratore": 100, "difesa_base": 1, "random_min": 0.7, "random_max": 1.5},
+            "spuntone": {"numeratore": 100, "difesa_base": 50, "random_min": 0.7, "random_max": 1.5},
+            "attaccante": {"numeratore": 100, "difesa_base": 1, "random_min": 0.7, "random_max": 1.3},
+        },
+        "danno_minimo": 5,
+    },
+    "Bersaglio enorme": {
+        "generale": {"distrazione_proc": 20},
+        "modalita": {
+            "Classico": {},
+            "Movibile": {"colpito_proc": 30, "danno_mul": 4},
+        },
+    },
+    "Muraglione extra": {
+        "generale": {
+            "def_attaccante_mul": 0.5,
+            "bonus_def_per_livello": 5,
+            "bonus_def_strutture_divisore": 4,
+            "infezione_proc": 10,
+            "infezione_def_delta": -50,
+        },
+        "modalita": {
+            "Possente": {},
+            "Infiammato": {"danno_bonus": 250, "autodanno": 100},
+        },
+    },
+    "Spaventapasseri ornamentale": {
+        "modalita": {
+            "Magico": {"attacco_diretto": False, "corvi_proc": 10},
+            "Animato": {"attacco_diretto": True},
+        },
+    },
+    "Clone": {
+        "generale": {"bonus_atk_difese_su_mancato_colpo": 20},
+        "modalita": {
+            "Aggressivo": {},
+            "Difensivo": {"agi_delta": -40},
+        },
+    },
+    "Chiesa": {
+        "modalita": {
+            "Credente": {"attacco_diretto": True},
+            "Orribile": {
+                "attacco_diretto": False,
+                "creatura_proc": 10,
+                "bonus_atk": 250,
+                "bonus_def": 250,
+                "bonus_agi": 25,
+            },
+        },
+    },
+    "Accampamento": {
+        "modalita": {
+            "Trappole danneggianti": {},
+            "Trappole demoralizzanti": {"danno_divisore": 1.3, "bonus_atk_difese": 50},
+        },
+    },
+    "Cane da guardia": {
+        "generale": {"rincorsa_proc": 30, "rincorsa_danno_divisore": 2},
+        "modalita": {
+            "Cane possente": {},
+            "Cane rapido": {"danno_divisore": 1.3, "rincorse_extra_max": 4, "rincorsa_extra_proc": 50},
+            "Orso": {"danno_mul": 1.5, "rincorsa_disabilitata": True},
+        },
+    },
+    "Stazione laser di sicurezza": {
+        "generale": {"bonus_def_proc": 10, "bonus_def_per_livello": 10},
+        "modalita": {
+            "Mitragliatrice laser": {},
+            "Difesa laser": {"atk_da_def_mul": 2, "def_da_atk_divisore": 2},
+            "Suicidio laser": {"autodanno": 55, "atk_mul": 2.5, "agi_delta": -26},
+        },
+    },
+    "Spuntone malefico": {
+        "generale": {"stop_proc": 60, "bonus_def_per_livello": 2},
+        "modalita": {
+            "Palese": {"roll_bonus_pct": 0},
+            "Sotterraneo": {"agi_delta": -25, "roll_bonus_pct": 20},
+        },
+    },
+    "Cannoncino": {
+        "generale": {"bonus_agi_difese": 5, "drago_proc": 10, "drago_bonus_agi": 20},
+        "modalita": {
+            "Rumoroso": {},
+            "Danneggiante": {"danno_mul": 2},
+        },
+    },
+    "Sedimento del cucciolo": {
+        "generale": {"mamma_proc": 10, "mamma_hp_min": -2, "mamma_hp_max": 10},
+        "modalita": {
+            "Assonnato": {},
+            "Affamato": {"agi_delta": 55, "atk_divisore": 1.5},
+        },
+    },
+    "Centrale di cura centralizzata": {
+        "generale": {"valore_per_livello": 3, "hp_minimo_modifica": 50},
+        "modalita": {
+            "Sparsa": {"bersagli": "tutti"},
+            "Concentrata": {"bersagli": 1},
+        },
+    },
+    "Fabbro incantaspade": {
+        "generale": {"bonus_atk_per_livello": 25, "bonus_def_per_livello": 25},
+        "modalita": {
+            "Malevolo": {"attacco_diretto": True},
+            "Curativo": {"attacco_diretto": False, "cura": True},
+        },
+    },
+}
