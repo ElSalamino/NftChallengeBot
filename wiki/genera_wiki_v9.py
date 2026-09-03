@@ -281,8 +281,8 @@ def build_html():
     )
     html = v3._must_replace(
         html,
-        '<div class=\\"card\\"><h3>${esc(b.name)}</h3><div class=\\"muted\\">Possibili premi</div>${chipLinks(\'item\',b.drops)}</div>',
-        '<div class=\\"card clickcard\\" onclick=\\"location.hash=\\\'marineboss/${enc(b.name)}\\\'\\"><h3>${link(\'marineboss\',b.name)}</h3><div class=\\"muted\\">Apri statistiche e drop</div>${chipLinks(\'item\',b.drops)}</div>',
+        "<div class=\"card\"><h3>${esc(b.name)}</h3><div class=\"muted\">Possibili premi</div>${chipLinks('item',b.drops)}</div>",
+        "<div class=\"card clickcard\" onclick=\"location.hash='marineboss/${enc(b.name)}'\"><h3>${link('marineboss',b.name)}</h3><div class=\"muted\">Apri statistiche e drop</div>${chipLinks('item',b.drops)}</div>",
         "boss marini cliccabili",
     )
     html = v3._must_replace(
