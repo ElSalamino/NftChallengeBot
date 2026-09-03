@@ -52,7 +52,7 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
           python - <<'PY'
           import random
           import liste
@@ -68,7 +68,6 @@ jobs:
           assert all(finali[nome] >= liste.SET_RAW_TARGET for nome in set_raw), [(nome, finali[nome]) for nome in set_raw if finali[nome] < liste.SET_RAW_TARGET]
           assert all(finali[nome] >= originali[nome] for nome in set_raw)
 
-          # I premi settimanali con livello devono poter uscire solo tra LV0 e LV4.
           rng = random.Random(12345)
           estratti = [settimanale.estrai_premio_oro_settimanale(rng=rng) for _ in range(500)]
           for premio in estratti:
@@ -100,6 +99,20 @@ jobs:
           grep -q "3 HP × livello della Centrale × numero di strutture presenti" _site/index.html
           grep -q "Premio della Settimanale" _site/index.html
           grep -q "LV0 e LV4" _site/index.html
+
+          # Wiki v8: Forme Mega + guida pesca.
+          grep -q "Come si ottiene / attiva la Forma Mega" _site/index.html
+          grep -q "Mixa/equipaggia insieme 2 item del Megaevento" _site/index.html
+          grep -q "Neo blaster" _site/index.html
+          grep -q "Chip terra" _site/index.html
+          grep -q "Potere di pesca" _site/index.html
+          grep -q "Pesci per location" _site/index.html
+          grep -q "Sacca e futuro uso come ingredienti" _site/index.html
+          grep -q "Richieste del Pescatore" _site/index.html
+          grep -q "Lotte marine" _site/index.html
+          grep -q "Kraken Nautico" _site/index.html
+          grep -q "allneed è formato da tutti i pesci" _site/index.html
+
           ! grep -q "generale.distrazione_proc=" _site/index.html
           ! grep -q "sistema.scaling.divisore_livello=" _site/index.html
           ! grep -q "Variabili tecniche" _site/index.html
