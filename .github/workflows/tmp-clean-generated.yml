@@ -1,0 +1,39 @@
+name: Cleanup generated test artifacts
+
+on:
+  push:
+    branches:
+      - fix/coda-int-settimanale-oro
+    paths:
+      - ".github/workflows/tmp-clean-generated.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/coda-int-settimanale-oro
+          fetch-depth: 0
+
+      - name: Ripristina artefatti come su main
+        run: |
+          git rm -rf --ignore-unmatch __pycache__ wiki/__pycache__ _site
+          for p in __pycache__ wiki/__pycache__ _site; do
+            if git ls-tree -d --name-only origin/main "$p" | grep -q .; then
+              git checkout origin/main -- "$p"
+            fi
+          done
+          rm .github/workflows/tmp-clean-generated.yml
+
+      - name: Commit pulizia
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Rimuove artefatti generati dai test"
+          git push origin HEAD:fix/coda-int-settimanale-oro
