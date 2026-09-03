@@ -18,6 +18,8 @@ v3 = v6.v3
 v2 = v6.v2
 bilanciamento = v6.bilanciamento
 liste = v6.liste
+_prefixed_flatten = v6._prefixed_flatten
+_structure_technical = v6._structure_technical
 
 
 def build_data():
