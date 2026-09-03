@@ -52,7 +52,7 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/genera_wiki_v9.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
           python - <<'PY'
           import random
           import liste
@@ -82,6 +82,28 @@ jobs:
           python wiki/run_wiki.py --output _site
           test -s _site/index.html
           test -s _site/data.json
+
+          python - <<'PY'
+          import json
+          import liste
+
+          with open('_site/data.json', encoding='utf-8') as fh:
+              data = json.load(fh)
+
+          assert data['meta']['wiki_version'] == 9
+          assert {x['name'] for x in data['achievements']} == set(liste.descri)
+          assert all(x['cap_bonus'] == 10 for x in data['achievements'])
+          assert data['achievement_system']['cap_bonus_each'] == 10
+          assert len(data['marine_bosses']) == len(liste.Nautici)
+          assert {'Kraken Nautico', 'Balena territoriale', 'Granchio da rave'} <= {x['name'] for x in data['marine_bosses']}
+
+          collectible_names = {x['name'] for x in data['items'] if x.get('is_collectible')}
+          usable_names = {x['name'] for x in data['items'] if x.get('is_usable')}
+          assert set(liste.decoro) <= collectible_names
+          assert set(liste.usabili) <= usable_names
+          print(f"Wiki v9: {len(data['achievements'])} obiettivi, {len(collectible_names)} collezionabili, {len(usable_names)} usabili")
+          PY
+
           grep -q "Boss giornaliero" _site/index.html
           grep -q "Statistiche a ogni livello" _site/index.html
           grep -q "Casa nemici dungeon" _site/index.html
@@ -112,6 +134,17 @@ jobs:
           grep -q "Lotte marine" _site/index.html
           grep -q "Kraken Nautico" _site/index.html
           grep -q "allneed è formato da tutti i pesci" _site/index.html
+
+          # Wiki v9: cataloghi, obiettivi, boss marini e Ambrosia completa.
+          grep -q "Collezionabili" _site/index.html
+          grep -q "Consumabili e oggetti attivabili" _site/index.html
+          grep -q "Tutti i traguardi del profilo" _site/index.html
+          grep -q "Bonus per ogni obiettivo" _site/index.html
+          grep -q "4.500 sfide totali" _site/index.html
+          grep -q "Apri statistiche e drop" _site/index.html
+          grep -q "Boss delle lotte marine: statistiche base e drop" _site/index.html
+          grep -q "ATK viene moltiplicato ×10" _site/index.html
+          grep -q "DEF ×10000" _site/index.html
 
           ! grep -q "generale.distrazione_proc=" _site/index.html
           ! grep -q "sistema.scaling.divisore_livello=" _site/index.html

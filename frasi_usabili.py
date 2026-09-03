@@ -8,8 +8,9 @@ alla descrizione decorativa.
 
 FRASI_USABILI_TECNICHE = {
     "Dell'ambrosia": (
-        "Consuma 1 Ambrosia per utilizzo. Aggiunge il boost d'assalto Divino LV1 "
-        "con durata +6; usi multipli sommano altri 6 punti di durata ciascuno."
+        "Consuma 1 Ambrosia per utilizzo. Aggiunge il boost d'assalto Divino LV1 con durata +6; "
+        "usi multipli sommano altri 6 punti di durata ciascuno. Finché Divino è attivo in assalto, "
+        "ATK viene moltiplicato ×10 e DEF ×10000; HP e AGI restano invariati."
     ),
     "Un eco-locatore": (
         "È riutilizzabile e richiede più di 3651 secondi dall'ultimo utilizzo. "
