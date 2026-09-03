@@ -33,7 +33,7 @@ FRASI_ANELLI_TECNICHE = {
     "Elsa vitale": "Nel {turno.crescita.proc:pct} dei turni la tua vitalità diventa potere: la crescita usa un decimo dei tuoi HP e metà della tua agilità per calcolare il boost.",
     "Benedizione sanguinolenta": "Nel {turno.cura_danno.proc:pct} dei turni il sangue perso torna utile: trasformi circa metà del danno ricevuto in cura.",
     "Corna da toro": "Nel {turno.terrore.proc:pct} dei turni fai davvero paura: più HP e agilità hai, più il nemico ne risente, usando un decimo dei tuoi HP e un terzo della tua agilità per calcolare il malus.",
-    "Sassolino scintillante": "Al momento non applica alcun effetto speciale in combattimento: il Sassolino scintillante è presente tra i gadget, ma non ha ancora una meccanica associata.",
+    "Sassolino scintillante": "Non fa nulla, ma si impegna moltissimo. Più sei vicino alla fine, più la tua speranza cresce insieme alla sua luce. Alla fine, però, non fa comunque nulla.",
     "Scudo levitante": "Negli assalti aiuti ogni compagno con almeno {assalto.aura.minimo} DEF, oppure con il {assalto.aura.percento_stat:pct} della tua DEF se il risultato è maggiore.",
     "Pegno di amicizia": "Il nemico si trattiene un po': il suo danno scende al {turno.difesa.moltiplicatore_danno:pct_mul} del normale e la tua INT viene usata per renderlo ancora meno efficace.",
     "Cuffia da boia": "Quando il nemico scende a {turno.esecuzione.hp_target_base} HP o meno, non gli lasci il tempo di riprendersi: l'esecuzione lo porta direttamente a {turno.esecuzione.hp_finale} HP.",
