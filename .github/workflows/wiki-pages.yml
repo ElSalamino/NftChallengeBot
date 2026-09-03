@@ -8,6 +8,7 @@ on:
       - "liste.py"
       - "set_raw_balance.py"
       - "bilanciamento.py"
+      - "settimanale.py"
       - "frasi_*.py"
       - "nft.py"
       - "turno_assalto.py"
@@ -20,6 +21,7 @@ on:
       - "liste.py"
       - "set_raw_balance.py"
       - "bilanciamento.py"
+      - "settimanale.py"
       - "frasi_*.py"
       - "nft.py"
       - "turno_assalto.py"
@@ -50,9 +52,11 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
           python - <<'PY'
+          import random
           import liste
+          import settimanale
 
           originali = liste.bonus_punteggio_originale
           finali = liste.bonus_punteggio
@@ -63,7 +67,17 @@ jobs:
           assert all(all(int(liste.bonus[nome].get(stat, 0)) == 0 for stat in ('hp', 'atk', 'def', 'agi')) for nome in set_zero)
           assert all(finali[nome] >= liste.SET_RAW_TARGET for nome in set_raw), [(nome, finali[nome]) for nome in set_raw if finali[nome] < liste.SET_RAW_TARGET]
           assert all(finali[nome] >= originali[nome] for nome in set_raw)
+
+          # I premi settimanali con livello devono poter uscire solo tra LV0 e LV4.
+          rng = random.Random(12345)
+          estratti = [settimanale.estrai_premio_oro_settimanale(rng=rng) for _ in range(500)]
+          for premio in estratti:
+              if " LV" in premio:
+                  lv = int(premio.rsplit(" LV", 1)[1])
+                  assert 0 <= lv <= 4, premio
+          assert set(settimanale.SOGLIE_PREMI_ORO_SETTIMANALE) == {8.4, 8.8, 9.6}
           print(f"Raw set: {len(set_raw)} normalizzati; {len(set_zero)} intenzionalmente a zero")
+          print("Settimanale oro: livelli limitati a LV0-LV4")
           PY
           python wiki/validate_wiki_v4.py
           python wiki/run_wiki.py --output _site
@@ -84,6 +98,8 @@ jobs:
           grep -Eq "20% di probabilità di distrarre l'attaccante|20% di probabilità di forzare l'attaccante a colpire il Bersaglio enorme" _site/index.html
           grep -q "Cura ogni struttura del villaggio di 3 HP per ogni livello della Centrale" _site/index.html
           grep -q "3 HP × livello della Centrale × numero di strutture presenti" _site/index.html
+          grep -q "Premio della Settimanale" _site/index.html
+          grep -q "LV0 e LV4" _site/index.html
           ! grep -q "generale.distrazione_proc=" _site/index.html
           ! grep -q "sistema.scaling.divisore_livello=" _site/index.html
           ! grep -q "Variabili tecniche" _site/index.html

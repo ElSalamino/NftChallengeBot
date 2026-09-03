@@ -1752,7 +1752,7 @@ def turno(main, oppo,cond=None):
             if danno <= 0:
                 danno = anello_val(anellon, "turno", "salvezza", "danno_min")
         elif anellon == "Coda demoniaca" and "lastD" in main:
-            percento = (main["lastD"] * bonus) / anello_val(anellon, "turno", "dolore", "divisore_chance")
+            percento = (main["lastD"] * bonusn) / anello_val(anellon, "turno", "dolore", "divisore_chance")
 
             if nome2 == anello_val(anellon, "turno", "dolore", "nome_speciale"):
                         percento += anello_val(anellon, "turno", "dolore", "bonus_speciale")

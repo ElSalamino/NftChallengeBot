@@ -5,6 +5,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import date
 from liste import *
 from bilanciamento import PROC_CLASSI, PROC_ANELLI, NUCLEI_CONFIG, DUNGEON_CONFIG, INCANTESIMI_CONFIG, EFFETTI_CONFIG, WEEKEND_MOD_CONFIG, WEEKEND_MOD_POOL, STRUTTURE_CONFIG
+from settimanale import PREMI_ORO_SETTIMANALE, SOGLIE_PREMI_ORO_SETTIMANALE, estrai_premio_oro_settimanale
 from frasi_set import FRASI_SET_TECNICHE
 from frasi_anelli import FRASI_ANELLI_TECNICHE
 from frasi_incantesimi import FRASI_INCANTESIMI_TECNICHE
@@ -3426,33 +3427,25 @@ Anello: {anello}
                 player[username]["exp"]['expattuale'] += exp
              
             altro = str()
-            premi = [
-            "Uno scudo d'oro LV0",
-            "Un pugnale d'oro LV0",
-            "Una balestra d'oro LV0",
-            "Spada d'oro fortissima LV0",
-            "Elmo d'oro fortissimo LV0",
-            "Anello d'oro fortissimo",
-            "Un rolex oro LV0"
-        ]
-            if punti > 8.4:
-                mio = random.choice(premi)
+            premi = PREMI_ORO_SETTIMANALE
+            if punti > SOGLIE_PREMI_ORO_SETTIMANALE[0]:
+                mio = estrai_premio_oro_settimanale(premi)
                 altro += f"{mio}"
                 try:
                     player[username]["zaino"][mio] += 1
                 except:
                     player[username]["zaino"][mio] = 1
                  
-            if punti > 8.8:
-                mio = random.choice(premi)
+            if punti > SOGLIE_PREMI_ORO_SETTIMANALE[1]:
+                mio = estrai_premio_oro_settimanale(premi)
                 altro += f"\n{mio}"
                 try:
                     player[username]["zaino"][mio] += 1
                 except:
                     player[username]["zaino"][mio] = 1
                  
-            if punti > 9.6:
-                mio = random.choice(premi)
+            if punti > SOGLIE_PREMI_ORO_SETTIMANALE[2]:
+                mio = estrai_premio_oro_settimanale(premi)
                 altro += f"\n{mio}"
                 try:
                     player[username]["zaino"][mio] += 1
