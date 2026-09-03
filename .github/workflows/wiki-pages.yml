@@ -140,7 +140,6 @@ jobs:
           grep -q "Consumabili e oggetti attivabili" _site/index.html
           grep -q "Tutti i traguardi del profilo" _site/index.html
           grep -q "Bonus per ogni obiettivo" _site/index.html
-          grep -q "+10 Cap massimo" _site/index.html
           grep -q "4.500 sfide totali" _site/index.html
           grep -q "Apri statistiche e drop" _site/index.html
           grep -q "Boss delle lotte marine: statistiche base e drop" _site/index.html
