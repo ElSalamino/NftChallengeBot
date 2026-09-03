@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 
-
+# Unica fonte per runtime e Wiki: modificare qui mantiene allineati premi e documentazione.
 PREMI_ORO_SETTIMANALE = (
     "Uno scudo d'oro LV0",
     "Un pugnale d'oro LV0",
