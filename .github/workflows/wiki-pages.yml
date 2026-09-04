@@ -54,7 +54,7 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/genera_wiki_v9.py wiki/genera_wiki_v10.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py dungeon_extra.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/genera_wiki_v9.py wiki/genera_wiki_v10.py wiki/genera_wiki_v11.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py dungeon_extra.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
           python - <<'PY'
           import random
           import liste
@@ -116,7 +116,7 @@ jobs:
           with open('_site/data.json', encoding='utf-8') as fh:
               data = json.load(fh)
 
-          assert data['meta']['wiki_version'] == 10
+          assert data['meta']['wiki_version'] == 11
           assert {x['name'] for x in data['achievements']} == set(liste.descri)
           assert all(x['cap_bonus'] == 10 for x in data['achievements'])
           assert data['achievement_system']['cap_bonus_each'] == 10
@@ -137,7 +137,21 @@ jobs:
           assert extra['ambush']['enemies'] == 2
           assert extra['ambush']['message'] == "Mentre giravi per il dungeon un gruppo di loschi figuri si avvicina, è un imboscata!"
 
-          print(f"Wiki v10: {len(data['achievements'])} obiettivi; Podio e imboscate documentati")
+          rooms = data['dungeon']['rooms']
+          assert len(rooms) == 31
+          assert data['dungeon_room_guide']['count'] == 31
+          assert all(r.get('guide') for r in rooms)
+          assert all(r['guide'].get('summary') and r['guide'].get('category') for r in rooms)
+          by_room = {r['name']: r for r in rooms}
+          assert len(by_room['Arena']['guide']['actions']) == 3
+          assert 'AGI' in {a['stat'] for a in by_room['Arena']['guide']['actions']}
+          assert '54%' in by_room['Fonte magica']['guide']['actions'][0]['chance']
+          assert 'LV2' in by_room['Faro']['guide']['actions'][0]['success']
+          assert 'irraggiungibile' in by_room['Lupo solitario']['guide']['actions'][0]['note']
+          assert '30%' in by_room['Biblioteca']['guide']['summary']
+          assert '123' in by_room['Chiesa']['guide']['actions'][0]['failure']
+
+          print(f"Wiki v11: {len(data['achievements'])} obiettivi; {len(rooms)} stanze tutte documentate")
           PY
 
           grep -q "Boss giornaliero" _site/index.html
@@ -191,6 +205,16 @@ jobs:
           grep -q "0,5% di probabilità di imboscata" _site/index.html
           grep -q "Mentre giravi per il dungeon un gruppo di loschi figuri si avvicina, è un imboscata!" _site/index.html
           grep -q "Mostri aggiunti" _site/index.html
+
+          # Wiki v11: guida completa e leggibile delle 31 stanze.
+          grep -q "Guida alle stanze" _site/index.html
+          grep -q "Come leggere le stanze" _site/index.html
+          grep -q "Probabilità di comparsa" _site/index.html
+          grep -q "Comportamento attuale" _site/index.html
+          grep -q "Prova di statistiche" _site/index.html
+          grep -q "Upgrade LVX" _site/index.html
+          grep -q "30% dei casi trovi un libro" _site/index.html
+          grep -q "123 danno dungeon" _site/index.html
 
           ! grep -q "generale.distrazione_proc=" _site/index.html
           ! grep -q "sistema.scaling.divisore_livello=" _site/index.html
