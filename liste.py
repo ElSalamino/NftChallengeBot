@@ -959,14 +959,14 @@ Approcci = { "Base +" : {"hp": 1, "def": 1.1, "atk": 1.1, "agi": 1.1, "Ap": "Bas
     "Agile": {"hp": 1, "def": .8, "atk": .8, "agi": 1.4, "Ap": "Base"},
     "Spinto": {"hp": 1, "def": 1.2, "atk": 1.2, "agi": 0.6, "Ap": "Base"},
     "Statico": {"hp": .8, "def": 1.2, "atk": 1.2, "agi": .8, "Ap": "Base"},
-    "Aggressivo": {"hp": 1, "def": .5, "atk": 1.5, "agi": 1, "Ap": "Base"},
+    "Aggressivo": {"hp": 1, "def": .6, "atk": 1.5, "agi": .9, "Ap": "Base"},
     "Difensivo": {"hp": 1, "def": 1.5, "atk": .5, "agi": 1, "Ap": "Base"},
     "Conservativo": {"hp": 1.4, "def": .8, "atk": .8, "agi": 1, "Ap": "Base"},
     "Distaccato": {"hp": 1, "def": .8, "atk": .8, "agi": 1.4, "Ap": "Base"},
     "Autorevole": {"hp": 1.5, "def": 1.5, "atk": .5, "agi": .5, "Ap": "Base"},
     "Schivo": {"hp": 1, "def": 1, "atk": .5, "agi": 1.5, "Ap": "Base"},
     "Malevolo": {"hp": .9, "def": .6, "atk": 1.3, "agi": 1.2, "Ap": "Base"},
-    "Spavaldo": {"hp": 1, "def": .5, "atk": 1.5, "agi": 1, "Ap": "Base"},
+    "Spavaldo": {"hp": .8, "def": .5, "atk": 1.7, "agi": 1, "Ap": "Base"},
     "Rischioso": {"hp": .5, "def": 1.25, "atk": 1.25, "agi": 1, "Ap": "Base"},
     "Rabbioso": {"hp": .5, "def": .75, "atk": 2, "agi": .75, "Ap": "Base"},
     "Impavido": {"hp": 1, "def": 1.4, "atk": .6, "agi": 1, "Ap": "Base"},
@@ -2477,31 +2477,11 @@ Boss["Franco est"] = {
 # set già sopra target viene ridotto.
 
 # Dono stellare: protezione unica e fuori dai set.
-# Per ogni statistica prende il valore raw massimo fra TUTTI gli equipaggiamenti
-# già definiti (armi/protezioni, normali ed extra) e lo raddoppia.
-def _dono_stellare_stat_massima(stat):
-    valori = []
-    for gruppo in (armi, armiextra, protezioni, protezioniextra):
-        for dati in gruppo.values():
-            try:
-                valori.append(int(dati.get(stat, 0)))
-            except (TypeError, ValueError):
-                pass
-    return max(valori) if valori else 0
-
-
-DONO_STELLARE_RAW_MASSIMI = {
-    stat: _dono_stellare_stat_massima(stat)
-    for stat in ("hp", "atk", "def", "agi")
-}
-
-protezioniextra["Dono stellare"] = {
-    "hp": DONO_STELLARE_RAW_MASSIMI["hp"] * 2,
-    "atk": DONO_STELLARE_RAW_MASSIMI["atk"] * 2,
-    "def": DONO_STELLARE_RAW_MASSIMI["def"] * 2,
-    "agi": DONO_STELLARE_RAW_MASSIMI["agi"] * 2,
-    "type": "🛡",
-}
+# Budget raw totale: 2680 con pesi HP x1, ATK x4, DEF x4, AGI x20.
+# Distribuzione quasi uniforme dei contributi raw: 680 / 660 / 660 / 680.
+DONO_STELLARE_RAW_SCORE = 2680
+DONO_STELLARE_RAW_DISTRIBUZIONE = {"hp": 680, "atk": 165, "def": 165, "agi": 34}
+protezioniextra["Dono stellare"] = {**DONO_STELLARE_RAW_DISTRIBUZIONE, "type": "🛡"}
 
 from set_raw_balance import (
     SET_RAW_TARGET,

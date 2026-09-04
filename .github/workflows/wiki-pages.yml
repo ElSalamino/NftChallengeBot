@@ -54,7 +54,7 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/genera_wiki_v9.py wiki/genera_wiki_v10.py wiki/genera_wiki_v11.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py dungeon_extra.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/genera_wiki_v9.py wiki/genera_wiki_v10.py wiki/genera_wiki_v11.py wiki/genera_wiki_v12.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py dungeon_extra.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
           python - <<'PY'
           import random
           import liste
@@ -100,9 +100,19 @@ jobs:
           scelti = scegli_nemici_imboscata(["a", "b", "c", "d"], ["a", "b"], 2, random.Random(3))
           assert len(scelti) == 2 and all(x not in {"a", "b"} for x in scelti)
 
+          # Dono stellare + approcci differenziati.
+          dono = liste.protezioniextra['Dono stellare']
+          assert {k: dono[k] for k in ('hp','atk','def','agi')} == {'hp':680,'atk':165,'def':165,'agi':34}
+          assert sum(dono[s] * liste.SET_RAW_WEIGHTS[s] for s in ('hp','atk','def','agi')) == 2680
+          assert liste.DONO_STELLARE_RAW_SCORE == 2680
+          assert liste.Approcci['Aggressivo'] == {'hp':1,'def':.6,'atk':1.5,'agi':.9,'Ap':'Base'}
+          assert liste.Approcci['Spavaldo'] == {'hp':.8,'def':.5,'atk':1.7,'agi':1,'Ap':'Base'}
+          assert all('Dono stellare' not in (x or []) for x in liste.classi.values())
+
           print(f"Raw set: {len(set_raw)} normalizzati; {len(set_zero)} intenzionalmente a zero")
           print("Settimanale oro: livelli limitati a LV0-LV4")
           print("Dungeon: Podio e imboscate verificati")
+          print("Dono stellare: 2680 raw distribuiti; Aggressivo/Spavaldo differenziati")
           PY
           python wiki/validate_wiki_v4.py
           python wiki/run_wiki.py --output _site
@@ -116,7 +126,7 @@ jobs:
           with open('_site/data.json', encoding='utf-8') as fh:
               data = json.load(fh)
 
-          assert data['meta']['wiki_version'] == 11
+          assert data['meta']['wiki_version'] == 12
           assert {x['name'] for x in data['achievements']} == set(liste.descri)
           assert all(x['cap_bonus'] == 10 for x in data['achievements'])
           assert data['achievement_system']['cap_bonus_each'] == 10
@@ -151,7 +161,19 @@ jobs:
           assert '30%' in by_room['Biblioteca']['guide']['summary']
           assert '123' in by_room['Chiesa']['guide']['actions'][0]['failure']
 
-          print(f"Wiki v11: {len(data['achievements'])} obiettivi; {len(rooms)} stanze tutte documentate")
+          # Wiki v12: raw score su equip, nemici, boss e Dono.
+          assert data['raw_score_system']['formula'] == 'HP ×1 · ATK ×4 · DEF ×4 · AGI ×20'
+          assert all('raw_score' in x for x in data['enemies'])
+          assert all('raw_score' in x for x in data['bosses'])
+          assert all('raw_score' in x for x in data['marine_bosses'])
+          equip = [x for x in data['items'] if x.get('levels')]
+          assert equip and all(x.get('raw_score') is not None for x in equip)
+          dono = next(x for x in data['items'] if x['name'] == 'Dono stellare')
+          assert dono['raw_score'] == 2680
+          assert dono['dono_stellare']['stats'] == {'hp':680,'atk':165,'def':165,'agi':34}
+          assert dono['dono_stellare']['contributions'] == {'hp':680,'atk':660,'def':660,'agi':680}
+
+          print(f"Wiki v12: {len(data['achievements'])} obiettivi; {len(rooms)} stanze; raw score esteso")
           PY
 
           grep -q "Boss giornaliero" _site/index.html
@@ -215,6 +237,11 @@ jobs:
           grep -q "Upgrade LVX" _site/index.html
           grep -q "30% dei casi trovi un libro" _site/index.html
           grep -q "123 danno dungeon" _site/index.html
+
+          # Wiki v12: raw score esteso e Dono stellare.
+          grep -q "Come sono determinate le raw stats" _site/index.html
+          grep -q "Contributi raw" _site/index.html
+          grep -q "Statistiche base" _site/index.html
 
           ! grep -q "generale.distrazione_proc=" _site/index.html
           ! grep -q "sistema.scaling.divisore_livello=" _site/index.html
