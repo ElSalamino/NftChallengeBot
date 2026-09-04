@@ -6,13 +6,14 @@ import random
 
 
 def podio_probabilita_pct(obiettivi_completati, obiettivi_totali, posizione):
-    """Percentuale letterale: completati / (totali / posizione)."""
+    """Converte il rapporto del Podio in percentuale: rapporto 1 = 100%, con cap al 100%."""
     posizione = int(posizione)
     totale = max(0, int(obiettivi_totali))
     completati = max(0, int(obiettivi_completati))
     if totale <= 0 or posizione <= 0:
         return 0.0
-    return max(0.0, completati / (totale / posizione))
+    rapporto = completati / (totale / posizione)
+    return min(100.0, max(0.0, rapporto * 100.0))
 
 
 def podio_livello_premio(posizione, livello_base=4):
