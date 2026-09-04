@@ -2491,3 +2491,11 @@ bonus, bonus_punteggio, bonus_punteggio_originale, bonus_tema = normalize_set_bo
     target=SET_RAW_TARGET,
 )
 # --- BILANCIAMENTO RAW SET 1200: FINE ---
+
+# --- PODIO DUNGEON / IMBOSCATE ---
+if "Podio" not in stanze:
+    stanze.append("Podio")
+for _scelta_podio in ("1° posto", "2° posto", "3° posto"):
+    if _scelta_podio not in scelte:
+        scelte.append(_scelta_podio)
+del _scelta_podio
