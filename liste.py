@@ -959,14 +959,14 @@ Approcci = { "Base +" : {"hp": 1, "def": 1.1, "atk": 1.1, "agi": 1.1, "Ap": "Bas
     "Agile": {"hp": 1, "def": .8, "atk": .8, "agi": 1.4, "Ap": "Base"},
     "Spinto": {"hp": 1, "def": 1.2, "atk": 1.2, "agi": 0.6, "Ap": "Base"},
     "Statico": {"hp": .8, "def": 1.2, "atk": 1.2, "agi": .8, "Ap": "Base"},
-    "Aggressivo": {"hp": 1, "def": .5, "atk": 1.5, "agi": 1, "Ap": "Base"},
+    "Aggressivo": {"hp": 1, "def": .6, "atk": 1.5, "agi": .9, "Ap": "Base"},
     "Difensivo": {"hp": 1, "def": 1.5, "atk": .5, "agi": 1, "Ap": "Base"},
     "Conservativo": {"hp": 1.4, "def": .8, "atk": .8, "agi": 1, "Ap": "Base"},
     "Distaccato": {"hp": 1, "def": .8, "atk": .8, "agi": 1.4, "Ap": "Base"},
     "Autorevole": {"hp": 1.5, "def": 1.5, "atk": .5, "agi": .5, "Ap": "Base"},
     "Schivo": {"hp": 1, "def": 1, "atk": .5, "agi": 1.5, "Ap": "Base"},
     "Malevolo": {"hp": .9, "def": .6, "atk": 1.3, "agi": 1.2, "Ap": "Base"},
-    "Spavaldo": {"hp": 1, "def": .5, "atk": 1.5, "agi": 1, "Ap": "Base"},
+    "Spavaldo": {"hp": .8, "def": .5, "atk": 1.7, "agi": 1, "Ap": "Base"},
     "Rischioso": {"hp": .5, "def": 1.25, "atk": 1.25, "agi": 1, "Ap": "Base"},
     "Rabbioso": {"hp": .5, "def": .75, "atk": 2, "agi": .75, "Ap": "Base"},
     "Impavido": {"hp": 1, "def": 1.4, "atk": .6, "agi": 1, "Ap": "Base"},
@@ -2477,47 +2477,11 @@ Boss["Franco est"] = {
 # set già sopra target viene ridotto.
 
 # Dono stellare: protezione unica e fuori dai set.
-# Prende UN SOLO equipaggiamento: quello con il raw score base più alto secondo
-# gli stessi pesi usati dalla Wiki (HP x1, ATK x4, DEF x4, AGI x20).
-# La distribuzione completa di quell'oggetto viene poi raddoppiata.
-from set_raw_balance import SET_RAW_WEIGHTS as _DONO_RAW_WEIGHTS
-
-
-def _dono_stellare_raw_score(dati):
-    totale = 0.0
-    for stat, peso in _DONO_RAW_WEIGHTS.items():
-        try:
-            valore = float((dati or {}).get(stat, 0) or 0)
-        except (TypeError, ValueError):
-            valore = 0.0
-        totale += valore * float(peso)
-    return totale
-
-
-def _dono_stellare_oggetto_migliore():
-    migliore_nome = None
-    migliore_dati = None
-    migliore_score = None
-    for gruppo in (armi, armiextra, protezioni, protezioniextra):
-        for nome, dati in gruppo.items():
-            if str(nome).split(" LV", 1)[0] == "Dono stellare":
-                continue
-            score = _dono_stellare_raw_score(dati)
-            if migliore_score is None or score > migliore_score:
-                migliore_nome = str(nome).split(" LV", 1)[0]
-                migliore_dati = dati
-                migliore_score = score
-    return migliore_nome, migliore_dati or {}, migliore_score or 0
-
-
-DONO_STELLARE_BASE_OGGETTO, _DONO_STELLARE_BASE_STATS, DONO_STELLARE_BASE_SCORE = _dono_stellare_oggetto_migliore()
-
-protezioniextra["Dono stellare"] = {
-    stat: int(round(float(_DONO_STELLARE_BASE_STATS.get(stat, 0) or 0) * 2))
-    for stat in ("hp", "atk", "def", "agi")
-}
-protezioniextra["Dono stellare"]["type"] = "🛡"
-DONO_STELLARE_RAW_SCORE = _dono_stellare_raw_score(protezioniextra["Dono stellare"])
+# Budget raw totale: 2680 con pesi HP x1, ATK x4, DEF x4, AGI x20.
+# Distribuzione quasi uniforme dei contributi raw: 680 / 660 / 660 / 680.
+DONO_STELLARE_RAW_SCORE = 2680
+DONO_STELLARE_RAW_DISTRIBUZIONE = {"hp": 680, "atk": 165, "def": 165, "agi": 34}
+protezioniextra["Dono stellare"] = {**DONO_STELLARE_RAW_DISTRIBUZIONE, "type": "🛡"}
 
 from set_raw_balance import (
     SET_RAW_TARGET,
