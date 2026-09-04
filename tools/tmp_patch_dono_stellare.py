@@ -13,20 +13,13 @@ def replace_once(path, old, new, label):
 
 
 # 1) liste.py: Dono stellare = protezione standalone, 2x il massimo di ogni raw stat
-# fra tutti gli equipaggiamenti già esistenti. Viene calcolato prima di inserirlo,
-# quindi non può auto-influenzare il proprio massimo.
-replace_once(
-    'liste.py',
-    '''protezioniextra = {\n    "Cappellino da pescatore": {"hp": 0, "atk": 100, "def": 100, "agi": 0, "type": "🛡"},''',
-    '''protezioniextra = {\n    "Cappellino da pescatore": {"hp": 0, "atk": 100, "def": 100, "agi": 0, "type": "🛡"},''',
-    'ancora protezioniextra',
-)
-
+# fra tutti gli equipaggiamenti già esistenti. Inserito appena prima del bilanciamento
+# dei set, quando armi/protezioni normali ed extra sono già tutti definiti.
 p = ROOT / 'liste.py'
 s = p.read_text(encoding='utf-8')
-anchor = '\n\nclassi = {'
+anchor = '\nfrom set_raw_balance import ('
 if s.count(anchor) != 1:
-    raise RuntimeError(f'ancora classi: {s.count(anchor)}')
+    raise RuntimeError(f'ancora set_raw_balance: {s.count(anchor)}')
 insert = r'''
 
 # Dono stellare: protezione unica e fuori dai set.
