@@ -1,0 +1,78 @@
+name: Finalizza Dono e approcci
+
+on:
+  push:
+    branches:
+      - feature/wiki-raw-score-v12
+    paths:
+      - ".github/workflows/tmp-finalize-raw-approcci.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/wiki-raw-score-v12
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Applica patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('liste.py')
+          s=p.read_text(encoding='utf-8')
+
+          # Dono stellare: budget raw fisso 2680, distribuito il più equamente possibile
+          # sui contributi pesati mantenendo statistiche intere.
+          pattern=re.compile(r'# Dono stellare: protezione unica e fuori dai set\..*?(?=from set_raw_balance import \()', re.S)
+          repl='''# Dono stellare: protezione unica e fuori dai set.\n# Budget raw totale: 2680 con pesi HP x1, ATK x4, DEF x4, AGI x20.\n# Distribuzione quasi uniforme dei contributi raw: 680 / 660 / 660 / 680.\nDONO_STELLARE_RAW_SCORE = 2680\nDONO_STELLARE_RAW_DISTRIBUZIONE = {"hp": 680, "atk": 165, "def": 165, "agi": 34}\nprotezioniextra["Dono stellare"] = {**DONO_STELLARE_RAW_DISTRIBUZIONE, "type": "🛡"}\n\n'''
+          s,n=pattern.subn(repl,s,count=1)
+          if n!=1: raise SystemExit(f'Blocco Dono non trovato: {n}')
+
+          def cambia(nome, nuovo):
+              nonlocal_s = None
+              return
+
+          patterns={
+              'Aggressivo': '{"hp": 1, "def": .6, "atk": 1.5, "agi": .9, "Ap": "Base"}',
+              'Spavaldo': '{"hp": .8, "def": .5, "atk": 1.7, "agi": 1, "Ap": "Base"}',
+          }
+          for nome, nuovo in patterns.items():
+              rx=re.compile(r'("'+re.escape(nome)+r'"\s*:\s*)\{[^{}]*"Ap"\s*:\s*"Base"[^{}]*\}')
+              s,n=rx.subn(lambda m:m.group(1)+nuovo,s,count=1)
+              if n!=1: raise SystemExit(f'Approccio {nome} non trovato: {n}')
+
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Verifica
+        run: |
+          python -m py_compile liste.py
+          python - <<'PY'
+          import liste
+          w=liste.SET_RAW_WEIGHTS
+          d=liste.protezioniextra['Dono stellare']
+          score=sum(d[s]*w[s] for s in ('hp','atk','def','agi'))
+          assert d['hp']==680 and d['atk']==165 and d['def']==165 and d['agi']==34, d
+          assert score==2680==liste.DONO_STELLARE_RAW_SCORE, score
+          assert liste.Approcci['Aggressivo']=={'hp':1,'def':.6,'atk':1.5,'agi':.9,'Ap':'Base'}
+          assert liste.Approcci['Spavaldo']=={'hp':.8,'def':.5,'atk':1.7,'agi':1,'Ap':'Base'}
+          assert all('Dono stellare' not in (x or []) for x in liste.classi.values())
+          print('Dono:', d, 'raw=', score)
+          print('Aggressivo:', liste.Approcci['Aggressivo'])
+          print('Spavaldo:', liste.Approcci['Spavaldo'])
+          PY
+      - name: Salva
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add liste.py
+          git diff --cached --quiet || git commit -m "Distribuisce il Dono e differenzia gli approcci"
+          git push origin HEAD:feature/wiki-raw-score-v12
