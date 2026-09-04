@@ -92,7 +92,8 @@ jobs:
           assert bilanciamento.DUNGEON_CONFIG["generale"]["imboscata"] == {"proc": 0.5, "nemici": 2}
           totale = len(liste.descri)
           assert totale > 0
-          assert [podio_probabilita_pct(totale, totale, x) for x in (1, 2, 3)] == [1, 2, 3]
+          assert [podio_probabilita_pct(totale, totale, x) for x in (1, 2, 3)] == [100, 100, 100]
+          assert [podio_probabilita_pct(26, 52, x) for x in (1, 2, 3)] == [50, 100, 100]
           assert [podio_livello_premio(x) for x in (1, 2, 3)] == [3, 2, 1]
           assert [podio_penalita_gloria(x) for x in (1, 2, 3)] == [10, 8, 6]
           assert podio_applica_penalita(4, 10) == (0, 4)
@@ -129,7 +130,7 @@ jobs:
 
           extra = data['dungeon_additions']
           assert extra['podium']['room'] == 'Podio'
-          assert [x['max_chance_pct'] for x in extra['podium']['positions']] == [1, 2, 3]
+          assert [x['max_chance_pct'] for x in extra['podium']['positions']] == [100, 100, 100]
           assert [x['reward_level'] for x in extra['podium']['positions']] == [3, 2, 1]
           assert [x['glory_loss'] for x in extra['podium']['positions']] == [10, 8, 6]
           assert extra['ambush']['proc_pct'] == 0.5
@@ -184,6 +185,7 @@ jobs:
           # Wiki v10: Podio e imboscate.
           grep -q "Podio" _site/index.html
           grep -q "obiettivi completati /" _site/index.html
+          grep -q "1 significa 100%" _site/index.html
           grep -q "oggetto casuale LV3" _site/index.html
           grep -q "10 Gloria" _site/index.html
           grep -q "0,5% di probabilità di imboscata" _site/index.html
