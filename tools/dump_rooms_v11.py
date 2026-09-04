@@ -10,6 +10,8 @@ sys.path.insert(0, str(ROOT / 'wiki'))
 import genera_wiki_v10 as wiki
 import bilanciamento
 
+# Stesso bootstrap usato da wiki/run_wiki.py: evita la vecchia chiave None nei set.
+wiki.v3.v2.set_names = wiki.v3._valid_set_names
 
 data = wiki.build_data()
 rooms = []
