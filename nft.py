@@ -3858,6 +3858,13 @@ async def dungeon_stanze(app, message,player,scelta,nop,username,evento,last_dun
                                                 player[username]["zaino"][pt[x]] += dif
                                 except:
                                                 player[username]["zaino"][pt[x]] = dif
+
+                        premio_stellare = "Dono stellare LV4"
+                        try:
+                            player[username]["zaino"][premio_stellare] += 1
+                        except:
+                            player[username]["zaino"][premio_stellare] = 1
+                        text += f"\nDalla spada si libera un bagliore: ottieni **{premio_stellare}**!"
                     else:
                         text += "\nCosa?\nCome non è il momento?!\nERA IL MIO MOMENTO\nNOOOOOOOOOOOOOOOOOOO"
                 

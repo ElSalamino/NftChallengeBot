@@ -2475,6 +2475,34 @@ Boss["Franco est"] = {
 # HP=1, ATK/DEF=4, AGI=20. I set a zero restano intenzionalmente a zero.
 # I valori sotto target vengono aumentati mantenendo il mix originale; nessun
 # set già sopra target viene ridotto.
+
+# Dono stellare: protezione unica e fuori dai set.
+# Per ogni statistica prende il valore raw massimo fra TUTTI gli equipaggiamenti
+# già definiti (armi/protezioni, normali ed extra) e lo raddoppia.
+def _dono_stellare_stat_massima(stat):
+    valori = []
+    for gruppo in (armi, armiextra, protezioni, protezioniextra):
+        for dati in gruppo.values():
+            try:
+                valori.append(int(dati.get(stat, 0)))
+            except (TypeError, ValueError):
+                pass
+    return max(valori) if valori else 0
+
+
+DONO_STELLARE_RAW_MASSIMI = {
+    stat: _dono_stellare_stat_massima(stat)
+    for stat in ("hp", "atk", "def", "agi")
+}
+
+protezioniextra["Dono stellare"] = {
+    "hp": DONO_STELLARE_RAW_MASSIMI["hp"] * 2,
+    "atk": DONO_STELLARE_RAW_MASSIMI["atk"] * 2,
+    "def": DONO_STELLARE_RAW_MASSIMI["def"] * 2,
+    "agi": DONO_STELLARE_RAW_MASSIMI["agi"] * 2,
+    "type": "🛡",
+}
+
 from set_raw_balance import (
     SET_RAW_TARGET,
     SET_RAW_WEIGHTS,
