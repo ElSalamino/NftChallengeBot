@@ -39,7 +39,9 @@ def build_data():
         posizioni.append({
             "position": posizione,
             "choice": f"{posizione}° posto",
-            "formula": f"obiettivi completati / ({totale_obiettivi} / {posizione}) %",
+            "formula": (
+                f"min(100%, [obiettivi completati / ({totale_obiettivi} / {posizione})] × 100%)"
+            ),
             "max_chance_pct": podio_probabilita_pct(
                 totale_obiettivi, totale_obiettivi, posizione
             ),
@@ -59,10 +61,11 @@ def build_data():
             "room": "Podio",
             "total_achievements": totale_obiettivi,
             "description": (
-                "Nel Podio scegli se tentare il 1°, 2° o 3° posto. La probabilità percentuale "
-                "è obiettivi completati / (numero totale obiettivi / posizione). Più obiettivi hai, "
-                "più la probabilità cresce. Premi e rischi: 1° = oggetto casuale LV3 e, se fallisci, "
-                "fino a 10 Gloria; 2° = oggetto casuale LV2 e fino a 8 Gloria; 3° = oggetto casuale LV1 "
+                "Nel Podio scegli se tentare il 1°, 2° o 3° posto. Si calcola il rapporto "
+                "obiettivi completati / (numero totale obiettivi / posizione): un risultato di 1 "
+                "significa 100% di probabilità, 0,5 significa 50%, e qualsiasi valore oltre 1 resta "
+                "comunque al 100%. Premi e rischi: 1° = oggetto casuale LV3 e, se fallisci, fino a "
+                "10 Gloria; 2° = oggetto casuale LV2 e fino a 8 Gloria; 3° = oggetto casuale LV1 "
                 "e fino a 6 Gloria. La Gloria non può mai scendere sotto zero."
             ),
             "positions": posizioni,
