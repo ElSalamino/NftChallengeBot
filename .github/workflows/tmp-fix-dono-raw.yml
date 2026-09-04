@@ -1,0 +1,77 @@
+name: Corregge raw Dono stellare
+
+on:
+  push:
+    branches:
+      - feature/wiki-raw-score-v12
+    paths:
+      - "tools/tmp_fix_dono_raw.py"
+      - ".github/workflows/tmp-fix-dono-raw.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/wiki-raw-score-v12
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Applica correzione
+        run: python tools/tmp_fix_dono_raw.py
+      - name: Verifica raw Dono
+        run: |
+          python -m py_compile liste.py wiki/genera_wiki_v12.py wiki/run_wiki.py
+          python - <<'PY'
+          import liste
+
+          weights = liste.SET_RAW_WEIGHTS
+          stats = ('hp', 'atk', 'def', 'agi')
+          gruppi = (liste.armi, liste.armiextra, liste.protezioni, liste.protezioniextra)
+
+          def score(d):
+              return sum(float(d.get(s, 0) or 0) * weights[s] for s in stats)
+
+          candidati = []
+          for gruppo in gruppi:
+              for nome, dati in gruppo.items():
+                  if str(nome).split(' LV', 1)[0] == 'Dono stellare':
+                      continue
+                  candidati.append((score(dati), str(nome).split(' LV', 1)[0], dati))
+
+          best_score, best_name, best = max(candidati, key=lambda x: x[0])
+          dono = liste.protezioniextra['Dono stellare']
+          assert liste.DONO_STELLARE_BASE_OGGETTO == best_name
+          assert liste.DONO_STELLARE_BASE_SCORE == best_score
+          for stat in stats:
+              assert dono[stat] == round(float(best.get(stat, 0) or 0) * 2), (stat, dono[stat], best.get(stat, 0))
+          assert score(dono) == best_score * 2
+          assert liste.DONO_STELLARE_RAW_SCORE == best_score * 2
+          assert all('Dono stellare' not in (componenti or []) for componenti in liste.classi.values())
+          print('Oggetto raw massimo:', best_name, best_score, {s: best.get(s, 0) for s in stats})
+          print('Dono stellare LV0:', score(dono), {s: dono[s] for s in stats})
+          PY
+          python wiki/run_wiki.py --output _site
+          python - <<'PY'
+          import json
+          with open('_site/data.json', encoding='utf-8') as fh:
+              d = json.load(fh)
+          assert d['meta']['wiki_version'] == 12
+          assert d['raw_score_system']['formula'] == 'HP ×1 · ATK ×4 · DEF ×4 · AGI ×20'
+          assert all('raw_score' in x for x in d['enemies'])
+          assert all('raw_score' in x for x in d['bosses'])
+          equip = [x for x in d['items'] if x.get('levels')]
+          assert equip and all(x.get('raw_score') is not None for x in equip)
+          PY
+      - name: Salva correzione
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add liste.py
+          git diff --cached --quiet || git commit -m "Corregge raw stats del Dono stellare"
+          git push origin HEAD:feature/wiki-raw-score-v12
