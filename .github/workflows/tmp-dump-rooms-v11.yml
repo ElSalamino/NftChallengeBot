@@ -1,20 +1,18 @@
-name: Test Wiki stanze v11
+name: Integra CI Wiki stanze v11
 
 on:
   push:
     branches:
       - feature/wiki-stanze-v11
     paths:
-      - "wiki/genera_wiki_v11.py"
-      - "wiki/run_wiki.py"
-      - "tools/patch_v11_exact.py"
+      - "tools/patch_wiki_ci_v11.py"
       - ".github/workflows/tmp-dump-rooms-v11.yml"
 
 permissions:
   contents: write
 
 jobs:
-  test:
+  patch:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
@@ -24,49 +22,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Rifinisce testi dal runtime
-        run: python tools/patch_v11_exact.py
-      - name: Compila e genera
+      - name: Aggiorna CI permanente
+        run: python tools/patch_wiki_ci_v11.py
+      - name: Verifica workflow e Wiki
         run: |
           python -m py_compile wiki/genera_wiki_v11.py wiki/run_wiki.py
-          python wiki/validate_wiki_v4.py
           python wiki/run_wiki.py --output _site
-      - name: Verifica tutte le stanze
-        run: |
           python - <<'PY'
           import json
-          with open('_site/data.json', encoding='utf-8') as fh:
-              data=json.load(fh)
-          rooms=data['dungeon']['rooms']
-          assert data['meta']['wiki_version']==11
-          assert len(rooms)==31, len(rooms)
-          assert data['dungeon_room_guide']['count']==31
-          assert all(r.get('guide') for r in rooms)
-          assert all(r['guide'].get('summary') and r['guide'].get('category') for r in rooms)
-          by={r['name']:r for r in rooms}
-          assert len(by['Arena']['guide']['actions'])==3
-          assert any(a['stat']=='AGI' for a in by['Arena']['guide']['actions'])
-          assert '54%' in by['Fonte magica']['guide']['actions'][0]['chance']
-          assert data['dungeon_additions']['podium']['positions'][0]['max_chance_pct']==100
-          assert 'LV2' in by['Faro']['guide']['actions'][0]['success']
-          assert 'irraggiungibile' in by['Lupo solitario']['guide']['actions'][0]['note']
-          assert 'condiviso' in by['Cancello']['guide']['summary'].lower()
-          assert '30%' in by['Biblioteca']['guide']['summary']
-          assert '123' in by['Chiesa']['guide']['actions'][0]['failure']
-          print('Wiki v11:',len(rooms),'stanze tutte documentate')
+          with open('_site/data.json',encoding='utf-8') as f: d=json.load(f)
+          assert d['meta']['wiki_version']==11
+          assert len(d['dungeon']['rooms'])==31
+          assert all(x.get('guide') for x in d['dungeon']['rooms'])
           PY
-          grep -q "Guida alle stanze" _site/index.html
-          grep -q "Come leggere le stanze" _site/index.html
-          grep -q "Probabilità di comparsa" _site/index.html
-          grep -q "Comportamento attuale" _site/index.html
-          grep -q "Prova di statistiche" _site/index.html
-          grep -q "Upgrade LVX" _site/index.html
-          grep -q "30% dei casi trovi un libro" _site/index.html
-          grep -q "123 danno dungeon" _site/index.html
-      - name: Salva rifiniture
+      - name: Salva CI
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add wiki/genera_wiki_v11.py
-          git diff --cached --quiet || git commit -m "Rifinisce Biblioteca e Chiesa nella Wiki stanze"
+          git add .github/workflows/wiki-pages.yml
+          git commit -m "Verifica tutte le stanze nella Wiki v11"
           git push origin HEAD:feature/wiki-stanze-v11
