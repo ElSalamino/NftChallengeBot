@@ -60,8 +60,7 @@ def build_data():
         for level in boss.get("levels", []):
             level["raw_score"] = raw_score(level.get("stats", {}))
 
-    # Anche i boss marini usano lo stesso indicatore, così tutte le schede boss
-    # espongono la stessa unità di confronto nel JSON della Wiki.
+    # Anche i boss marini usano lo stesso indicatore.
     for boss in data.get("marine_bosses", []):
         boss["raw_score"] = raw_score(boss.get("stats", {}))
 
@@ -70,6 +69,36 @@ def build_data():
         "formula": "HP ×1 · ATK ×4 · DEF ×4 · AGI ×20",
         "description": "Somma pesata delle statistiche grezze, usata come indicatore unico per confrontare la quantità di statistiche raw.",
     }
+
+    # Dono stellare: documenta la nuova regola dinamica e il riferimento corrente.
+    dono_name = getattr(liste, "DONO_STELLARE_BASE_OGGETTO", None)
+    dono_base_score = getattr(liste, "DONO_STELLARE_BASE_SCORE", None)
+    dono_score = getattr(liste, "DONO_STELLARE_RAW_SCORE", None)
+    data["dono_stellare"] = {
+        "base_item": dono_name,
+        "base_raw_score": int(round(dono_base_score)) if dono_base_score is not None else None,
+        "raw_score": int(round(dono_score)) if dono_score is not None else None,
+        "rule": "Individua il singolo equipaggiamento LV0 col raw score più alto e raddoppia tutte le sue raw stats, mantenendone la distribuzione. Non appartiene ad alcun set.",
+    }
+    for item in data.get("items", []):
+        if item.get("name") == "Dono stellare":
+            item["dono_stellare"] = data["dono_stellare"]
+
+    # La v11 descriveva ancora la vecchia interpretazione dei quattro massimi separati.
+    for room in data.get("dungeon", {}).get("rooms", []):
+        if room.get("name") != "Spada conficcata":
+            continue
+        guide = room.get("guide", {})
+        guide["summary"] = "Nei giorni 17 o 21 la Spada ti riporta volutamente alla base e ti consegna Dono stellare LV4."
+        for action in guide.get("actions", []):
+            if action.get("name") == "Estrai la spada":
+                action["note"] = (
+                    "Il reset della build è lo scopo della stanza, non un malus accidentale. "
+                    f"Dono stellare prende come riferimento l'equipaggiamento col raw score LV0 più alto"
+                    + (f" ({dono_name}, {int(round(dono_base_score))} raw)" if dono_name and dono_base_score is not None else "")
+                    + " e ne raddoppia HP/ATK/DEF/AGI mantenendo esattamente la stessa distribuzione. È una protezione standalone e non entra in alcun set."
+                )
+
     data["meta"]["wiki_version"] = 12
     return data
 
@@ -87,12 +116,22 @@ function injectRawScore(html,score,basis){
   if(!block)return html;
   return html.includes(marker)?html.replace(marker,block+marker):html+block;
 }
+function donoStellareSection(i){
+  if(!i||i.name!=='Dono stellare'||!i.dono_stellare)return '';
+  const d=i.dono_stellare;
+  return sectionTitle('Come sono determinate le raw stats')+`<div class="card"><p>${esc(d.rule)}</p>${d.base_item?`<p><b>Riferimento attuale:</b> ${link('item',d.base_item)} · <b>${esc(d.base_raw_score)} raw</b> → Dono <b>${esc(d.raw_score)} raw</b>.</p>`:''}</div>`;
+}
 
 const _wikiV12ItemDetail=itemDetail;
 itemDetail=function(name){
   const i=find(D.items,name);
-  const base=_wikiV12ItemDetail(name);
+  let base=_wikiV12ItemDetail(name);
   if(!i)return base;
+  const special=donoStellareSection(i);
+  if(special){
+    const marker='</div><aside class="sidebox">';
+    base=base.includes(marker)?base.replace(marker,special+marker):base+special;
+  }
   return injectRawScore(base,i.raw_score,i.raw_score_basis||'LV0');
 };
 
@@ -108,6 +147,14 @@ const _wikiV12BossDetail=bossDetail;
 bossDetail=function(name){
   const b=find(D.bosses,name);
   const base=_wikiV12BossDetail(name);
+  if(!b)return base;
+  return injectRawScore(base,b.raw_score,'Statistiche base');
+};
+
+const _wikiV12MarineBossDetail=marineBossDetail;
+marineBossDetail=function(name){
+  const b=find(D.marine_bosses,name);
+  const base=_wikiV12MarineBossDetail(name);
   if(!b)return base;
   return injectRawScore(base,b.raw_score,'Statistiche base');
 };
