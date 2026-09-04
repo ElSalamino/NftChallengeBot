@@ -1,18 +1,19 @@
-name: Dump stanze dungeon v11
+name: Test Wiki stanze v11
 
 on:
   push:
     branches:
       - feature/wiki-stanze-v11
     paths:
-      - "tools/dump_rooms_v11.py"
+      - "wiki/genera_wiki_v11.py"
+      - "wiki/run_wiki.py"
       - ".github/workflows/tmp-dump-rooms-v11.yml"
 
 permissions:
   contents: read
 
 jobs:
-  dump:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,5 +22,39 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Dump stanze
-        run: python tools/dump_rooms_v11.py
+      - name: Compila e genera
+        run: |
+          python -m py_compile wiki/genera_wiki_v11.py wiki/run_wiki.py
+          python wiki/validate_wiki_v4.py
+          python wiki/run_wiki.py --output _site
+      - name: Verifica tutte le stanze
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          sys.path.insert(0, 'wiki')
+          import liste
+          with open('_site/data.json', encoding='utf-8') as fh:
+              data=json.load(fh)
+          rooms=data['dungeon']['rooms']
+          assert data['meta']['wiki_version']==11
+          assert len(rooms)==31, len(rooms)
+          assert data['dungeon_room_guide']['count']==31
+          assert all(r.get('guide') for r in rooms)
+          assert all(r['guide'].get('summary') and r['guide'].get('category') for r in rooms)
+          by={r['name']:r for r in rooms}
+          assert len(by['Arena']['guide']['actions'])==3
+          assert any(a['stat']=='AGI' for a in by['Arena']['guide']['actions'])
+          assert '54%' in by['Fonte magica']['guide']['actions'][0]['chance']
+          assert '100%' in by['Podio']['guide']['actions'][0]['note'] or data['dungeon_additions']['podium']['positions'][0]['max_chance_pct']==100
+          assert 'LV2' in by['Faro']['guide']['actions'][0]['success']
+          assert 'irraggiungibile' in by['Lupo solitario']['guide']['actions'][0]['note']
+          assert 'globale' in by['Cancello']['guide']['summary'].lower()
+          print('Wiki v11:',len(rooms),'stanze tutte documentate')
+          PY
+          grep -q "Guida alle stanze" _site/index.html
+          grep -q "Come leggere le stanze" _site/index.html
+          grep -q "Probabilità di comparsa" _site/index.html
+          grep -q "Comportamento attuale" _site/index.html
+          grep -q "Prova di statistiche" _site/index.html
+          grep -q "Upgrade LVX" _site/index.html
