@@ -8,6 +8,7 @@ on:
       - "liste.py"
       - "set_raw_balance.py"
       - "bilanciamento.py"
+      - "dungeon_extra.py"
       - "settimanale.py"
       - "frasi_*.py"
       - "nft.py"
@@ -21,6 +22,7 @@ on:
       - "liste.py"
       - "set_raw_balance.py"
       - "bilanciamento.py"
+      - "dungeon_extra.py"
       - "settimanale.py"
       - "frasi_*.py"
       - "nft.py"
@@ -52,11 +54,19 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/genera_wiki_v9.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/genera_wiki_v9.py wiki/genera_wiki_v10.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py dungeon_extra.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py
           python - <<'PY'
           import random
           import liste
           import settimanale
+          import bilanciamento
+          from dungeon_extra import (
+              podio_probabilita_pct,
+              podio_livello_premio,
+              podio_penalita_gloria,
+              podio_applica_penalita,
+              scegli_nemici_imboscata,
+          )
 
           originali = liste.bonus_punteggio_originale
           finali = liste.bonus_punteggio
@@ -75,8 +85,23 @@ jobs:
                   lv = int(premio.rsplit(" LV", 1)[1])
                   assert 0 <= lv <= 4, premio
           assert set(settimanale.SOGLIE_PREMI_ORO_SETTIMANALE) == {8.4, 8.8, 9.6}
+
+          # Dungeon Podio + imboscate.
+          assert "Podio" in liste.stanze
+          assert all(x in liste.scelte for x in ("1° posto", "2° posto", "3° posto"))
+          assert bilanciamento.DUNGEON_CONFIG["generale"]["imboscata"] == {"proc": 0.5, "nemici": 2}
+          totale = len(liste.descri)
+          assert totale > 0
+          assert [podio_probabilita_pct(totale, totale, x) for x in (1, 2, 3)] == [1, 2, 3]
+          assert [podio_livello_premio(x) for x in (1, 2, 3)] == [3, 2, 1]
+          assert [podio_penalita_gloria(x) for x in (1, 2, 3)] == [10, 8, 6]
+          assert podio_applica_penalita(4, 10) == (0, 4)
+          scelti = scegli_nemici_imboscata(["a", "b", "c", "d"], ["a", "b"], 2, random.Random(3))
+          assert len(scelti) == 2 and all(x not in {"a", "b"} for x in scelti)
+
           print(f"Raw set: {len(set_raw)} normalizzati; {len(set_zero)} intenzionalmente a zero")
           print("Settimanale oro: livelli limitati a LV0-LV4")
+          print("Dungeon: Podio e imboscate verificati")
           PY
           python wiki/validate_wiki_v4.py
           python wiki/run_wiki.py --output _site
@@ -90,7 +115,7 @@ jobs:
           with open('_site/data.json', encoding='utf-8') as fh:
               data = json.load(fh)
 
-          assert data['meta']['wiki_version'] == 9
+          assert data['meta']['wiki_version'] == 10
           assert {x['name'] for x in data['achievements']} == set(liste.descri)
           assert all(x['cap_bonus'] == 10 for x in data['achievements'])
           assert data['achievement_system']['cap_bonus_each'] == 10
@@ -101,7 +126,17 @@ jobs:
           usable_names = {x['name'] for x in data['items'] if x.get('is_usable')}
           assert set(liste.decoro) <= collectible_names
           assert set(liste.usabili) <= usable_names
-          print(f"Wiki v9: {len(data['achievements'])} obiettivi, {len(collectible_names)} collezionabili, {len(usable_names)} usabili")
+
+          extra = data['dungeon_additions']
+          assert extra['podium']['room'] == 'Podio'
+          assert [x['max_chance_pct'] for x in extra['podium']['positions']] == [1, 2, 3]
+          assert [x['reward_level'] for x in extra['podium']['positions']] == [3, 2, 1]
+          assert [x['glory_loss'] for x in extra['podium']['positions']] == [10, 8, 6]
+          assert extra['ambush']['proc_pct'] == 0.5
+          assert extra['ambush']['enemies'] == 2
+          assert extra['ambush']['message'] == "Mentre giravi per il dungeon un gruppo di loschi figuri si avvicina, è un imboscata!"
+
+          print(f"Wiki v10: {len(data['achievements'])} obiettivi; Podio e imboscate documentati")
           PY
 
           grep -q "Boss giornaliero" _site/index.html
@@ -145,6 +180,15 @@ jobs:
           grep -q "Boss delle lotte marine: statistiche base e drop" _site/index.html
           grep -q "ATK viene moltiplicato ×10" _site/index.html
           grep -q "DEF ×10000" _site/index.html
+
+          # Wiki v10: Podio e imboscate.
+          grep -q "Podio" _site/index.html
+          grep -q "obiettivi completati /" _site/index.html
+          grep -q "oggetto casuale LV3" _site/index.html
+          grep -q "10 Gloria" _site/index.html
+          grep -q "0,5% di probabilità di imboscata" _site/index.html
+          grep -q "Mentre giravi per il dungeon un gruppo di loschi figuri si avvicina, è un imboscata!" _site/index.html
+          grep -q "Mostri aggiunti" _site/index.html
 
           ! grep -q "generale.distrazione_proc=" _site/index.html
           ! grep -q "sistema.scaling.divisore_livello=" _site/index.html
