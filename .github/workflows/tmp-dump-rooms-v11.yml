@@ -1,0 +1,25 @@
+name: Dump stanze dungeon v11
+
+on:
+  push:
+    branches:
+      - feature/wiki-stanze-v11
+    paths:
+      - "tools/dump_rooms_v11.py"
+      - ".github/workflows/tmp-dump-rooms-v11.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/wiki-stanze-v11
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Dump stanze
+        run: python tools/dump_rooms_v11.py
