@@ -60,7 +60,6 @@ def build_data():
         for level in boss.get("levels", []):
             level["raw_score"] = raw_score(level.get("stats", {}))
 
-    # Anche i boss marini usano lo stesso indicatore.
     for boss in data.get("marine_bosses", []):
         boss["raw_score"] = raw_score(boss.get("stats", {}))
 
@@ -70,21 +69,18 @@ def build_data():
         "description": "Somma pesata delle statistiche grezze, usata come indicatore unico per confrontare la quantità di statistiche raw.",
     }
 
-    # Dono stellare: documenta la nuova regola dinamica e il riferimento corrente.
-    dono_name = getattr(liste, "DONO_STELLARE_BASE_OGGETTO", None)
-    dono_base_score = getattr(liste, "DONO_STELLARE_BASE_SCORE", None)
-    dono_score = getattr(liste, "DONO_STELLARE_RAW_SCORE", None)
+    dono_stats = dict(getattr(liste, "DONO_STELLARE_RAW_DISTRIBUZIONE", {}))
+    dono_score = int(getattr(liste, "DONO_STELLARE_RAW_SCORE", raw_score(dono_stats)))
     data["dono_stellare"] = {
-        "base_item": dono_name,
-        "base_raw_score": int(round(dono_base_score)) if dono_base_score is not None else None,
-        "raw_score": int(round(dono_score)) if dono_score is not None else None,
-        "rule": "Individua il singolo equipaggiamento LV0 col raw score più alto e raddoppia tutte le sue raw stats, mantenendone la distribuzione. Non appartiene ad alcun set.",
+        "raw_score": dono_score,
+        "stats": dono_stats,
+        "contributions": {stat: int(dono_stats.get(stat, 0) * RAW_WEIGHTS[stat]) for stat in RAW_WEIGHTS},
+        "rule": "Ha un budget fisso di 2680 punti raw, distribuito il più equamente possibile fra HP, ATK, DEF e AGI secondo i pesi raw. Non appartiene ad alcun set.",
     }
     for item in data.get("items", []):
         if item.get("name") == "Dono stellare":
             item["dono_stellare"] = data["dono_stellare"]
 
-    # La v11 descriveva ancora la vecchia interpretazione dei quattro massimi separati.
     for room in data.get("dungeon", {}).get("rooms", []):
         if room.get("name") != "Spada conficcata":
             continue
@@ -93,10 +89,9 @@ def build_data():
         for action in guide.get("actions", []):
             if action.get("name") == "Estrai la spada":
                 action["note"] = (
-                    "Il reset della build è lo scopo della stanza, non un malus accidentale. "
-                    f"Dono stellare prende come riferimento l'equipaggiamento col raw score LV0 più alto"
-                    + (f" ({dono_name}, {int(round(dono_base_score))} raw)" if dono_name and dono_base_score is not None else "")
-                    + " e ne raddoppia HP/ATK/DEF/AGI mantenendo esattamente la stessa distribuzione. È una protezione standalone e non entra in alcun set."
+                    "Il reset della build è lo scopo della stanza. Dono stellare è una protezione standalone da 2680 raw: "
+                    "680 HP, 165 ATK, 165 DEF e 34 AGI a LV0; i contributi raw sono rispettivamente 680, 660, 660 e 680. "
+                    "Non entra in alcun set."
                 )
 
     data["meta"]["wiki_version"] = 12
@@ -118,8 +113,8 @@ function injectRawScore(html,score,basis){
 }
 function donoStellareSection(i){
   if(!i||i.name!=='Dono stellare'||!i.dono_stellare)return '';
-  const d=i.dono_stellare;
-  return sectionTitle('Come sono determinate le raw stats')+`<div class="card"><p>${esc(d.rule)}</p>${d.base_item?`<p><b>Riferimento attuale:</b> ${link('item',d.base_item)} · <b>${esc(d.base_raw_score)} raw</b> → Dono <b>${esc(d.raw_score)} raw</b>.</p>`:''}</div>`;
+  const d=i.dono_stellare, s=d.stats||{}, c=d.contributions||{};
+  return sectionTitle('Come sono determinate le raw stats')+`<div class="card"><p>${esc(d.rule)}</p><p><b>LV0:</b> HP ${esc(s.hp)} · ATK ${esc(s.atk)} · DEF ${esc(s.def)} · AGI ${esc(s.agi)}.</p><p><b>Contributi raw:</b> ${esc(c.hp)} / ${esc(c.atk)} / ${esc(c.def)} / ${esc(c.agi)} = <b>${esc(d.raw_score)}</b>.</p></div>`;
 }
 
 const _wikiV12ItemDetail=itemDetail;
