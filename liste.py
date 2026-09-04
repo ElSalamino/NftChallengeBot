@@ -2477,31 +2477,47 @@ Boss["Franco est"] = {
 # set già sopra target viene ridotto.
 
 # Dono stellare: protezione unica e fuori dai set.
-# Per ogni statistica prende il valore raw massimo fra TUTTI gli equipaggiamenti
-# già definiti (armi/protezioni, normali ed extra) e lo raddoppia.
-def _dono_stellare_stat_massima(stat):
-    valori = []
+# Prende UN SOLO equipaggiamento: quello con il raw score base più alto secondo
+# gli stessi pesi usati dalla Wiki (HP x1, ATK x4, DEF x4, AGI x20).
+# La distribuzione completa di quell'oggetto viene poi raddoppiata.
+from set_raw_balance import SET_RAW_WEIGHTS as _DONO_RAW_WEIGHTS
+
+
+def _dono_stellare_raw_score(dati):
+    totale = 0.0
+    for stat, peso in _DONO_RAW_WEIGHTS.items():
+        try:
+            valore = float((dati or {}).get(stat, 0) or 0)
+        except (TypeError, ValueError):
+            valore = 0.0
+        totale += valore * float(peso)
+    return totale
+
+
+def _dono_stellare_oggetto_migliore():
+    migliore_nome = None
+    migliore_dati = None
+    migliore_score = None
     for gruppo in (armi, armiextra, protezioni, protezioniextra):
-        for dati in gruppo.values():
-            try:
-                valori.append(int(dati.get(stat, 0)))
-            except (TypeError, ValueError):
-                pass
-    return max(valori) if valori else 0
+        for nome, dati in gruppo.items():
+            if str(nome).split(" LV", 1)[0] == "Dono stellare":
+                continue
+            score = _dono_stellare_raw_score(dati)
+            if migliore_score is None or score > migliore_score:
+                migliore_nome = str(nome).split(" LV", 1)[0]
+                migliore_dati = dati
+                migliore_score = score
+    return migliore_nome, migliore_dati or {}, migliore_score or 0
 
 
-DONO_STELLARE_RAW_MASSIMI = {
-    stat: _dono_stellare_stat_massima(stat)
-    for stat in ("hp", "atk", "def", "agi")
-}
+DONO_STELLARE_BASE_OGGETTO, _DONO_STELLARE_BASE_STATS, DONO_STELLARE_BASE_SCORE = _dono_stellare_oggetto_migliore()
 
 protezioniextra["Dono stellare"] = {
-    "hp": DONO_STELLARE_RAW_MASSIMI["hp"] * 2,
-    "atk": DONO_STELLARE_RAW_MASSIMI["atk"] * 2,
-    "def": DONO_STELLARE_RAW_MASSIMI["def"] * 2,
-    "agi": DONO_STELLARE_RAW_MASSIMI["agi"] * 2,
-    "type": "🛡",
+    stat: int(round(float(_DONO_STELLARE_BASE_STATS.get(stat, 0) or 0) * 2))
+    for stat in ("hp", "atk", "def", "agi")
 }
+protezioniextra["Dono stellare"]["type"] = "🛡"
+DONO_STELLARE_RAW_SCORE = _dono_stellare_raw_score(protezioniextra["Dono stellare"])
 
 from set_raw_balance import (
     SET_RAW_TARGET,
