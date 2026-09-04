@@ -7,13 +7,15 @@ on:
     paths:
       - "wiki/genera_wiki_v11.py"
       - "wiki/run_wiki.py"
+      - "tools/patch_v11_exact.py"
       - ".github/workflows/tmp-dump-rooms-v11.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +24,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Rifinisce testi dal runtime
+        run: python tools/patch_v11_exact.py
       - name: Compila e genera
         run: |
           python -m py_compile wiki/genera_wiki_v11.py wiki/run_wiki.py
@@ -31,9 +35,6 @@ jobs:
         run: |
           python - <<'PY'
           import json
-          import sys
-          sys.path.insert(0, 'wiki')
-          import liste
           with open('_site/data.json', encoding='utf-8') as fh:
               data=json.load(fh)
           rooms=data['dungeon']['rooms']
@@ -46,10 +47,12 @@ jobs:
           assert len(by['Arena']['guide']['actions'])==3
           assert any(a['stat']=='AGI' for a in by['Arena']['guide']['actions'])
           assert '54%' in by['Fonte magica']['guide']['actions'][0]['chance']
-          assert '100%' in by['Podio']['guide']['actions'][0]['note'] or data['dungeon_additions']['podium']['positions'][0]['max_chance_pct']==100
+          assert data['dungeon_additions']['podium']['positions'][0]['max_chance_pct']==100
           assert 'LV2' in by['Faro']['guide']['actions'][0]['success']
           assert 'irraggiungibile' in by['Lupo solitario']['guide']['actions'][0]['note']
-          assert 'globale' in by['Cancello']['guide']['summary'].lower()
+          assert 'condiviso' in by['Cancello']['guide']['summary'].lower()
+          assert '30%' in by['Biblioteca']['guide']['summary']
+          assert '123' in by['Chiesa']['guide']['actions'][0]['failure']
           print('Wiki v11:',len(rooms),'stanze tutte documentate')
           PY
           grep -q "Guida alle stanze" _site/index.html
@@ -58,3 +61,12 @@ jobs:
           grep -q "Comportamento attuale" _site/index.html
           grep -q "Prova di statistiche" _site/index.html
           grep -q "Upgrade LVX" _site/index.html
+          grep -q "30% dei casi trovi un libro" _site/index.html
+          grep -q "123 danno dungeon" _site/index.html
+      - name: Salva rifiniture
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add wiki/genera_wiki_v11.py
+          git diff --cached --quiet || git commit -m "Rifinisce Biblioteca e Chiesa nella Wiki stanze"
+          git push origin HEAD:feature/wiki-stanze-v11
