@@ -1314,3 +1314,16 @@ STRUTTURE_CONFIG = {
         },
     },
 }
+
+# --- PODIO DUNGEON / IMBOSCATE ---
+DUNGEON_CONFIG.setdefault("generale", {}).update({
+    "podio_livello_base": 4,
+    "podio_gloria_base": 6,
+    "podio_gloria_moltiplicatore": 2,
+    "imboscata": {"proc": 0.5, "nemici": 2},
+})
+DUNGEON_CONFIG.setdefault("stanze", {})["Podio"] = {
+    "1° posto": {"posizione": 1},
+    "2° posto": {"posizione": 2},
+    "3° posto": {"posizione": 3},
+}
