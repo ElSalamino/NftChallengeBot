@@ -61,9 +61,9 @@ def build_data():
             "description": (
                 "Nel Podio scegli se tentare il 1°, 2° o 3° posto. La probabilità percentuale "
                 "è obiettivi completati / (numero totale obiettivi / posizione). Più obiettivi hai, "
-                "più la probabilità cresce. In caso di successo ricevi un oggetto livellabile casuale "
-                "dal pool dungeon al livello LV(4-posizione). In caso di fallimento perdi "
-                "2×(6-posizione) Gloria, ma la Gloria non può scendere sotto zero."
+                "più la probabilità cresce. Premi e rischi: 1° = oggetto casuale LV3 e, se fallisci, "
+                "fino a 10 Gloria; 2° = oggetto casuale LV2 e fino a 8 Gloria; 3° = oggetto casuale LV1 "
+                "e fino a 6 Gloria. La Gloria non può mai scendere sotto zero."
             ),
             "positions": posizioni,
         },
