@@ -1,0 +1,63 @@
+name: Applica Dono stellare
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "tools/tmp_patch_dono_stellare.py"
+      - ".github/workflows/tmp-apply-dono-stellare.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Applica patch
+        run: python tools/tmp_patch_dono_stellare.py
+      - name: Verifica Dono stellare
+        run: |
+          python -m py_compile liste.py nft.py wiki/genera_wiki_v11.py wiki/run_wiki.py
+          python - <<'PY'
+          import liste
+          stats = ('hp','atk','def','agi')
+          dono = liste.protezioniextra['Dono stellare']
+          gruppi = (liste.armi, liste.armiextra, liste.protezioni, liste.protezioniextra)
+          for stat in stats:
+              altri = []
+              for gruppo in gruppi:
+                  for nome, dati in gruppo.items():
+                      if nome == 'Dono stellare':
+                          continue
+                      try:
+                          altri.append(int(dati.get(stat, 0)))
+                      except (TypeError, ValueError):
+                          pass
+              massimo = max(altri)
+              assert dono[stat] == massimo * 2, (stat, dono[stat], massimo)
+              assert liste.DONO_STELLARE_RAW_MASSIMI[stat] == massimo
+          assert dono['type'] == '🛡'
+          assert all('Dono stellare' not in componenti for componenti in liste.classi.values())
+          print('Massimi oggetti:', liste.DONO_STELLARE_RAW_MASSIMI)
+          print('Dono stellare LV0:', {s:dono[s] for s in stats})
+          PY
+          grep -q 'premio_stellare = "Dono stellare LV4"' nft.py
+          grep -q 'protezione unica fuori da qualsiasi set' wiki/genera_wiki_v11.py
+          python wiki/validate_wiki_v4.py
+          python wiki/run_wiki.py --output _site
+          grep -q 'Dono stellare' _site/index.html
+          grep -q 'Dono stellare' _site/data.json
+      - name: Salva modifica
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add liste.py nft.py wiki/genera_wiki_v11.py
+          git diff --cached --quiet || git commit -m "Aggiunge Dono stellare come protezione unica"
+          git push origin HEAD:main
