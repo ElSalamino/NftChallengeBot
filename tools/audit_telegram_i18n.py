@@ -38,18 +38,27 @@ for username, shown, expected in (
     normalize_update_input(message)
     assert message.text == expected
 
+entity_command = SimpleNamespace(
+    from_user=SimpleNamespace(username="alice", language_code="en"),
+    text="/equip Sword LV0",
+)
+normalize_update_input(entity_command)
+assert entity_command.text == "/equip Spada LV0"
+
 assert language_for_recipient(123) == "en"
 players["alice"]["lang"] = "es"
 assert language_for_recipient(123) == "es"  # la cache conserva l'identità, non la lingua
 
-inline = InlineKeyboardMarkup([[InlineKeyboardButton("Chiudi", callback_data="close")]])
+inline = InlineKeyboardMarkup(
+    [[InlineKeyboardButton("Spada LV0", callback_data="equip_Spada LV0")]]
+)
 reply = ReplyKeyboardMarkup([["Lingua 🌐", "Indietro"]])
 english = localize_markup(inline, "en")
 spanish = localize_markup(reply, "es")
 
-assert english.inline_keyboard[0][0].text == "Close"
-assert english.inline_keyboard[0][0].callback_data == "close"
+assert english.inline_keyboard[0][0].text == "Sword LV0"
+assert english.inline_keyboard[0][0].callback_data == "equip_Spada LV0"
 assert spanish.keyboard[0] == ["Idioma 🌐", "Atrás"]
-assert inline.inline_keyboard[0][0].text == "Chiudi"  # la tastiera sorgente non viene mutata
+assert inline.inline_keyboard[0][0].text == "Spada LV0"  # la tastiera sorgente non viene mutata
 
-print("Telegram i18n OK: profili, pulsanti e callback stabili")
+print("Telegram i18n OK: nomi entità, input, pulsanti e callback compatibili")

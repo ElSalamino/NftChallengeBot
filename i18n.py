@@ -14,6 +14,14 @@ from collections import Counter
 from functools import lru_cache
 from pathlib import Path
 
+from entity_registry import (
+    clear_caches as clear_entity_caches,
+    display_name as display_entity_name,
+    normalize_entity_names,
+    resolve_id as resolve_entity_id,
+    translate_entity_names,
+)
+
 
 ROOT = Path(__file__).resolve().parent
 LOCALES_DIR = ROOT / "locales"
@@ -187,6 +195,20 @@ def _constant_replacer(language: str):
 
 
 def _translate_segment(segment: str, language: str) -> str:
+    equipped = re.fullmatch(
+        r"Set (?:del|della|dell'|dei|degli|delle)\s*(.+?) equipaggiato!",
+        segment,
+        re.IGNORECASE,
+    )
+    if equipped:
+        entity_id = resolve_entity_id(equipped.group(1), "set")
+        if entity_id:
+            shown = display_entity_name(entity_id, language, "set")
+            if language == "en":
+                return f"{shown} set equipped!"
+            if language == "es":
+                return f"¡Set de {shown} equipado!"
+
     direct = translate_source(segment, language)
     if direct != segment:
         return str(direct)
@@ -224,7 +246,10 @@ def translate_text(text: object, language: str = DEFAULT_LANGUAGE) -> object:
         trailing = body[len(body.rstrip()):]
         core_end = len(body) - len(trailing) if trailing else len(body)
         core = body[len(leading):core_end]
-        translated.append(leading + _translate_segment(core, language) + trailing + ending)
+        rendered = _translate_segment(core, language)
+        translated.append(
+            leading + str(translate_entity_names(rendered, language)) + trailing + ending
+        )
     return "".join(translated)
 
 
@@ -272,6 +297,7 @@ def normalize_input(text: object, language: str = DEFAULT_LANGUAGE) -> object:
     if not isinstance(text, str):
         return text
     language = normalize_language(language)
+    text = str(normalize_entity_names(text, language))
     direct = _reverse_index(language).get(text.casefold())
     if direct is not None:
         return direct
@@ -292,3 +318,4 @@ def clear_caches() -> None:
     _constant_replacer.cache_clear()
     _reverse_index.cache_clear()
     _reverse_template_index.cache_clear()
+    clear_entity_caches()

@@ -31,6 +31,7 @@ STATS = ("hp", "atk", "def", "agi")
 RAW_WEIGHTS = {"hp": 1, "atk": 4, "def": 4, "agi": 20}
 
 import liste
+from entity_registry import legacy_name, resolve_id
 from dungeon_extra import (
     podio_applica_penalita,
     podio_livello_premio,
@@ -84,7 +85,7 @@ def _wiki_data():
     wiki_dir = ROOT / "wiki"
     if str(wiki_dir) not in sys.path:
         sys.path.insert(0, str(wiki_dir))
-    import genera_wiki_v13 as wiki
+    import genera_wiki_v14 as wiki
     wiki.v3.v2.set_names = wiki.v3._valid_set_names
     _WIKI_DATA = wiki.build_data()
     return _WIKI_DATA
@@ -100,6 +101,7 @@ def equipment_catalog():
     ):
         for full_name, data in collection.items():
             rows.append({
+                "id": resolve_id(full_name, "item") or str(full_name),
                 "name": str(full_name),
                 "base": base_item(full_name),
                 "kind": kind,
@@ -112,15 +114,29 @@ def equipment_catalog():
 
 def catalog():
     wiki = _wiki_data()
+    def refs(values, kind):
+        return sorted(
+            [
+                {"id": resolve_id(value, kind) or str(value), "name": str(value)}
+                for value in values
+            ],
+            key=lambda row: row["name"].lower(),
+        )
+
     return {
         "equipment": equipment_catalog(),
-        "rings": sorted([str(x) for x in getattr(liste, "anelli", {})], key=str.lower),
+        "rings": refs(getattr(liste, "anelli", {}), "ring"),
         "approaches": [
-            {"name": str(name), "stats": {k: cfg.get(k, 1) for k in STATS}}
+            {
+                "id": resolve_id(name, "approach") or str(name),
+                "name": str(name),
+                "stats": {k: cfg.get(k, 1) for k in STATS},
+            }
             for name, cfg in getattr(liste, "Approcci", {}).items()
         ],
         "sets": [
             {
+                "id": resolve_id(name, "set") or str(name),
                 "name": str(name),
                 "components": [base_item(x) for x in (components or [])],
                 "bonus": {k: getattr(liste, "bonus", {}).get(name, {}).get(k, 0) for k in STATS},
@@ -128,11 +144,11 @@ def catalog():
             for name, components in getattr(liste, "classi", {}).items()
             if name is not None
         ],
-        "enemies": sorted([str(x) for x in getattr(liste, "nemici", {})], key=str.lower),
-        "bosses": sorted([str(x) for x in getattr(liste, "Boss", {})], key=str.lower),
-        "marine_bosses": sorted([str(x) for x in getattr(liste, "Nautici", {})], key=str.lower),
-        "locations": [str(x) for x in getattr(liste, "location", [])],
-        "rooms": [str(x) for x in getattr(liste, "stanze", [])],
+        "enemies": refs(getattr(liste, "nemici", {}), "enemy"),
+        "bosses": refs(getattr(liste, "Boss", {}), "boss"),
+        "marine_bosses": refs(getattr(liste, "Nautici", {}), "marine_boss"),
+        "locations": refs(getattr(liste, "location", []), "location"),
+        "rooms": refs(getattr(liste, "stanze", []), "room"),
         "counts": wiki.get("meta", {}).get("counts", {}),
         "raw_formula": "HP ×1 · ATK ×4 · DEF ×4 · AGI ×20",
     }
@@ -141,6 +157,7 @@ def catalog():
 def _find_equipment(full_name):
     if not full_name:
         return None
+    full_name = legacy_name(full_name, "item")
     for collection in (
         getattr(liste, "armi", {}),
         getattr(liste, "armiextra", {}),
@@ -175,8 +192,8 @@ def build_fighter(config):
         "def": float(config.get("def", 100) or 0),
         "agi": float(config.get("agi", 50) or 0),
     }
-    weapon = config.get("weapon") or None
-    protection = config.get("protection") or None
+    weapon = legacy_name(config.get("weapon"), "item") if config.get("weapon") else None
+    protection = legacy_name(config.get("protection"), "item") if config.get("protection") else None
     for selected in (weapon, protection):
         item = _find_equipment(selected)
         if item:
@@ -189,7 +206,7 @@ def build_fighter(config):
         for stat in STATS:
             stats[stat] += float(set_bonus.get(stat, 0) or 0)
 
-    approach = config.get("approach") or "Base"
+    approach = legacy_name(config.get("approach") or "Base", "approach")
     app_cfg = getattr(liste, "Approcci", {}).get(approach, getattr(liste, "Approcci", {}).get("Base", {}))
     for stat in STATS:
         stats[stat] = round(stats[stat] * float(app_cfg.get(stat, 1) or 1), 4)
@@ -197,12 +214,15 @@ def build_fighter(config):
     incantamenti = config.get("incantamenti") or []
     if isinstance(incantamenti, str):
         incantamenti = [x.strip() for x in incantamenti.split(",") if x.strip()]
+    incantamenti = [legacy_name(value, "incantation") for value in incantamenti]
+
+    ring = legacy_name(config.get("ring"), "ring") if config.get("ring") else None
 
     fighter = {
         "Nome": str(config.get("name") or "Playtester"),
         **stats,
         "set": set_name,
-        "anello": config.get("ring") or None,
+        "anello": ring,
         "Ap": approach,
         "arma": weapon,
         "protezione": protection,
@@ -210,6 +230,13 @@ def build_fighter(config):
         "boost": {"sfida": {}, "assalto": {}, "dungeon": {}},
         "schivato": False,
         "fatto": 0,
+        "entity_ids": {
+            "weapon": resolve_id(weapon, "item") if weapon else None,
+            "protection": resolve_id(protection, "item") if protection else None,
+            "set": resolve_id(set_name, "set") if set_name else None,
+            "ring": resolve_id(ring, "ring") if ring else None,
+            "approach": resolve_id(approach, "approach"),
+        },
     }
     fighter["raw_score"] = raw_score(fighter)
     return fighter
@@ -224,6 +251,8 @@ def _opponent_source(kind, name):
 
 
 def build_opponent(kind, name, level=0):
+    registry_kind = "marine_boss" if kind == "marine" else kind
+    name = legacy_name(name, registry_kind)
     src = _opponent_source(kind, name)
     if not isinstance(src, dict):
         raise ValueError(f"Avversario non trovato: {kind}/{name}")
@@ -249,6 +278,7 @@ def build_opponent(kind, name, level=0):
     fighter["raw_score"] = raw_score(fighter)
     fighter["_playtest_kind"] = kind
     fighter["_playtest_level"] = int(level or 0)
+    fighter["_entity_id"] = resolve_id(name, registry_kind)
     return fighter
 
 
@@ -340,10 +370,10 @@ def dungeon_room(payload):
     rooms = list(getattr(liste, "stanze", []))
     room = random.choice(rooms)
     wiki_rooms = {x.get("name"): x for x in _wiki_data().get("dungeon", {}).get("rooms", [])}
-    result = {"room": room, "data": wiki_rooms.get(room, {})}
+    result = {"room": room, "room_id": resolve_id(room, "room"), "data": wiki_rooms.get(room, {})}
 
     # La nuova imboscata è realmente testabile qui: 0,5%, 2 mostri fuori zona.
-    location = payload.get("location")
+    location = legacy_name(payload.get("location"), "location")
     proc = random.random() < 0.005
     result["ambush"] = None
     if proc:
@@ -381,7 +411,7 @@ def podium_try(payload):
 
 
 def fishing_try(payload):
-    location = payload.get("location")
+    location = legacy_name(payload.get("location"), "location")
     power = max(1, int(payload.get("power") or 1))
     pool = list(getattr(liste, "pesciame", {}).get(location, []))
     if not pool:
@@ -389,13 +419,16 @@ def fishing_try(payload):
     max_index = min(power, len(pool) - 1)
     index = random.randint(0, max_index)
     species = pool[index]
+    item_name = f"Pesce {species}"
     return {
         "location": location,
+        "location_id": resolve_id(location, "location"),
         "power": power,
         "max_unlocked_index": max_index,
         "index": index,
         "species": species,
-        "item_name": f"Pesce {species}",
+        "item_name": item_name,
+        "item_id": resolve_id(item_name, "item"),
         "note": "Selezione specie secondo il pool corrente; peso/record verranno agganciati al runtime nel prossimo passaggio.",
     }
 
@@ -443,6 +476,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._file(PLAYTEST_DIR / "index.html", "text/html; charset=utf-8")
             if path == "/assets/i18n.js":
                 return self._file(ROOT / "i18n_web.js", "text/javascript; charset=utf-8")
+            if path == "/entities.json":
+                return self._file(ROOT / "entities.json", "application/json; charset=utf-8")
             if path in {f"/locales/{language}.json" for language in ("it", "en", "es")}:
                 return self._file(ROOT / path.lstrip("/"), "application/json; charset=utf-8")
             if path == "/api/status":
@@ -474,18 +509,35 @@ class Handler(BaseHTTPRequestHandler):
 
 def self_test():
     assert (ROOT / "i18n_web.js").exists()
+    assert (ROOT / "entities.json").exists()
     assert all((ROOT / "locales" / f"{language}.json").exists() for language in ("it", "en", "es"))
     c = catalog()
     assert c["equipment"] and c["approaches"] and c["enemies"] and c["bosses"]
+    for key in (
+        "equipment", "rings", "approaches", "sets", "enemies", "bosses",
+        "marine_bosses", "locations", "rooms",
+    ):
+        assert all(isinstance(row.get("id"), str) and "." in row["id"] for row in c[key]), key
     p = build_fighter({"name": "Test", "hp": 1000, "atk": 100, "def": 100, "agi": 50, "approach": "Base"})
     assert p["Nome"] == "Test" and p["hp"] > 0
-    target = build_opponent("enemy", c["enemies"][0], 0)
+    by_id = build_fighter({
+        "name": "ID Test",
+        "hp": 1000,
+        "atk": 100,
+        "def": 100,
+        "agi": 50,
+        "approach": resolve_id("Base", "approach"),
+        "weapon": resolve_id("Spada della beta LV0", "item"),
+    })
+    assert by_id["arma"] == "Spada della beta LV0"
+    assert by_id["entity_ids"]["weapon"] == resolve_id("Spada della beta LV0", "item")
+    target = build_opponent("enemy", c["enemies"][0]["id"], 0)
     state = {"player": p, "enemy": target, "round": 0, "winner": None, "log": []}
     # Forza il fallback nel test strutturale: verifica che la web app funzioni anche senza Telegram.
     _fallback_attack(state["player"], state["enemy"])
-    fish_locations = [x for x in c["locations"] if x in getattr(liste, "pesciame", {})]
+    fish_locations = [x for x in c["locations"] if x["name"] in getattr(liste, "pesciame", {})]
     if fish_locations:
-        assert fishing_try({"location": fish_locations[0], "power": 1})["species"]
+        assert fishing_try({"location": fish_locations[0]["id"], "power": 1})["species"]
     assert podium_try({"achievements": 52, "total_achievements": 52, "position": 1, "glory": 20})["chance_pct"] == 100
     print("Playtest web: self-test OK")
     print(json.dumps({"runtime": runtime_status(), "counts": c["counts"]}, ensure_ascii=False, indent=2))
