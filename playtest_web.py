@@ -84,7 +84,7 @@ def _wiki_data():
     wiki_dir = ROOT / "wiki"
     if str(wiki_dir) not in sys.path:
         sys.path.insert(0, str(wiki_dir))
-    import genera_wiki_v12 as wiki
+    import genera_wiki_v13 as wiki
     wiki.v3.v2.set_names = wiki.v3._valid_set_names
     _WIKI_DATA = wiki.build_data()
     return _WIKI_DATA
@@ -441,6 +441,10 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if path in ("/", "/index.html"):
                 return self._file(PLAYTEST_DIR / "index.html", "text/html; charset=utf-8")
+            if path == "/assets/i18n.js":
+                return self._file(ROOT / "i18n_web.js", "text/javascript; charset=utf-8")
+            if path in {f"/locales/{language}.json" for language in ("it", "en", "es")}:
+                return self._file(ROOT / path.lstrip("/"), "application/json; charset=utf-8")
             if path == "/api/status":
                 return self._json(runtime_status())
             if path == "/api/catalog":
@@ -469,6 +473,8 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def self_test():
+    assert (ROOT / "i18n_web.js").exists()
+    assert all((ROOT / "locales" / f"{language}.json").exists() for language in ("it", "en", "es"))
     c = catalog()
     assert c["equipment"] and c["approaches"] and c["enemies"] and c["bosses"]
     p = build_fighter({"name": "Test", "hp": 1000, "atk": 100, "def": 100, "agi": 50, "approach": "Base"})

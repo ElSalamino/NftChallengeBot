@@ -16,6 +16,7 @@ button,input,select{font:inherit}button{cursor:pointer}.wrap{max-width:1450px;ma
 <div class="wrap">
   <div class="top">
     <div class="brand"><h1>🎮 NFT — Single Player Playtest</h1><p>Sandbox locale per provare build, sfide, dungeon e pesca sui dati reali del repository.</p></div>
+    <select id="languageSelect" data-i18n-skip aria-label="Lingua" style="width:auto"><option value="it">🇮🇹 Italiano</option><option value="en">🇬🇧 English</option><option value="es">🇪🇸 Español</option></select>
     <div id="runtimeBadge" class="badge">Controllo runtime…</div>
   </div>
   <div class="tabs">
@@ -113,8 +114,9 @@ button,input,select{font:inherit}button{cursor:pointer}.wrap{max-width:1450px;ma
     <div class="card"><h2>Dati caricati dal gioco</h2><div id="dataKpis" class="kpis"></div><p class="muted" style="margin-top:14px">La web app non mantiene una seconda copia dei cataloghi: legge gli stessi moduli Python e la stessa pipeline dati della Wiki.</p></div>
   </section>
 </div>
+<script src="/assets/i18n.js"></script>
 <script>
-let C=null, fightState=null, fishHistory=[];
+let C=null, fightState=null, fishHistory=[], podiumOutcomeSource='—';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function api(path,body){const opt=body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{};const r=await fetch(path,opt);const d=await r.json();if(!r.ok)throw new Error(d.error||r.statusText);return d}
@@ -136,14 +138,17 @@ async function roundFight(){if(!fightState||fightState.winner)return;fightState=
 async function autoFight(){let guard=0;while(fightState&&!fightState.winner&&guard++<100){await roundFight();await new Promise(r=>setTimeout(r,30))}if(guard>=100&&!fightState.winner){fightState.log.push('STOP: 100 turni raggiunti.');renderFight()}}
 function roomActionsHtml(room){const g=room.data?.guide;if(!g)return '<div class="muted">Nessuna guida disponibile.</div>';return `<div class="roomtitle">${esc(room.room)}</div><p>${esc(g.summary||'')}</p><div class="chips"><span class="chip">${esc(g.category||'Stanza')}</span></div>${(g.actions||[]).map(a=>`<div class="roomaction"><b>${esc(a.name)}</b>${a.stat?` · <span class="ok">${esc(a.stat)}</span>`:''}${a.chance?`<div class="mini">Probabilità/check: ${esc(a.chance)}</div>`:''}${a.success?`<div>✅ ${esc(a.success)}</div>`:''}${a.failure?`<div>❌ ${esc(a.failure)}</div>`:''}${a.note?`<div class="mini">${esc(a.note)}</div>`:''}</div>`).join('')}`}
 async function visitRoom(){try{const r=await api('/api/dungeon/room',{location:$('dungeonLocation').value});$('roomResult').innerHTML=roomActionsHtml(r)+(r.ambush?`<div class="ambush"><b>${esc(r.ambush.message)}</b><br>Prossimi mostri: ${r.ambush.enemies.map(esc).join(' + ')}</div>`:'')}catch(e){$('roomResult').innerHTML=`<span class="err">${esc(e.message)}</span>`}}
-async function podium(pos){try{const r=await api('/api/dungeon/podium',{achievements:number('achDone'),total_achievements:number('achTotal'),position:pos,glory:number('glory')});$('glory').value=r.glory_after;$('podiumOutcome').value=r.won?`VINTO LV${r.reward_level} (${r.chance_pct}%)`:`Persi ${r.glory_lost} Gloria (${r.chance_pct}%)`}catch(e){$('podiumOutcome').value=e.message}}
+function renderPodiumOutcome(){$('podiumOutcome').value=podiumOutcomeSource==='—'?'—':NFTI18n.translate(podiumOutcomeSource)}
+async function podium(pos){try{const r=await api('/api/dungeon/podium',{achievements:number('achDone'),total_achievements:number('achTotal'),position:pos,glory:number('glory')});$('glory').value=r.glory_after;podiumOutcomeSource=r.won?`VINTO LV${r.reward_level} (${r.chance_pct}%)`:`Persi ${r.glory_lost} Gloria (${r.chance_pct}%)`;renderPodiumOutcome()}catch(e){podiumOutcomeSource=e.message;renderPodiumOutcome()}}
 async function fish(){try{const r=await api('/api/fishing',{location:$('fishLocation').value,power:number('fishPower')});$('fishResult').innerHTML=`<div class="fish">🎣 ${esc(r.item_name)}</div><p class="muted">Indice ${r.index}/${r.max_unlocked_index} sbloccato dal Potere ${r.power}. ${esc(r.note)}</p>`;fishHistory.unshift(r.item_name);fishHistory=fishHistory.slice(0,20);$('fishLog').innerHTML=fishHistory.map(x=>`<span class="chip">${esc(x)}</span>`).join('')}catch(e){$('fishResult').innerHTML=`<span class="err">${esc(e.message)}</span>`}}
 function renderData(){const c=C.counts||{};const rows=[['Equip',C.equipment.length],['Nemici',C.enemies.length],['Boss',C.bosses.length],['Stanze',C.rooms.length],['Set',C.sets.length],['Anelli',C.rings.length],['Location',C.locations.length],['Wiki items',c.items??'—']];$('dataKpis').innerHTML=rows.map(([a,b])=>`<div class="kpi"><span class="muted">${esc(a)}</span><b>${esc(b)}</b></div>`).join('')}
 async function init(){
+  await NFTI18n.init();
   document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab,.page').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.page).classList.add('active')});
   const [status,c]=await Promise.all([api('/api/status'),api('/api/catalog')]);C=c;const badge=$('runtimeBadge');badge.textContent=status.exact_runtime?'● Runtime 1:1 nft.turno attivo':'● Fallback: runtime Telegram non importato';badge.classList.add(status.exact_runtime?'good':'warn');if(status.runtime_error)badge.title=status.runtime_error;
   opt($('pApproach'),C.approaches.map(x=>x.name),'Base');$('pApproach').value='Base';opt($('pWeapon'),C.equipment.filter(x=>x.kind==='Arma').map(x=>({value:x.name,label:`${x.name} · raw ${x.raw_score}`})));opt($('pProtection'),C.equipment.filter(x=>x.kind==='Protezione').map(x=>({value:x.name,label:`${x.name} · raw ${x.raw_score}`})));opt($('pRing'),C.rings);opt($('dungeonLocation'),C.locations);opt($('fishLocation'),C.locations);updateTargets();applySave(loadSave());renderData();await calc();
   $('calcBtn').onclick=calc;$('saveBtn').onclick=()=>{save();calc();$('saveBtn').textContent='Salvato ✓';setTimeout(()=>$('saveBtn').textContent='Salva nel browser',900)};$('resetBtn').onclick=()=>{localStorage.removeItem('nft-playtest-player');location.reload()};$('targetKind').onchange=updateTargets;$('startFight').onclick=startFight;$('roundFight').onclick=roundFight;$('autoFight').onclick=autoFight;$('visitRoom').onclick=visitRoom;document.querySelectorAll('[data-podium]').forEach(x=>x.onclick=()=>podium(Number(x.dataset.podium)));$('fishBtn').onclick=fish;
+  window.addEventListener('nftlanguagechange',renderPodiumOutcome);
 }
 init().catch(e=>{document.body.innerHTML=`<pre style="color:#ff7070;padding:20px">Errore avvio: ${esc(e.stack||e.message)}</pre>`});
 </script>
