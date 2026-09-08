@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Smoke test dell'adattatore locale Pyrogram (richiede requirements-playtest)."""
+from pathlib import Path
+import sys
 from types import SimpleNamespace
 
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from telegram_i18n import (
     bind_players,
