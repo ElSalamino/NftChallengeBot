@@ -1,0 +1,59 @@
+name: Audit localizzazione IT EN ES
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "__init__.py"
+      - "nft.py"
+      - "turno_assalto.py"
+      - "liste.py"
+      - "frasi_*.py"
+      - "playtest/**"
+      - "playtest_web.py"
+      - "wiki/**"
+      - "i18n.py"
+      - "telegram_i18n.py"
+      - "i18n_web.js"
+      - "locales/**"
+      - "tools/**"
+      - ".github/workflows/i18n.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "__init__.py"
+      - "nft.py"
+      - "turno_assalto.py"
+      - "liste.py"
+      - "frasi_*.py"
+      - "playtest/**"
+      - "playtest_web.py"
+      - "wiki/**"
+      - "i18n.py"
+      - "telegram_i18n.py"
+      - "i18n_web.js"
+      - "locales/**"
+      - "tools/**"
+      - ".github/workflows/i18n.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compila runtime e strumenti
+        run: |
+          python -m py_compile __init__.py nft.py i18n.py telegram_i18n.py playtest_web.py tools/bootstrap_i18n.py tools/audit_i18n.py wiki/genera_wiki_v13.py
+          node --check i18n_web.js
+          node tools/audit_i18n_web.js
+      - name: Verifica copertura e placeholder
+        run: |
+          python wiki/run_wiki.py --output /tmp/nft-wiki-i18n
+          python tools/audit_i18n.py --wiki-dir /tmp/nft-wiki-i18n
+          git diff --check

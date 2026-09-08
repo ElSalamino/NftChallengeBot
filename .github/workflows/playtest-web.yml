@@ -16,6 +16,9 @@ on:
       - "dungeon_extra.py"
       - "nft.py"
       - "turno_assalto.py"
+      - "i18n.py"
+      - "i18n_web.js"
+      - "locales/**"
       - "wiki/**"
       - ".github/workflows/playtest-web.yml"
   pull_request:
@@ -31,6 +34,9 @@ on:
       - "dungeon_extra.py"
       - "nft.py"
       - "turno_assalto.py"
+      - "i18n.py"
+      - "i18n_web.js"
+      - "locales/**"
       - "wiki/**"
       - ".github/workflows/playtest-web.yml"
   workflow_dispatch:
@@ -49,7 +55,9 @@ jobs:
 
       - name: Test strutturale senza dipendenze Telegram
         run: |
-          python -m py_compile playtest_web.py
+          python -m py_compile playtest_web.py i18n.py
+          node --check i18n_web.js
+          node tools/audit_i18n_web.js
           python playtest_web.py --self-test
           test -s playtest/index.html
           test -s requirements-playtest.txt
@@ -58,12 +66,15 @@ jobs:
           grep -q "NFT — Single Player Playtest" playtest/index.html
           grep -q "Podio — test rapido" playtest/index.html
           grep -q "Lancia la canna" playtest/index.html
+          grep -q 'id="languageSelect"' playtest/index.html
+          grep -q '/assets/i18n.js' playtest/index.html
 
       - name: Installa dipendenze minime del runtime
         run: python -m pip install --disable-pip-version-check -r requirements-playtest.txt
 
       - name: Verifica motore nft.turno dalla web app
         run: |
+          python tools/audit_telegram_i18n.py
           python - <<'PY'
           import json
           import playtest_web as p

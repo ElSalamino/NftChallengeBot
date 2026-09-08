@@ -1,12 +1,20 @@
 # coding=utf-8
-import copy,html,json,random,sys,time,asyncio,gc, importlib
+import copy,html,json,random,sys,time,asyncio,gc, importlib, os
 from io import BytesIO, StringIO
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
-from pyrogram import Client, ContinuePropagation, filters, idle
+from pyrogram import ContinuePropagation, StopPropagation, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.types import ReplyKeyboardMarkup,ReplyKeyboardRemove
 from pyrogram.errors import FloodWait
+from i18n import normalize_language, tr
+from telegram_i18n import (
+    LocalizedClient,
+    bind_players,
+    language_from_update,
+    normalize_update_input,
+    set_current_language,
+)
 nft = importlib.import_module("nft")
 liste = importlib.import_module("liste")
 nft.aggiorna_descrizioni_bilanciamento(liste)
@@ -27,42 +35,43 @@ if 1 == 1:
     pozioni = dict()
     try: 
         with open("./backup/pozioni.json") as json_file:
-        pozioni = json.load(json_file)
+            pozioni = json.load(json_file)
     except: pass
     
     sicurezza = dict()
     try: 
         with open("./backup/sicurezza.json") as json_file:
-        sicurezza = json.load(json_file)
+            sicurezza = json.load(json_file)
     except: pass
     
     clan = dict()
     try: 
         with open("./backup/clan.json") as json_file:
-        clan = json.load(json_file)
+            clan = json.load(json_file)
     except: pass
     
     trader = dict()
     try: 
         with open("./backup/trader.json") as json_file:
-        trader = json.load(json_file)
+            trader = json.load(json_file)
     except: pass
     
     player = dict()
     try: 
         with open("./backup/player.json") as json_file:
-        player = json.load(json_file)
+            player = json.load(json_file)
     except: pass
     
     inabilitati = dict()
-    try: with open("./backup/inabilitati.json") as json_file:
-        inabilitati = json.load(json_file)
+    try:
+        with open("./backup/inabilitati.json") as json_file:
+            inabilitati = json.load(json_file)
     except: pass
 
     evento = list()
     try: 
         with open("./backup/evento.json") as json_file:
-        evento = json.load(json_file)
+            evento = json.load(json_file)
     except: pass
 try:
     nft.set_weekend_mod(evento.get("mod"))
@@ -71,13 +80,14 @@ except Exception:
 
 strader = {"sfide":{}}
 sched = BackgroundScheduler({'apscheduler.job_defaults.max_instances': 12})
+bind_players(lambda: player)
 
 
-app = Client(
+app = LocalizedClient(
     "nft",
-    api_id=,
-    api_hash="",
-    bot_token="",
+    api_id=int(os.environ.get("NFT_API_ID", "0")),
+    api_hash=os.environ.get("NFT_API_HASH", ""),
+    bot_token=os.environ.get("NFT_BOT_TOKEN", ""),
     workers= 32
 )
 
@@ -89,13 +99,61 @@ if 1 == 1:
         pass
     app.stop()
 
-cestino = Client(
+cestino = LocalizedClient(
     "cestino",
-    api_id=,
-    api_hash="",
-    bot_token="",
+    api_id=int(os.environ.get("NFT_API_ID", "0")),
+    api_hash=os.environ.get("NFT_API_HASH", ""),
+    bot_token=os.environ.get("NFT_CESTINO_BOT_TOKEN", ""),
     workers= 32
 )
+
+
+@app.on_message(group=-1000)
+async def _imposta_lingua_messaggio(client, message):
+    """Imposta il contesto locale e riconverte i pulsanti tradotti negli ID storici."""
+    normalize_update_input(message)
+
+
+@app.on_callback_query(group=-1000)
+async def _imposta_lingua_callback(client, query):
+    # I callback_data sono ID stabili e non devono mai essere tradotti.
+    language_from_update(query)
+
+
+def _tastiera_lingue():
+    return InlineKeyboardMarkup(
+        [[
+            InlineKeyboardButton("🇮🇹 Italiano", callback_data="language:set:it"),
+            InlineKeyboardButton("🇬🇧 English", callback_data="language:set:en"),
+            InlineKeyboardButton("🇪🇸 Español", callback_data="language:set:es"),
+        ]]
+    )
+
+
+@app.on_message(
+    filters.private
+    & (filters.command(["lingua", "language", "idioma"]) | filters.regex(r"^Lingua 🌐$")),
+    group=-900,
+)
+async def scegli_lingua(client, message):
+    language = language_from_update(message)
+    name = tr(f"language.name.{language}", language)
+    testo = tr("language.choose", language) + "\n" + tr(
+        "language.current", language, name=name
+    )
+    await app.send_message(message.chat.id, testo, reply_markup=_tastiera_lingue())
+
+
+@app.on_callback_query(filters.regex(r"^language:set:(it|en|es)$"), group=-900)
+async def salva_lingua(client, query):
+    language = normalize_language(query.data.rsplit(":", 1)[-1])
+    username = query.from_user.username
+    if username in player:
+        player[username]["lang"] = language
+    set_current_language(language)
+    await query.message.edit_text(tr("language.changed", language))
+    await query.answer()
+    raise StopPropagation
 
 
 # eventi attuali
@@ -540,6 +598,7 @@ async def start(client, message):
         await app.send_message(message.chat.id,"Necessiti di un username per giocare!")
 
     elif username in list(player):
+        player[username].setdefault("lang", normalize_language(message.from_user.language_code))
         await app.send_photo(message.chat.id, "AgACAgQAAxkBAAEWlM1hXIl8xLH3Ikyw8Ej5mBQU0eWangACPbcxG_Ef6VIEjy5Z1I_m7pRVBTVdAAMBAAMCAANtAANdMwACHgQ", caption="Sei già iscritto!\nNon sai cosa fare?\nhttps://telegra.ph/Una-piccola-guida-per-NFT-10-14 \nSe non lo hai già fatto fai /ruota!")
         
         if len(message.command) > 1:
@@ -607,6 +666,7 @@ async def start(client, message):
                     "amichevoli":"si"
                 },
                 "id":message.from_user.id,
+                "lang": normalize_language(message.from_user.language_code),
                 "setta":{"benedizione":None,"libero":True},
                 "classe": "Nullatenente",
                 "inviti": {"numero": 0, "link": nft.id_generator(), "dachi": None},
@@ -716,7 +776,7 @@ async def logger(client, message):
                                 print(f"Nuovo {username}")
                                 sicurezza[username] = {"tempi":[],"ultima":time.time()}
                     
-                    if message.text in ['Pesca 🎣', 'Domande ❔', 'Top 🔝', 'Obbiettivi 🎖', 'Notifiche 🛎', 'Invita 📮', 'Switch 🪖', 'menu', 'Sfida ⚔️', 'Arena ☠️', 'Dungeon 🏃‍♂️', 'Assalto 📯', 'Clan 🔱', 'Boss 👹', 'Muoviti 🚩', 'Setta ©️', 'Trafficante \U0001f977', 'Negozio 🛒', 'Pescatore 🎣', 'Me 👤', 'Altro 🧩', 'Info 🗞', 'Chiudi🚫']:
+                    if message.text in ['Pesca 🎣', 'Domande ❔', 'Top 🔝', 'Obbiettivi 🎖', 'Notifiche 🛎', 'Invita 📮', 'Switch 🪖', 'Lingua 🌐', 'menu', 'Sfida ⚔️', 'Arena ☠️', 'Dungeon 🏃‍♂️', 'Assalto 📯', 'Clan 🔱', 'Boss 👹', 'Muoviti 🚩', 'Setta ©️', 'Trafficante \U0001f977', 'Negozio 🛒', 'Pescatore 🎣', 'Me 👤', 'Altro 🧩', 'Info 🗞', 'Chiudi🚫']:
                         dist = int(elapsed)
                         print(f"{username} - {message.text} [{g}]({dist})")
                     
@@ -939,7 +999,7 @@ async def tastiera(clinet,message):
         message.from_user.username,  # Edit this
         text,
         reply_markup=ReplyKeyboardMarkup(
-            [["Pesca 🎣"],["Domande ❔"],["Top 🔝","Obbiettivi 🎖","Notifiche 🛎"],["Invita 📮","Switch 🪖"],["menu"]],
+            [["Pesca 🎣"],["Domande ❔"],["Top 🔝","Obbiettivi 🎖","Notifiche 🛎"],["Invita 📮","Switch 🪖"],["Lingua 🌐"],["menu"]],
             resize_keyboard=True  # Make the keyboard smaller
         )
         
@@ -5696,7 +5756,7 @@ async def usa(client, message):
                                 
                                 player[username]["cap"] += liste.valore[ricercato] * (x + 1 )
                                 ora = player[username]["cap"]
-                                await app.send_message(message.chat.id,f"+{rep}up\n({ora}\{cap})")
+                                await app.send_message(message.chat.id,f"+{rep}up\n({ora}/{cap})")
                             
                         elif ricercato == "Un punto attacco":
                             rep = 1
@@ -5724,7 +5784,7 @@ async def usa(client, message):
                                         break
                                 player[username]["cap"] += liste.valore[ricercato] * (x + 1 )
                                 ora = player[username]["cap"]
-                                await app.send_message(message.chat.id,f"{rep} danno extra approvato\n({ora}\{cap})")
+                                await app.send_message(message.chat.id,f"{rep} danno extra approvato\n({ora}/{cap})")
 
                         elif ricercato == "Un punto difesa":
                             rep = 1
@@ -5753,7 +5813,7 @@ async def usa(client, message):
                                     
                                 player[username]["cap"] += liste.valore[ricercato] * (x + 1 )
                                 ora = player[username]["cap"]
-                                await app.send_message(message.chat.id,f"Ecco a te {rep} scudino extra\n({ora}\{cap})")
+                                await app.send_message(message.chat.id,f"Ecco a te {rep} scudino extra\n({ora}/{cap})")
 
                         elif ricercato == "Un punto agilità":
                             rep = 1
@@ -5781,7 +5841,7 @@ async def usa(client, message):
                                         break
                                 player[username]["cap"] += liste.valore[ricercato] * (x + 1 )
                                 ora = player[username]["cap"]
-                                await app.send_message(message.chat.id,f"Aumentata l'abilità di salto dello {rep * 0.42069}%\n({ora}\{cap})")
+                                await app.send_message(message.chat.id,f"Aumentata l'abilità di salto dello {rep * 0.42069}%\n({ora}/{cap})")
                                 
 
                         elif ricercato == "Una licenza per animali domestici":

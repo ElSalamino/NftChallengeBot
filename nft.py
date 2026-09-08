@@ -9,6 +9,7 @@ from settimanale import PREMI_ORO_SETTIMANALE, SOGLIE_PREMI_ORO_SETTIMANALE, est
 from frasi_set import FRASI_SET_TECNICHE
 from frasi_anelli import FRASI_ANELLI_TECNICHE
 from frasi_incantesimi import FRASI_INCANTESIMI_TECNICHE
+from i18n import tr, translate_source
 from dungeon_extra import (
     podio_probabilita_pct,
     podio_livello_premio,
@@ -463,7 +464,7 @@ def _valore_placeholder_set(nome, bonus, percorso):
     return valore
 
 
-def _format_placeholder_set(valore, formato=""):
+def _format_placeholder_set(valore, formato="", language="it"):
     if formato == "pct":
         return f"{_numero_placeholder_tecnico(valore)}%"
     if formato == "x":
@@ -475,7 +476,7 @@ def _format_placeholder_set(valore, formato=""):
     if formato == "abs":
         return _numero_placeholder_tecnico(abs(valore))
     if formato == "bool":
-        return "sì" if valore else "no"
+        return tr("common.yes" if valore else "common.no", language)
     if formato == "rid_pct":
         return f"{_numero_placeholder_tecnico((1 - float(valore)) * 100)}%"
     if formato == "pct_mul":
@@ -485,8 +486,8 @@ def _format_placeholder_set(valore, formato=""):
     return _numero_placeholder_tecnico(valore)
 
 
-def render_frase_set_tecnica(nome, bonus=None):
-    template = FRASI_SET_TECNICHE.get(nome, "")
+def render_frase_set_tecnica(nome, bonus=None, language="it"):
+    template = translate_source(FRASI_SET_TECNICHE.get(nome, ""), language)
     if not template:
         return ""
     parti = []
@@ -497,15 +498,15 @@ def render_frase_set_tecnica(nome, bonus=None):
         if conversione:
             raise ValueError(f"Conversione placeholder non supportata: {conversione}")
         valore = _valore_placeholder_set(nome, bonus or {}, campo)
-        parti.append(_format_placeholder_set(valore, formato))
+        parti.append(_format_placeholder_set(valore, formato, language))
     return "".join(parti)
 
 
-def descrizione_set_tecnica(nome, bonus=None):
+def descrizione_set_tecnica(nome, bonus=None, language="it"):
     """Descrizione meccanica del set, con frase custom e dati analitici."""
-    righe = ["⚙️ Dettagli del set"]
+    righe = [tr("technical.set.details", language)]
     bonus = bonus or {}
-    frase_custom = render_frase_set_tecnica(nome, bonus)
+    frase_custom = render_frase_set_tecnica(nome, bonus, language)
     if frase_custom:
         righe.append(frase_custom)
     bonus_testo = []
@@ -515,7 +516,7 @@ def descrizione_set_tecnica(nome, bonus=None):
             segno = "+" if valore > 0 else ""
             bonus_testo.append(f"{stat.upper()} {segno}{valore}")
     if bonus_testo:
-        righe.append("• Bonus base: " + " | ".join(bonus_testo))
+        righe.append(tr("technical.base_bonus", language, bonus=" | ".join(bonus_testo)))
 
     return "\n".join(righe)
 
@@ -529,8 +530,8 @@ def _valore_placeholder_anello(nome, percorso):
     return valore
 
 
-def render_frase_anello_tecnica(nome):
-    template = FRASI_ANELLI_TECNICHE.get(nome, "")
+def render_frase_anello_tecnica(nome, language="it"):
+    template = translate_source(FRASI_ANELLI_TECNICHE.get(nome, ""), language)
     if not template:
         return ""
     parti = []
@@ -541,14 +542,14 @@ def render_frase_anello_tecnica(nome):
         if conversione:
             raise ValueError(f"Conversione placeholder non supportata: {conversione}")
         valore = _valore_placeholder_anello(nome, campo)
-        parti.append(_format_placeholder_set(valore, formato))
+        parti.append(_format_placeholder_set(valore, formato, language))
     return "".join(parti)
 
 
-def descrizione_anello_tecnica(nome):
+def descrizione_anello_tecnica(nome, language="it"):
     """Descrizione leggibile dell'anello, sempre allineata a PROC_ANELLI."""
-    righe = ["⚙️ Dettagli dell'anello"]
-    frase = render_frase_anello_tecnica(nome)
+    righe = [tr("technical.ring.details", language)]
+    frase = render_frase_anello_tecnica(nome, language)
     if frase:
         righe.append(frase)
     return "\n".join(righe)
@@ -563,8 +564,8 @@ def _valore_placeholder_incantesimo(nome, percorso):
     return valore
 
 
-def render_frase_incantesimo_tecnica(nome):
-    template = FRASI_INCANTESIMI_TECNICHE.get(nome, "")
+def render_frase_incantesimo_tecnica(nome, language="it"):
+    template = translate_source(FRASI_INCANTESIMI_TECNICHE.get(nome, ""), language)
     if not template:
         return ""
     parti = []
@@ -575,14 +576,14 @@ def render_frase_incantesimo_tecnica(nome):
         if conversione:
             raise ValueError(f"Conversione placeholder non supportata: {conversione}")
         valore = _valore_placeholder_incantesimo(nome, campo)
-        parti.append(_format_placeholder_set(valore, formato))
+        parti.append(_format_placeholder_set(valore, formato, language))
     return "".join(parti)
 
 
-def descrizione_incantesimo_tecnica(nome):
+def descrizione_incantesimo_tecnica(nome, language="it"):
     """Descrizione umana dell'incantesimo, allineata a INCANTESIMI_CONFIG."""
-    righe = ["⚙️ Dettagli dell'incantesimo"]
-    frase = render_frase_incantesimo_tecnica(nome)
+    righe = [tr("technical.spell.details", language)]
+    frase = render_frase_incantesimo_tecnica(nome, language)
     if frase:
         righe.append(frase)
     return "\n".join(righe)
@@ -619,9 +620,9 @@ def aggiorna_descrizioni_bilanciamento(liste_module):
         dati_libro["descrizione"] = base + "\n\n" + descrizione_incantesimo_tecnica(effetto)
 
 
-def testo_lista_set(liste_module):
+def testo_lista_set(liste_module, language="it"):
     """Catalogo completo dei set con i componenti richiesti per completarli."""
-    righe = ["🧩 **SET E COMPONENTI**", ""]
+    righe = [translate_source("🧩 **SET E COMPONENTI**", language), ""]
     for nome in sorted(liste_module.classi, key=lambda x: str(x).lower()):
         componenti = liste_module.classi[nome]
         righe.append(f"**{nome}**")
@@ -629,7 +630,7 @@ def testo_lista_set(liste_module):
             for componente in componenti:
                 righe.append(f"• `{componente}`")
         else:
-            righe.append("• _Nessun componente definito_")
+            righe.append(translate_source("• _Nessun componente definito_", language))
         righe.append("")
     return "\n".join(righe)
 
