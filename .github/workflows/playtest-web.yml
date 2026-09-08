@@ -56,6 +56,7 @@ jobs:
       - name: Verifica motore nft.turno dalla web app
         run: |
           python - <<'PY'
+          import json
           import playtest_web as p
 
           status = p.runtime_status()
@@ -80,5 +81,6 @@ jobs:
           result = p.fight_round({'state': state})
           assert result['round'] == 1
           assert result['log']
+          json.dumps(result, ensure_ascii=False)
           print('Round web 1:1 eseguito contro', c['enemies'][0])
           PY
