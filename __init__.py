@@ -7,6 +7,7 @@ from pyrogram import ContinuePropagation, StopPropagation, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.types import ReplyKeyboardMarkup,ReplyKeyboardRemove
 from pyrogram.errors import FloodWait
+from entity_registry import decode_players, encode_players
 from i18n import normalize_language, tr
 from telegram_i18n import (
     LocalizedClient,
@@ -59,7 +60,7 @@ if 1 == 1:
     player = dict()
     try: 
         with open("./backup/player.json") as json_file:
-            player = json.load(json_file)
+            player = decode_players(json.load(json_file))
     except: pass
     
     inabilitati = dict()
@@ -793,7 +794,7 @@ def savexit(client, message):
     with open("./backup/pozioni.json", "w") as outfile:
         json.dump(pozioni, outfile)
     with open("./backup/player.json", "w") as outfile:
-        json.dump(player, outfile)
+        json.dump(encode_players(player), outfile, ensure_ascii=False)
     with open("./backup/sicurezza.json", "w") as outfile:
         json.dump(sicurezza, outfile)
     with open("./backup/sicurezza2.json", "w") as outfile:
@@ -806,7 +807,7 @@ def savexit(client, message):
     with open("./backup/pozioni2.json", "w") as outfile:
         json.dump(pozioni, outfile)
     with open("./backup/player2.json", "w") as outfile:
-        json.dump(player, outfile)
+        json.dump(encode_players(player), outfile, ensure_ascii=False)
     
     with open("./backup/inabilitati2.json", "w") as outfile:
         json.dump(inabilitati, outfile)
@@ -828,7 +829,7 @@ def save(client, message):
     with open("./backup/pozioni.json", "w") as outfile:
         json.dump(pozioni, outfile)
     with open("./backup/player.json", "w") as outfile:
-        json.dump(player, outfile)
+        json.dump(encode_players(player), outfile, ensure_ascii=False)
     with open("./backup/sicurezza.json", "w") as outfile:
         json.dump(sicurezza, outfile)
     with open("./backup/sicurezza2.json", "w") as outfile:
@@ -841,7 +842,7 @@ def save(client, message):
     with open("./backup/pozioni2.json", "w") as outfile:
         json.dump(pozioni, outfile)
     with open("./backup/player2.json", "w") as outfile:
-        json.dump(player, outfile)
+        json.dump(encode_players(player), outfile, ensure_ascii=False)
     
     with open("./backup/inabilitati2.json", "w") as outfile:
         json.dump(inabilitati, outfile)
@@ -2268,7 +2269,7 @@ def auto_backup():
         json.dump(evento, outfile)
 
     with open("./backup/player.json", "w") as outfile:
-        json.dump(player, outfile)
+        json.dump(encode_players(player), outfile, ensure_ascii=False)
     with open("./backup/sicurezza.json", "w") as outfile:
         json.dump(sicurezza, outfile)
     

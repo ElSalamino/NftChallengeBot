@@ -10,6 +10,7 @@ La wiki non contiene copie manuali dei valori di gioco. `run_wiki.py` importa i 
 - `nft.py`: solo per formule runtime non ancora centralizzate (es. scaling boss/dungeon) e per ricavare le azioni delle stanze.
 - `turno_assalto.py`: runtime dell'assalto, indicato come fonte per gli edifici.
 - `locales/it.json`, `locales/en.json`, `locales/es.json`: testi localizzati con fallback italiano.
+- `entities.json`: ID stabili e nomi delle entità in italiano, inglese e spagnolo.
 
 ## Generazione locale
 
@@ -18,8 +19,10 @@ python wiki/run_wiki.py --output _site
 ```
 
 Il risultato è un sito statico senza dipendenze esterne: `_site/index.html`, `_site/data.json`,
-`_site/assets/i18n.js`, i tre cataloghi in `_site/locales/` e `.nojekyll`.
-Il selettore in testata conserva la lingua scelta nel browser.
+`_site/assets/i18n.js`, `_site/entities.json`, i tre cataloghi in `_site/locales/`
+e `.nojekyll`. Il selettore in testata conserva la lingua scelta nel browser;
+le schede — inclusi gli ingredienti — usano ID negli URL e accettano ancora i
+vecchi link basati sul nome.
 
 ## Pubblicazione
 

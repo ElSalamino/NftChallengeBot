@@ -13,6 +13,8 @@ on:
       - "playtest_web.py"
       - "wiki/**"
       - "i18n.py"
+      - "entity_registry.py"
+      - "entities.json"
       - "telegram_i18n.py"
       - "i18n_web.js"
       - "locales/**"
@@ -30,6 +32,8 @@ on:
       - "playtest_web.py"
       - "wiki/**"
       - "i18n.py"
+      - "entity_registry.py"
+      - "entities.json"
       - "telegram_i18n.py"
       - "i18n_web.js"
       - "locales/**"
@@ -49,11 +53,12 @@ jobs:
           python-version: "3.12"
       - name: Compila runtime e strumenti
         run: |
-          python -m py_compile __init__.py nft.py i18n.py telegram_i18n.py playtest_web.py tools/bootstrap_i18n.py tools/audit_i18n.py wiki/genera_wiki_v13.py
+          python -m py_compile __init__.py nft.py i18n.py entity_registry.py telegram_i18n.py playtest_web.py tools/bootstrap_i18n.py tools/bootstrap_entities.py tools/audit_i18n.py tools/audit_entities.py wiki/genera_wiki_v13.py wiki/genera_wiki_v14.py
           node --check i18n_web.js
           node tools/audit_i18n_web.js
       - name: Verifica copertura e placeholder
         run: |
           python wiki/run_wiki.py --output /tmp/nft-wiki-i18n
           python tools/audit_i18n.py --wiki-dir /tmp/nft-wiki-i18n
+          python tools/audit_entities.py
           git diff --check

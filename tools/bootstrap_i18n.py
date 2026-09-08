@@ -118,6 +118,134 @@ EXPLICIT = {
     "ui.label.last_catch": {"it": "Ultima pesca", "en": "Latest catch", "es": "Última pesca"},
     "ui.label.boss": {"it": "Boss", "en": "Boss", "es": "Jefe"},
     "ui.label.marine_boss": {"it": "Boss marino", "en": "Marine boss", "es": "Jefe marino"},
+    "wiki.label.books": {"it": "Libri", "en": "Books", "es": "Libros"},
+    "wiki.label.technical_effect": {
+        "it": "Effetto tecnico",
+        "en": "Technical effect",
+        "es": "Efecto técnico",
+    },
+    "wiki.label.usables": {"it": "Usabili", "en": "Usable items", "es": "Objetos usables"},
+    "wiki.label.book": {"it": "Libro", "en": "Book", "es": "Libro"},
+    "wiki.label.core": {"it": "Nucleo", "en": "Core", "es": "Núcleo"},
+    "wiki.label.fish": {"it": "Pesce", "en": "Fish", "es": "Pez"},
+    "wiki.label.usable": {"it": "Usabile", "en": "Usable item", "es": "Objeto usable"},
+    "wiki.label.ingredient": {"it": "Ingrediente", "en": "Ingredient", "es": "Ingrediente"},
+    "wiki.label.decorative_lore": {
+        "it": "Decorativo / lore",
+        "en": "Decorative / lore",
+        "es": "Decorativo / trasfondo",
+    },
+    "wiki.label.shop": {"it": "Shop", "en": "Shop", "es": "Tienda"},
+    "wiki.item.ingredient_description": {
+        "it": "Ingrediente del sistema delle pozioni.",
+        "en": "Ingredient used by the potion system.",
+        "es": "Ingrediente utilizado por el sistema de pociones.",
+    },
+    "set.frontline_archer.technical": {
+        "it": "Hai il 25% di sfinire il nemico e togliergli 60 difesa. In assalto il Fabbro ha il 100% di darti 5 attacco e 5 difesa per livello.",
+        "en": "You have a 25% chance to exhaust the enemy and reduce their DEF by 60. In Assault, the Blacksmith has a 100% chance to grant you +5 ATK and +5 DEF per level.",
+        "es": "Tienes un 25 % de probabilidad de agotar al enemigo y reducir su DEF en 60. En Asalto, el Herrero tiene un 100 % de probabilidad de darte +5 ATK y +5 DEF por nivel.",
+    },
+    "set.shadow_assassin.human": {
+        "it": "Set dell'Assassino delle ombre equipaggiato!\nNascondi i tuo operato!",
+        "en": "Shadow Assassin set equipped!\nHide your handiwork!",
+        "es": "¡Set de Asesino de las sombras equipado!\n¡Oculta tu trabajo!",
+    },
+    "set.shadow_assassin.technical": {
+        "it": "ASSALTO — COUNTER della Centrale di cura centralizzata: quando la Centrale prova a curare, hai un primo controllo al 80% e un secondo al 70% per trasformare la sua cura in danno alle strutture. Il valore è 3 danni per livello della Centrale; nel primo effetto le strutture sotto la soglia di 50 HP vengono preservate.",
+        "en": "ASSAULT — COUNTER to the Centralized Healing Center: when the Center tries to heal, you make an 80% check followed by a 70% check to turn its healing into structure damage. The value is 3 damage per Center level; on the first effect, structures below 50 HP are preserved.",
+        "es": "ASALTO — CONTRA la Central de curación: cuando intenta curar, haces una comprobación del 80 % seguida de otra del 70 % para convertir su curación en daño a las estructuras. El valor es 3 de daño por nivel de la Central; en el primer efecto se conservan las estructuras con menos de 50 HP.",
+    },
+    "set.bug_abuser.human": {
+        "it": "Set del ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||",
+        "en": "Set of the ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||",
+        "es": "Set de ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||",
+    },
+    "set.relic_seeker.technical": {
+        "it": "Hai il 24% di trovare una reliquia durante la sfida: può regalarti +15 agilità, +150 HP, +60 difesa oppure +250 attacco. ASSALTO — HARD COUNTER del Cannoncino: se scegli il Cannoncino come bersaglio, al 100% guadagni +7000 DEF per l'assalto.",
+        "en": "During a Challenge, you have a 24% chance to find a relic that grants +15 AGI, +150 HP, +60 DEF, or +250 ATK. ASSAULT — HARD COUNTER to the Little Cannon: if you target the Little Cannon, you gain +7000 DEF for the Assault with 100% certainty.",
+        "es": "Durante un Desafío, tienes un 24 % de probabilidad de encontrar una reliquia que otorga +15 AGI, +150 HP, +60 DEF o +250 ATK. ASALTO — CONTRA TOTAL del Cañoncito: si eliges el Cañoncito como objetivo, obtienes +7000 DEF para el Asalto con un 100 % de probabilidad.",
+    },
+    "set.sky_controller.technical": {
+        "it": "Sfida: a fine di ogni turno, se hai guadagnato HP durante quel turno, guadagni ATK pari agli HP recuperati/2 e DEF pari agli HP recuperati/2.",
+        "en": "Challenge: at the end of each turn, if you gained HP during that turn, gain ATK equal to half the HP recovered and DEF equal to half the HP recovered.",
+        "es": "Desafío: al final de cada turno, si recuperaste HP durante ese turno, obtienes ATK igual a la mitad de los HP recuperados y DEF igual a la mitad de los HP recuperados.",
+    },
+    "set.entrance_controller.human": {
+        "it": "Set del CControllore del'entrata equipaggiato!\nAssicurati una precisione infinita con queste statistiche extra!",
+        "en": "Entrance Controller set equipped!\nSecure infinite accuracy with these extra stats!",
+        "es": "¡Set de Controlador de la entrada equipado!\n¡Consigue precisión infinita con estas estadísticas adicionales!",
+    },
+    "set.primordial_damned.human": {
+        "it": "Il male divora ogni difesa: in sfida e in assalto tutta la DEF viene convertita in ATK.",
+        "en": "Evil devours every defense: in Challenge and Assault, all DEF is converted into ATK.",
+        "es": "El mal devora toda defensa: en Desafío y Asalto, toda la DEF se convierte en ATK.",
+    },
+    "set.primordial_damned.technical": {
+        "it": "Sfida/Assalto: converte il 100% della DEF posseduta in ATK e porta la DEF a 0.",
+        "en": "Challenge/Assault: converts 100% of your DEF into ATK and reduces DEF to 0.",
+        "es": "Desafío/Asalto: convierte el 100 % de tu DEF en ATK y reduce la DEF a 0.",
+    },
+    "set.worm_duelist.technical": {
+        "it": "COMBATTIMENTO e ASSALTO: il primo verme è garantito; poi hai il 11% di mangiarne un altro, ripetendo finché fallisci. Ogni verme dà +1 ATK, +1 DEF e +20 HP.",
+        "en": "COMBAT and ASSAULT: the first worm is guaranteed; then you have an 11% chance to eat another, repeating until you fail. Each worm grants +1 ATK, +1 DEF, and +20 HP.",
+        "es": "COMBATE y ASALTO: el primer gusano está garantizado; después tienes un 11 % de probabilidad de comer otro, repitiendo hasta que falles. Cada gusano otorga +1 ATK, +1 DEF y +20 HP.",
+    },
+    "set.living_bait.technical": {
+        "it": "Sfida: all'inizio la DEF viene impostata a 0. Assalto: anche la DEF dell'assaltatore viene impostata a 0.",
+        "en": "Challenge: your DEF is set to 0 at the start. Assault: the attacker's DEF is also set to 0.",
+        "es": "Desafío: tu DEF se establece en 0 al inicio. Asalto: la DEF del asaltante también se establece en 0.",
+    },
+    "set.eternal_doom.technical": {
+        "it": "Sfida: quando un tuo colpo va a segno hai il 20% di togliere 10 ATK, 10 DEF e 10 AGI all'avversario.",
+        "en": "Challenge: whenever one of your hits lands, you have a 20% chance to remove 10 ATK, 10 DEF, and 10 AGI from the opponent.",
+        "es": "Desafío: cuando uno de tus golpes acierta, tienes un 20 % de probabilidad de quitar 10 ATK, 10 DEF y 10 AGI al oponente.",
+    },
+    "set.ghoul.technical": {
+        "it": "Hai il 44% di mettere pressione al nemico e togliergli 10 ATK e 10 DEF. ASSALTO — HARD COUNTER del Clone: quando lo incontri, al 100% gli togli 3000 ATK e 5000 DEF per quello scontro contro la struttura.",
+        "en": "You have a 44% chance to pressure the enemy and remove 10 ATK and 10 DEF. ASSAULT — HARD COUNTER to the Clone: when you encounter it, you always remove 3000 ATK and 5000 DEF for that structure fight.",
+        "es": "Tienes un 44 % de probabilidad de presionar al enemigo y quitarle 10 ATK y 10 DEF. ASALTO — CONTRA TOTAL del Clon: cuando lo encuentras, siempre le quitas 3000 ATK y 5000 DEF durante ese combate contra la estructura.",
+    },
+    "set.counterpart_enchanter.human": {
+        "it": "Set dell'Incantatore di controparte equipaggiato!\nPolimorfazione attiva e pronta a colpire!",
+        "en": "Counterpart Enchanter set equipped!\nPolymorphing active and ready to strike!",
+        "es": "¡Set de Encantador de contraparte equipado!\n¡Polimorfización activa y lista para atacar!",
+    },
+    "set.grove_squire.technical": {
+        "it": "Finché non hai inflitto più di 300 danni continui a crescere: +30 HP, +10 ATK, +10 DEF e +3 AGI. ASSALTO — HARD COUNTER dello Spaventapasseri ornamentale: quando lo incontri lo neutralizzi e guadagni +3000 ATK e +2000 DEF, che restano per il resto dell'assalto.",
+        "en": "Until you have dealt more than 300 damage, you keep growing: +30 HP, +10 ATK, +10 DEF, and +3 AGI. ASSAULT — HARD COUNTER to the Ornamental Scarecrow: when you encounter it, you neutralize it and gain +3000 ATK and +2000 DEF for the rest of the Assault.",
+        "es": "Hasta que hayas infligido más de 300 de daño, sigues creciendo: +30 HP, +10 ATK, +10 DEF y +3 AGI. ASALTO — CONTRA TOTAL del Espantapájaros ornamental: cuando lo encuentras, lo neutralizas y obtienes +3000 ATK y +2000 DEF durante el resto del Asalto.",
+    },
+    "set.shadow_assassin.equipped": {
+        "it": "Set dell'Assassino delle ombre equipaggiato!",
+        "en": "Shadow Assassin set equipped!",
+        "es": "¡Set de Asesino de las sombras equipado!",
+    },
+    "set.shadow_assassin.flavour": {
+        "it": "Nascondi i tuo operato!",
+        "en": "Hide your handiwork!",
+        "es": "¡Oculta tu trabajo!",
+    },
+    "set.entrance_controller.equipped": {
+        "it": "Set del CControllore del'entrata equipaggiato!",
+        "en": "Entrance Controller set equipped!",
+        "es": "¡Set de Controlador de la entrada equipado!",
+    },
+    "set.entrance_controller.flavour": {
+        "it": "Assicurati una precisione infinita con queste statistiche extra!",
+        "en": "Secure infinite accuracy with these extra stats!",
+        "es": "¡Consigue precisión infinita con estas estadísticas adicionales!",
+    },
+    "set.counterpart_enchanter.equipped": {
+        "it": "Set dell'Incantatore di controparte equipaggiato!",
+        "en": "Counterpart Enchanter set equipped!",
+        "es": "¡Set de Encantador de contraparte equipado!",
+    },
+    "set.counterpart_enchanter.flavour": {
+        "it": "Polimorfazione attiva e pronta a colpire!",
+        "en": "Polymorphing active and ready to strike!",
+        "es": "¡Polimorfización activa y lista para atacar!",
+    },
     "playtest.tab.character": {"it": "🧍 Scheda", "en": "🧍 Character", "es": "🧍 Personaje"},
     "playtest.tab.challenge": {"it": "⚔️ Sfida", "en": "⚔️ Challenge", "es": "⚔️ Desafío"},
     "playtest.tab.dungeon": {"it": "🗝 Dungeon", "en": "🗝 Dungeon", "es": "🗝 Mazmorra"},
@@ -484,12 +612,14 @@ def _looks_like_code(text: str) -> bool:
         "text/html", "application/json", "<!doctype",
     )):
         return True
+    if lower.startswith(("wiki v14 ", "patch html non applicabile:")):
+        return True
     if "<html" in lower or "function " in lower or "def " in lower:
         return True
     if any(
         token in text
         for token in (
-            "=>", ".map(", ".forEach(", "document.", "${", "===", "&&", "||", "</",
+            "=>", ".map(", ".forEach(", ".slice(", ".join(", "document.", "${", "===", "&&", "||", "</",
             "<div", "<span", "<table", "class=", "onclick=", "location.hash", "JSON.stringify",
             "\\s*", "(?:", "(?P", "`).", "`;", "));", "}));", ":''", "sectionTitle(",
             "}if(", "find(D.", "special+=",

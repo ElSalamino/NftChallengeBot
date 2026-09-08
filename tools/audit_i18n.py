@@ -81,6 +81,10 @@ def main():
         localized_item = translate_text("Pesce Drago", language)
         if normalize_input(localized_item, language) != "Pesce Drago":
             errors.append(f"{language}: round-trip template dinamico non valido")
+    if translate_text("Set del Abitante equipaggiato!", "en") != "Resident set equipped!":
+        errors.append("frase scenica set inglese non localizzata")
+    if translate_text("Set del Abitante equipaggiato!", "es") != "¡Set de Habitante equipado!":
+        errors.append("frase scenica set spagnola non localizzata")
 
     if errors:
         print("ERRORI I18N:")

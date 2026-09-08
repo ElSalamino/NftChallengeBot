@@ -14,9 +14,12 @@ on:
       - "nft.py"
       - "turno_assalto.py"
       - "i18n.py"
+      - "entity_registry.py"
+      - "entities.json"
       - "i18n_web.js"
       - "locales/**"
       - "tools/audit_i18n.py"
+      - "tools/audit_entities.py"
       - "wiki/**"
       - ".github/workflows/wiki-pages.yml"
   pull_request:
@@ -32,9 +35,12 @@ on:
       - "nft.py"
       - "turno_assalto.py"
       - "i18n.py"
+      - "entity_registry.py"
+      - "entities.json"
       - "i18n_web.js"
       - "locales/**"
       - "tools/audit_i18n.py"
+      - "tools/audit_entities.py"
       - "wiki/**"
       - ".github/workflows/wiki-pages.yml"
   workflow_dispatch:
@@ -62,7 +68,7 @@ jobs:
 
       - name: Genera wiki dai dati del gioco
         run: |
-          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/genera_wiki_v9.py wiki/genera_wiki_v10.py wiki/genera_wiki_v11.py wiki/genera_wiki_v12.py wiki/genera_wiki_v13.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py dungeon_extra.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py i18n.py tools/audit_i18n.py
+          python -m py_compile wiki/genera_wiki_v2.py wiki/genera_wiki_v3.py wiki/genera_wiki_v4.py wiki/genera_wiki_v5.py wiki/genera_wiki_v6.py wiki/genera_wiki_v7.py wiki/genera_wiki_v8.py wiki/genera_wiki_v9.py wiki/genera_wiki_v10.py wiki/genera_wiki_v11.py wiki/genera_wiki_v12.py wiki/genera_wiki_v13.py wiki/genera_wiki_v14.py wiki/run_wiki.py wiki/validate_wiki.py wiki/validate_wiki_v4.py liste.py set_raw_balance.py bilanciamento.py dungeon_extra.py settimanale.py frasi_set.py frasi_anelli.py frasi_incantesimi.py frasi_usabili.py i18n.py entity_registry.py tools/audit_i18n.py tools/audit_entities.py
           python - <<'PY'
           import random
           import liste
@@ -127,10 +133,12 @@ jobs:
           test -s _site/index.html
           test -s _site/data.json
           test -s _site/assets/i18n.js
+          test -s _site/entities.json
           test -s _site/locales/it.json
           test -s _site/locales/en.json
           test -s _site/locales/es.json
           python tools/audit_i18n.py --wiki-dir _site
+          python tools/audit_entities.py
 
           python - <<'PY'
           import json
@@ -139,7 +147,8 @@ jobs:
           with open('_site/data.json', encoding='utf-8') as fh:
               data = json.load(fh)
 
-          assert data['meta']['wiki_version'] == 13
+          assert data['meta']['wiki_version'] == 14
+          assert data['meta']['entity_schema_version'] == 1
           assert data['meta']['languages'] == ['it', 'en', 'es']
           assert {x['name'] for x in data['achievements']} == set(liste.descri)
           assert all(x['cap_bonus'] == 10 for x in data['achievements'])
@@ -187,7 +196,9 @@ jobs:
           assert dono['dono_stellare']['stats'] == {'hp':680,'atk':165,'def':165,'agi':34}
           assert dono['dono_stellare']['contributions'] == {'hp':680,'atk':660,'def':660,'agi':680}
 
-          print(f"Wiki v13: {len(data['achievements'])} obiettivi; {len(rooms)} stanze; IT/EN/ES attivi")
+          assert all(x.get('id') for x in data['items'])
+          assert all(x.get('id') for x in data['sets'])
+          print(f"Wiki v14: {len(data['achievements'])} obiettivi; {len(rooms)} stanze; ID + IT/EN/ES attivi")
           PY
 
           grep -q "Boss giornaliero" _site/index.html
